@@ -61,6 +61,8 @@ public class Main extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        System.out.println("Test");
+
         //Initialize main.xml
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
