@@ -15,7 +15,7 @@
             android:enabled="true"
             android:exported="true"/>
         <service
-            android:name=".controller.MyService"
+            android:name=".model.ReminderService"
             android:enabled="true"
             android:exported="true" />
         <activity
