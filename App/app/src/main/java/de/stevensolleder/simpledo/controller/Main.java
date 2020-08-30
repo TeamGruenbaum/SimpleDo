@@ -141,7 +141,10 @@ public class Main extends AppCompatActivity
                 int adapterPosition=viewHolder.getAdapterPosition();
 
                 entryRecyclerViewAdapter.deleteEntry(adapterPosition);
-                NotificationHelper.cancelNotification(entry);
+                if(entry.getDate()!=null)
+                {
+                    NotificationHelper.cancelNotification(entry);
+                }
 
                 snackbar=Snackbar.make(findViewById(R.id.root),"Rückgängig machen?", BaseTransientBottomBar.LENGTH_SHORT);
                 snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
@@ -160,7 +163,10 @@ public class Main extends AppCompatActivity
                     public void onClick(View view)
                     {
                         entryRecyclerViewAdapter.insertEntry(entry, adapterPosition);
-                        NotificationHelper.planAndSendNotification(entry);
+                        if(entry.getDate()!=null)
+                        {
+                            NotificationHelper.planAndSendNotification(entry);
+                        }
                     }
                 });
 
