@@ -39,7 +39,7 @@ public class Main extends AppCompatActivity
     private MaterialButton addCardDatePickerMaterialButton;
     private MaterialButton addCardTimePickerMaterialButton;
     private MaterialButton addCardColorMenuMaterialButton;
-    private MaterialButton addCardRemindMaterialButton; //N
+    private MaterialButton addCardRemindMaterialButton;
     private LinearLayout addCardDeadlineLinearLayout;
     private TextView addCardDateTextView;
     private TextView addCardTimeTextView;
@@ -49,13 +49,13 @@ public class Main extends AppCompatActivity
     private MenuItem changeDirectionMaterialButton;
     private MenuItem changeCriteriumMaterialButton;
 
-    private BottomAppBar bottomAppBar; //N
+    private BottomAppBar bottomAppBar;
 
     private Date chosenDate=null;
     private Time chosenTime=null;
     private int chosenColor=-1;
 
-    private boolean reminding=false; //N
+    private boolean reminding=false;
 
 
     @Override
