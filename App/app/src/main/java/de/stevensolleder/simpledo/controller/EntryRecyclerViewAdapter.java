@@ -47,6 +47,8 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             entryViewViewHolder.bell.setVisibility(View.GONE);
         }
 
+        System.out.println("test");
+
         if(getEntry(position).getDate()!=null)
         {
             entryViewViewHolder.getDateTextView().setText(getEntry(position).getDate().toString());
@@ -55,6 +57,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             if(getEntry(position).getTime()!=null)
             {
                 entryViewViewHolder.getTimeTextView().setText(getEntry(position).getTime().toString());
+                System.out.println(getEntry(position).getTime().toString());
             }
         }
         else
@@ -237,7 +240,27 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
 
+                    picker.setOnCancelListener(new DialogInterface.OnCancelListener()
+                    {
+                        @Override
+                        public void onCancel(DialogInterface dialogInterface)
+                        {
+                            Entry temp=SaveHelper.getEntry(getPosition());
+
+                            temp.setDate(null);
+                            changeEntry(temp, getPosition());
+
+                            if(temp.isNotifying())
+                            {
+                                NotificationHelper.cancelNotification(temp);
+                            }
+                        }
+                    });
+
                     picker.show();
+
+                    picker.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
+                    picker.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Löschen");
 
                     return true;
                 });
@@ -261,7 +284,27 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     }, Calendar.getInstance().get(Calendar.HOUR), Calendar.getInstance().get(Calendar.MINUTE), true);
 
+                    timePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener()
+                    {
+                        @Override
+                        public void onCancel(DialogInterface dialogInterface)
+                        {
+                            Entry temp=SaveHelper.getEntry(getPosition());
+
+                            temp.setTime(null);
+                            changeEntry(temp, getPosition());
+
+                            if(temp.isNotifying())
+                            {
+                                NotificationHelper.planAndSendNotification(temp);
+                            }
+                        }
+                    });
+
                     timePickerDialog.show();
+
+                    timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
+                    timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Löschen");
 
                     return true;
                 });
