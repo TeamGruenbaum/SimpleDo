@@ -61,7 +61,7 @@ public class Main extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        System.out.println("Test");
+        System.out.println("Hallo");
 
         //Initialize main.xml
         super.onCreate(savedInstanceState);
