@@ -102,6 +102,7 @@
 
                 <View
                     android:id="@+id/divider1"
+                    android:visibility="gone"
                     android:layout_width="1dp"
                     android:layout_margin="6dp"
                     android:layout_height="match_parent"
@@ -110,7 +111,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/remindButton"
                     style="@style/cardButton"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     android:enabled="false"
                     app:icon="@drawable/ic_notifications_off"/>
 

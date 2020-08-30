@@ -57,6 +57,8 @@ public class Main extends AppCompatActivity
 
     private boolean reminding=false;
 
+    private View addCardDivider;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -88,6 +90,8 @@ public class Main extends AppCompatActivity
         startButton=findViewById(R.id.start);
 
         addCardRemindMaterialButton=findViewById(R.id.remindButton);
+
+        addCardDivider=findViewById(R.id.divider1);
 
         //Set attributes from entryRecyclerView
         entryRecyclerView.setHasFixedSize(true);
@@ -232,6 +236,7 @@ public class Main extends AppCompatActivity
                     addCardDeadlineLinearLayout.setVisibility(View.VISIBLE);
                     addCardDateTextView.setText(chosenDate.toString());
 
+                    addCardDivider.setVisibility(View.VISIBLE);
                     addCardRemindMaterialButton.setVisibility(View.VISIBLE);
                     addCardRemindMaterialButton.setEnabled(true);
 
@@ -249,6 +254,7 @@ public class Main extends AppCompatActivity
                             addCardTimePickerMaterialButton.setVisibility(View.GONE);
                             addCardDeadlineLinearLayout.setVisibility(View.GONE);
 
+                            addCardDivider.setVisibility(View.GONE);
                             addCardRemindMaterialButton.setVisibility(View.GONE);
                             addCardRemindMaterialButton.setEnabled(false);
 
