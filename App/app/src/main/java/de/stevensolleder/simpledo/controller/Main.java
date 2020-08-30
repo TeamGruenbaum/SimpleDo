@@ -58,11 +58,11 @@ public class Main extends AppCompatActivity
     private boolean reminding=false;
 
 
+    Snackbar snackbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        System.out.println("Github");
-
         //Initialize main.xml
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
@@ -137,12 +137,15 @@ public class Main extends AppCompatActivity
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir)
             {
-                Entry temp=getEntry(viewHolder.getAdapterPosition());
-                int temp2=viewHolder.getAdapterPosition();
+                Entry entry=getEntry(viewHolder.getAdapterPosition());
+                int adapterPosition=viewHolder.getAdapterPosition();
 
-                entryRecyclerViewAdapter.deleteEntry(temp2);
+                entryRecyclerViewAdapter.deleteEntry(adapterPosition);
+                NotificationHelper.cancelNotification(entry);
 
-                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),"Rückgängig machen?", BaseTransientBottomBar.LENGTH_SHORT);
+                snackbar=Snackbar.make(findViewById(R.id.root),"Rückgängig machen?", BaseTransientBottomBar.LENGTH_SHORT);
+                snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
+
                 if(addCardMaterialCardView.getVisibility()== View.VISIBLE)
                 {
                     snackbar.setAnchorView(addCardMaterialCardView);
@@ -156,10 +159,13 @@ public class Main extends AppCompatActivity
                     @Override
                     public void onClick(View view)
                     {
-                        entryRecyclerViewAdapter.insertEntry(temp, temp2);
+                        entryRecyclerViewAdapter.insertEntry(entry, adapterPosition);
+                        NotificationHelper.planAndSendNotification(entry);
                     }
                 });
-                snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE);
+
+                snackbar.setDuration(BaseTransientBottomBar.LENGTH_SHORT);
+
                 snackbar.show();
             }
 
@@ -509,8 +515,6 @@ public class Main extends AppCompatActivity
 
     public void start(View view)
     {
-        Toast.makeText(this, "Gesetzt!", Toast.LENGTH_SHORT).show();
-
         bottomAppBar.performHide();
         startButton.hide();
         addCardMaterialCardView.setVisibility(View.VISIBLE);
