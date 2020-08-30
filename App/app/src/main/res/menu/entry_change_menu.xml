@@ -1,0 +1,47 @@
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/editText"
+        android:title="Edit Text"
+        app:showAsAction="always" />
+    <item android:id="@+id/editDate"
+        android:title="Edit Date"/>
+    <item android:id="@+id/editTime"
+        android:title="Edit Time"
+        android:visible="false"/>
+    <item android:id="@+id/editNotifcation"
+        android:title="Activate Notifications"
+        android:visible="false"/>
+    <item android:id="@+id/editColor"
+        android:title="Edit Color">
+        <menu>
+            <item android:id="@+id/white"
+                android:icon="@drawable/ic_white"
+                android:title="White"
+                app:showAsAction="ifRoom" />
+            <item android:id="@+id/yellow"
+                android:icon="@drawable/ic_yellow"
+                android:title="Yellow"
+                app:showAsAction="ifRoom" />
+            <item android:id="@+id/orange"
+                android:icon="@drawable/ic_orange"
+                android:title="Orange"
+                app:showAsAction="ifRoom" />
+            <item android:id="@+id/red"
+                android:icon="@drawable/ic_red"
+                android:title="Red"
+                app:showAsAction="ifRoom" />
+            <item android:id="@+id/green"
+                android:icon="@drawable/ic_green"
+                android:title="Green"
+                app:showAsAction="ifRoom" />
+            <item android:id="@+id/blue"
+                android:icon="@drawable/ic_blue"
+                android:title="Blue"
+                app:showAsAction="ifRoom" />
+            <item android:id="@+id/purple"
+                android:icon="@drawable/ic_purple"
+                android:title="Purple"
+                app:showAsAction="ifRoom"/>
+        </menu>
+    </item>
+</menu>

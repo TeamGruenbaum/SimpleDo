@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="visible">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/my_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingBottom="100dp"
+        android:scrollbars="vertical"/>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/addCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_anchor="@id/bottomAppBar"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:visibility="visible"
+        app:cardElevation="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/contentEditText"
+                style="@style/cardContentText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/addCardDeadline"
+                style="@style/cardDeadlineText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/addCardDate"
+                    style="@style/deadlineText" />
+
+                <TextView
+                    style="@style/deadlineText"
+                    android:text=" " />
+
+                <TextView
+                    android:id="@+id/addCardTime"
+                    style="@style/deadlineText"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divider0"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:id="@+id/deadline"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:gravity="right"
+                android:orientation="horizontal"
+                android:padding="0dp">
+
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dateButton"
+                    style="@style/cardButton"
+                    android:visibility="visible"
+                    app:icon="@drawable/ic_calendar"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/timeButton"
+                    style="@style/cardButton"
+                    android:visibility="gone"
+                    app:icon="@drawable/ic_alarm"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/colorButton"
+                    style="@style/cardButton"
+                    android:visibility="visible"
+                    app:icon="@drawable/ic_brush"/>
+
+                <View
+                    android:id="@+id/divider1"
+                    android:layout_width="1dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"
+                    android:layout_height="match_parent"
+                    android:background="?android:attr/listDivider" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/remindButton"
+                    style="@style/cardButton"
+                    android:visibility="visible"
+                    android:enabled="false"
+                    app:icon="@drawable/ic_notifications_off"/>
+
+                <View
+                    android:id="@+id/divider2"
+                    android:layout_width="1dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"
+                    android:layout_height="match_parent"
+                    android:background="?android:attr/listDivider" />
+
+                <com.google.android.material.button.MaterialButton
+                    style="@style/cardButton"
+                    android:layout_marginRight="10dp"
+                    android:onClick="addCard"
+                    android:visibility="visible"
+                    app:icon="@drawable/ic_add"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bottomAppBar"
+        style="@style/Widget.MaterialComponents.BottomAppBar.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:menu="@menu/app_bar_menu"
+        app:backgroundTint="#FFFFFF"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/start"
+        android:layout_width="wrap_content"
+        app:backgroundTint="@color/secondaryColor"
+        app:borderWidth="0dp"
+        android:layout_height="wrap_content"
+        app:layout_anchor="@id/bottomAppBar"
+        app:srcCompat="@drawable/ic_add"
+        android:onClick="start"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
