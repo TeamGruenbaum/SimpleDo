@@ -58,8 +58,6 @@ public class Main extends AppCompatActivity
     private boolean reminding=false;
 
 
-    Snackbar snackbar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -146,7 +144,7 @@ public class Main extends AppCompatActivity
                     NotificationHelper.cancelNotification(entry);
                 }
 
-                snackbar=Snackbar.make(findViewById(R.id.root),"Rückgängig machen?", BaseTransientBottomBar.LENGTH_SHORT);
+                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),"Rückgängig machen?", BaseTransientBottomBar.LENGTH_SHORT);
                 snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
 
                 if(addCardMaterialCardView.getVisibility()== View.VISIBLE)
@@ -169,8 +167,6 @@ public class Main extends AppCompatActivity
                         }
                     }
                 });
-
-                snackbar.setDuration(BaseTransientBottomBar.LENGTH_SHORT);
 
                 snackbar.show();
             }
