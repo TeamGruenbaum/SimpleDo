@@ -18,15 +18,13 @@ public class ReminderService extends Service {
     {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(SimpleDo.getAppContext(), "main")
                 .setSmallIcon(R.drawable.ic_add)
-                .setContentTitle("SimpleDo")
-                .setContentText(intent.getStringExtra("CONTENT_TEXT"))
+                .setContentTitle(getResources().getString(R.string.app_name))
+                .setContentText(intent.getStringExtra("CONTENT"))
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
                 .setAutoCancel(true)
                 .setContentIntent(PendingIntent.getActivity(SimpleDo.getAppContext(), 0, new Intent(SimpleDo.getAppContext(), Main.class), 0));
 
-
         NotificationManagerCompat notificationManagerCompat=NotificationManagerCompat.from(SimpleDo.getAppContext());
-
         notificationManagerCompat.notify(IdentificationHelper.createUniqueID(), builder.build());
 
         return Service.START_STICKY;

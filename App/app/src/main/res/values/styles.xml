@@ -5,7 +5,6 @@
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorAccent">@color/secondaryColor</item>
-        <item name="android:windowTranslucentStatus">true </item>
     </style>
 
     <style name="cardButton" parent="@style/Widget.MaterialComponents.Button.TextButton">

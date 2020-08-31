@@ -333,7 +333,6 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         NotificationHelper.planAndSendNotification(temp);
                     }
 
-
                     return true;
                 });
 
