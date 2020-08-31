@@ -640,6 +640,9 @@ public class Main extends AppCompatActivity
         setupSortLayout();
 
         addCardContentEditText.getText().clear();
+        addCardDeadlineLinearLayout.setVisibility(View.GONE);
+        chosenDate=null;
+        chosenTime=null;
 
         if(reminding)
         {
