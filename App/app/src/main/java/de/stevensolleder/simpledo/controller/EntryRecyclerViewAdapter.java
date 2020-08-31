@@ -47,8 +47,6 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             entryViewViewHolder.bell.setVisibility(View.GONE);
         }
 
-        System.out.println("test");
-
         if(getEntry(position).getDate()!=null)
         {
             entryViewViewHolder.getDateTextView().setText(getEntry(position).getDate().toString());
@@ -57,8 +55,13 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             if(getEntry(position).getTime()!=null)
             {
                 entryViewViewHolder.getTimeTextView().setText(getEntry(position).getTime().toString());
-                System.out.println(getEntry(position).getTime().toString());
+                entryViewViewHolder.getTimeTextView().setVisibility(View.VISIBLE);
             }
+            else
+            {
+                entryViewViewHolder.getTimeTextView().setVisibility(View.GONE);
+            }
+
         }
         else
         {
@@ -329,7 +332,6 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
                         NotificationHelper.planAndSendNotification(temp);
                     }
-
 
                     return true;
                 });
