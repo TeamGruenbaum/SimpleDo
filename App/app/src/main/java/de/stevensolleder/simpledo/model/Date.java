@@ -32,6 +32,7 @@ public class Date implements Comparable<Date>
         return day+"."+month+"."+this.year;
     }
 
+    //Method for sorting by deadline
     @Override
     public int compareTo(Date comparingDate)
     {
@@ -46,15 +47,19 @@ public class Date implements Comparable<Date>
         return (year-comparingDate.year);
     }
 
-    public int getDay() {
+
+    public int getDay()
+    {
         return day;
     }
 
-    public int getMonth() {
+    public int getMonth()
+    {
         return month;
     }
 
-    public int getYear() {
+    public int getYear()
+    {
         return year;
     }
 }

@@ -13,6 +13,7 @@ public class Entry implements Serializable
     private boolean notifying;
     private int ID;
 
+    //Constructors for adding all kinds of cards to the RecyclerView
     public Entry(String content, boolean notifying)
     {
         this.content=content;
@@ -20,35 +21,36 @@ public class Entry implements Serializable
         this.ID=IdentificationHelper.createUniqueID();
     }
 
-    public Entry(String content, Date date, boolean hasNotifcation)
+    public Entry(String content, Date date, boolean notifying)
     {
-        this(content, hasNotifcation);
+        this(content, notifying);
         this.date=date;
     }
 
-    public Entry(String content, Date date,  Time time, boolean hasNotifcation)
+    public Entry(String content, Date date,  Time time, boolean notifying)
     {
-        this(content, date, hasNotifcation);
+        this(content, date, notifying);
         this.time=time;
     }
 
-    public Entry(String content, int color, boolean hasNotifcation)
+    public Entry(String content, int color, boolean notifying)
     {
-        this(content, hasNotifcation);
+        this(content, notifying);
         this.color=color;
     }
 
-    public Entry(String content, Date date,  int color, boolean hasNotifcation)
+    public Entry(String content, Date date,  int color, boolean notifying)
     {
-        this(content, date, hasNotifcation);
+        this(content, date, notifying);
         this.color=color;
     }
 
-    public Entry(String content, Date date, Time time, int color, boolean hasNotifcation)
+    public Entry(String content, Date date, Time time, int color, boolean notifying)
     {
-        this(content, date, color, hasNotifcation);
+        this(content, date, color, notifying);
         this.time=time;
     }
+
 
     public String getContent()
     {

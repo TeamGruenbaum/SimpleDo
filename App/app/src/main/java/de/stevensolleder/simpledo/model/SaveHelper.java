@@ -1,15 +1,16 @@
 package de.stevensolleder.simpledo.model;
 
-import android.content.*;
-
-import com.google.gson.Gson;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import java.util.Collections;
 import java.util.Comparator;
 
+import com.google.gson.Gson;
+
 public class SaveHelper
 {
-
+    //Methods for editing the entries in class Save
     public static void addEntry(Entry newValue)
     {
         Save temporary=getSave();
@@ -55,6 +56,7 @@ public class SaveHelper
         save(temporary);
     }
 
+    //Methods for sorting the entries by different Criteria
     public static void sortEntries()
     {
         Save temporary=getSave();
@@ -168,7 +170,7 @@ public class SaveHelper
         save(temporary);
     }
 
-
+    //Methods for saving
     private static Save getSave()
     {
         SharedPreferences preferences= SimpleDo.getAppContext().getSharedPreferences("settings", Context.MODE_PRIVATE);

@@ -1,8 +1,8 @@
 package de.stevensolleder.simpledo.model;
 
-import android.content.*;
-
-import de.stevensolleder.simpledo.model.ReminderService;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 
 public class ReminderBroadcastReceiver extends BroadcastReceiver
 {
