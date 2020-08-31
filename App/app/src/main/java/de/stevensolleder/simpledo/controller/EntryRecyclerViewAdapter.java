@@ -1,18 +1,32 @@
 package de.stevensolleder.simpledo.controller;
 
-import android.app.*;
-import android.content.*;
-import android.view.*;
-import android.view.inputmethod.*;
-import android.widget.*;
+import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.view.ContextMenu;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.DatePicker;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
 
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
-
 import java.util.Calendar;
+
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 
 import de.stevensolleder.simpledo.R;
 import de.stevensolleder.simpledo.model.*;
@@ -160,12 +174,11 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             {
                 if(keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK && keyEvent.getAction() == KeyEvent.ACTION_UP)
                 {
-
                     contentEditText.clearFocus();
 
-                    Entry temp = SaveHelper.getEntry(getPosition());
-                    temp.setContent(contentEditText.getText().toString());
-                    changeEntry(temp, getPosition());
+                    Entry entry = SaveHelper.getEntry(getPosition());
+                    entry.setContent(contentEditText.getText().toString());
+                    changeEntry(entry, getPosition());
                 }
             });
 
@@ -230,31 +243,32 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                     contentEditText.clearFocus();
                     UIUtil.hideKeyboard(mainActivity);
 
-                    DatePickerDialog picker = new DatePickerDialog(mainActivity);
+                    DatePickerDialog datePickerDialog=new DatePickerDialog(mainActivity);
 
-                    picker.setButton(DialogInterface.BUTTON_POSITIVE, "Übernehmen", new DialogInterface.OnClickListener() {
+                    datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Übernehmen", new DialogInterface.OnClickListener()
+                    {
                         @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            DatePicker datePicker = picker.getDatePicker();
+                        public void onClick(DialogInterface dialogInterface, int i)
+                        {
+                            DatePicker datePicker=datePickerDialog.getDatePicker();
 
                             Entry entry = SaveHelper.getEntry(getPosition());
-
                             entry.setDate(new Date(datePicker.getDayOfMonth(), datePicker.getMonth(), datePicker.getYear()));
                             changeEntry(entry, getPosition());
 
-                            if (entry.isNotifying()) {
+                            if (entry.isNotifying())
+                            {
                                 NotificationHelper.planAndSendNotification(entry);
                             }
                         }
                     });
 
-                    picker.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen", new DialogInterface.OnClickListener()
+                    datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen", new DialogInterface.OnClickListener()
                     {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i)
                         {
                             Entry temp=SaveHelper.getEntry(getPosition());
-
                             temp.setDate(null);
                             temp.setTime(null);
                             changeEntry(temp, getPosition());
@@ -266,10 +280,10 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     });
 
-                    picker.show();
+                    datePickerDialog.show();
 
-                    picker.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
-                    picker.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Löschen");
+                    datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
+                    datePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Löschen");
 
                     return true;
                 });
@@ -285,7 +299,6 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         public void onTimeSet(TimePicker timePicker, int hour, int minute)
                         {
                             Entry temp=SaveHelper.getEntry(getPosition());
-
                             temp.setTime(new Time(hour, minute));
                             changeEntry(temp, getPosition());
 
@@ -313,24 +326,27 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     });
 
-                    timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
+                    timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener()
+                    {
                         @Override
-                        public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event) {
+                        public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event)
+                        {
                             if (keyCode == KeyEvent.KEYCODE_BACK)
                             {
                                 timePickerDialog.dismiss();
                             }
+
                             return true;
                         }
                     });
 
-                    timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
+                    timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener()
+                    {
                         @Override
-                        public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event) {
-                            if (keyCode == KeyEvent.KEYCODE_BACK)
-                            {
+                        public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event)
+                        {
+                            if (keyCode == KeyEvent.KEYCODE_BACK){}
 
-                            }
                             return true;
                         }
                     });
@@ -347,23 +363,21 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
                 contextMenu.getItem(3).setOnMenuItemClickListener(item ->
                 {
-                    Entry temp=SaveHelper.getEntry(getPosition());
+                    Entry entry=SaveHelper.getEntry(getPosition());
 
                     if(SaveHelper.getEntry(getPosition()).isNotifying())
                     {
-                        temp.setNotifying(false);
+                        entry.setNotifying(false);
+                        changeEntry(entry, getPosition());
 
-                        changeEntry(temp, getPosition());
-
-                        NotificationHelper.cancelNotification(temp);
+                        NotificationHelper.cancelNotification(entry);
                     }
                     else
                     {
-                        temp.setNotifying(true);
+                        entry.setNotifying(true);
+                        changeEntry(entry, getPosition());
 
-                        changeEntry(temp, getPosition());
-
-                        NotificationHelper.planAndSendNotification(temp);
+                        NotificationHelper.planAndSendNotification(entry);
                     }
 
                     return true;
@@ -371,10 +385,9 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
                 MenuItem.OnMenuItemClickListener colorChanger=(subitem) ->
                 {
-                    Entry temp=SaveHelper.getEntry(getPosition());
-
-                    temp.setColor(colorChangeMenuMenuItemToColor(subitem));
-                    changeEntry(temp, getPosition());
+                    Entry entry=SaveHelper.getEntry(getPosition());
+                    entry.setColor(colorChangeMenuMenuItemToColor(subitem));
+                    changeEntry(entry, getPosition());
 
                     return true;
                 };
@@ -386,52 +399,34 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             });
         }
 
-        public MaterialCardView getCardMaterialCardView() {
+        public MaterialCardView getCardMaterialCardView()
+        {
             return cardMaterialCardView;
         }
 
-        public void setCardMaterialCardView(MaterialCardView cardMaterialCardView) {
-            this.cardMaterialCardView = cardMaterialCardView;
-        }
-
-        public AddCardContentEditText getContentEditText() {
+        public AddCardContentEditText getContentEditText()
+        {
             return contentEditText;
         }
 
-        public void setContentEditText(AddCardContentEditText contentEditText) {
-            this.contentEditText = contentEditText;
-        }
-
-        public LinearLayout getDeadlineLinearLayout() {
+        public LinearLayout getDeadlineLinearLayout()
+        {
             return deadlineLinearLayout;
         }
 
-        public void setDeadlineLinearLayout(LinearLayout deadlineLinearLayout) {
-            this.deadlineLinearLayout = deadlineLinearLayout;
-        }
-
-        public TextView getDateTextView() {
+        public TextView getDateTextView()
+        {
             return dateTextView;
         }
-
-        public void setDateTextView(TextView dateTextView) {
-            this.dateTextView = dateTextView;
-        }
-
-        public TextView getTimeTextView() {
+        
+        public TextView getTimeTextView()
+        {
             return timeTextView;
         }
 
-        public void setTimeTextView(TextView timeTextView) {
-            this.timeTextView = timeTextView;
-        }
-
-        public ContextMenu getContextMenu() {
+        public ContextMenu getContextMenu()
+        {
             return contextMenu;
-        }
-
-        public void setContextMenu(ContextMenu contextMenu) {
-            this.contextMenu = contextMenu;
         }
     }
 }

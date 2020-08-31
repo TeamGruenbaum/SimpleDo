@@ -1,15 +1,31 @@
 package de.stevensolleder.simpledo.controller;
 
-import android.app.*;
-import android.content.*;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
-import android.os.*;
-import android.view.*;
+import android.os.Build;
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.*;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
@@ -18,16 +34,17 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
-
-import static de.stevensolleder.simpledo.model.ColorHelper.colorChangeMenuMenuItemToColor;
-import static de.stevensolleder.simpledo.model.SaveHelper.*;
-
 import java.lang.reflect.Field;
 import java.util.Calendar;
 
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
+
 import de.stevensolleder.simpledo.*;
 import de.stevensolleder.simpledo.model.*;
+
+import static de.stevensolleder.simpledo.model.ColorHelper.*;
+import static de.stevensolleder.simpledo.model.NotificationHelper.*;
+import static de.stevensolleder.simpledo.model.SaveHelper.*;
 
 public class Main extends AppCompatActivity
 {
@@ -68,10 +85,8 @@ public class Main extends AppCompatActivity
 
         //Initialize all attributes from main.xml
         entryRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        entryRecyclerViewAdapter=new EntryRecyclerViewAdapter(this);
 
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN|WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
-        //sortingMaterialButtonsRelativeLayout=findViewById(R.id.walter);
         bottomAppBar=findViewById(R.id.bottomAppBar);
         changeDirectionMaterialButton=bottomAppBar.getMenu().getItem(0);
         changeCriteriumMaterialButton=bottomAppBar.getMenu().getItem(1);
@@ -91,32 +106,27 @@ public class Main extends AppCompatActivity
 
         addCardRemindMaterialButton=findViewById(R.id.remindButton);
 
-
-
-        //Set attributes from entryRecyclerView
+        //Set attributes from entryRecyclerView and set Adapter
         entryRecyclerView.setHasFixedSize(true);
         entryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         entryRecyclerView.setVerticalScrollBarEnabled(false);
-
-        //Create and set Adapter
-        entryRecyclerViewAdapter=new EntryRecyclerViewAdapter(this);
         entryRecyclerView.setAdapter(entryRecyclerViewAdapter);
 
         //Create and set Animator
         //EntryListAnimator entryListAnimator=new EntryListAnimator();
         //entryRecyclerView.setItemAnimator(entryListAnimator);
 
+        //Create notifcationchannel for reminders
         createNotificationChannel();
 
         //Setting swipe gestures
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT)
         {
-            EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder temp;
-            int distance=0;
-
+            //onMove() is called when a dragged card is dropped
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)
             {
+                //Sometimes getContextMenu() return null, to avoid a crash we use try-catch
                 try
                 {
                     ((EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder)viewHolder).getContextMenu().close();
@@ -128,6 +138,10 @@ public class Main extends AppCompatActivity
                 return viewHolder.getAdapterPosition()!=target.getAdapterPosition();
             }
 
+            //distance contains how many cards were passed after dropping the card after a dragging the card
+            int distance=0;
+
+            //onMoved() is called when a card is in drag mode and changed the position with another card
             @Override
             public void onMoved(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, int fromPos, RecyclerView.ViewHolder target, int toPos, int x, int y)
             {
@@ -136,6 +150,7 @@ public class Main extends AppCompatActivity
                 super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
             }
 
+            //onSwiped() is called when a card is swiped successfully to the left or to the right
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir)
             {
@@ -145,7 +160,7 @@ public class Main extends AppCompatActivity
                 entryRecyclerViewAdapter.deleteEntry(adapterPosition);
                 if(entry.getDate()!=null)
                 {
-                    NotificationHelper.cancelNotification(entry);
+                    cancelNotification(entry);
                 }
 
                 Snackbar snackbar=Snackbar.make(findViewById(R.id.root),"Rückgängig machen?", BaseTransientBottomBar.LENGTH_SHORT);
@@ -167,7 +182,7 @@ public class Main extends AppCompatActivity
                         entryRecyclerViewAdapter.insertEntry(entry, adapterPosition);
                         if(entry.getDate()!=null)
                         {
-                            NotificationHelper.planAndSendNotification(entry);
+                            planAndSendNotification(entry);
                         }
                     }
                 });
@@ -175,22 +190,26 @@ public class Main extends AppCompatActivity
                 snackbar.show();
             }
 
+            //This contains the current dragged card
+            EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder entryRecyclerViewViewHolder;
+
+            //onSelectedChanged() is called when the state of the current dragged card
             @Override
-            public void onSelectedChanged (RecyclerView.ViewHolder viewHolder, int actionState)
+            public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState)
             {
                 if(actionState == ItemTouchHelper.ACTION_STATE_DRAG)
                 {
                     ((EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder) viewHolder).getCardMaterialCardView().setDragged(true);
-                    temp=(EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder) viewHolder;
+                    entryRecyclerViewViewHolder=(EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder) viewHolder;
                 }
 
                 if(actionState==ItemTouchHelper.ACTION_STATE_IDLE)
                 {
                     try
                     {
-                        temp.getCardMaterialCardView().setDragged(false);
+                        entryRecyclerViewViewHolder.getCardMaterialCardView().setDragged(false);
                     }
-                    catch(Exception ignored){}
+                    catch(Exception exception){}
 
                     if(distance!=0)
                     {
@@ -209,43 +228,23 @@ public class Main extends AppCompatActivity
             }
         }).attachToRecyclerView(entryRecyclerView);
 
-        addCardRemindMaterialButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                reminding = !reminding;
-
-                Drawable temp;
-
-                if(reminding)
-                {
-                    temp=getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme());
-                }
-                else
-                {
-                    temp=getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme());
-                }
-
-                addCardRemindMaterialButton.setIcon(temp);
-            }
-        });
-
-        //Setting up date-, time- and colorpicker
+        //Setting up date-, time- and color picker and remind button
         addCardDatePickerMaterialButton.setOnClickListener((View view) ->
         {
-            DatePickerDialog picker = new DatePickerDialog(Main.this);
+            DatePickerDialog datePickerDialog=new DatePickerDialog(Main.this);
 
-            picker.setButton(DialogInterface.BUTTON_POSITIVE, "Übernehmen", new DialogInterface.OnClickListener() {
+            datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Übernehmen", new DialogInterface.OnClickListener()
+            {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i)
                 {
-                    DatePicker temp=picker.getDatePicker();
+                    DatePicker temp=datePickerDialog.getDatePicker();
 
                     chosenDate=new Date(temp.getDayOfMonth(), temp.getMonth(), temp.getYear());
+
                     addCardTimePickerMaterialButton.setVisibility(View.VISIBLE);
                     addCardDeadlineLinearLayout.setVisibility(View.VISIBLE);
                     addCardDateTextView.setText(chosenDate.toString());
-
                     addCardDivider.setVisibility(View.VISIBLE);
                     addCardRemindMaterialButton.setVisibility(View.VISIBLE);
                     addCardRemindMaterialButton.setEnabled(true);
@@ -254,16 +253,16 @@ public class Main extends AppCompatActivity
                 }
             });
 
-            picker.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen", new DialogInterface.OnClickListener()
+            datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen", new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i)
                 {
                     chosenDate=null;
                     chosenTime=null;
+
                     addCardTimePickerMaterialButton.setVisibility(View.GONE);
                     addCardDeadlineLinearLayout.setVisibility(View.GONE);
-
                     addCardDivider.setVisibility(View.GONE);
                     addCardRemindMaterialButton.setVisibility(View.GONE);
                     addCardRemindMaterialButton.setEnabled(false);
@@ -274,7 +273,7 @@ public class Main extends AppCompatActivity
 
             UIUtil.hideKeyboard(Main.this);
 
-            picker.show();
+            datePickerDialog.show();
         });
 
         addCardTimePickerMaterialButton.setOnClickListener(new View.OnClickListener()
@@ -288,9 +287,11 @@ public class Main extends AppCompatActivity
                     public void onTimeSet(TimePicker timePicker, int hour, int minute)
                     {
                         chosenTime=new Time(hour, minute);
+
                         addCardTimeTextView.setVisibility(View.VISIBLE);
                         addCardTimeTextView.setText(chosenTime.toString());
 
+                        //UIUtil doesn't work in time picker so we use the direct methods
                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.toggleSoftInput(0,0);
                     }
@@ -302,6 +303,7 @@ public class Main extends AppCompatActivity
                     public void onCancel(DialogInterface dialogInterface)
                     {
                         chosenTime=null;
+
                         addCardTimeTextView.setVisibility(View.GONE);
 
                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -309,11 +311,11 @@ public class Main extends AppCompatActivity
                     }
                 });
 
-                UIUtil.hideKeyboard(Main.this);
-
-                timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
+                timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener()
+                {
                     @Override
-                    public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event) {
+                    public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event)
+                    {
                         if (keyCode == KeyEvent.KEYCODE_BACK)
                         {
                             timePickerDialog.dismiss();
@@ -321,11 +323,14 @@ public class Main extends AppCompatActivity
                             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                             imm.toggleSoftInput(0,0);
                         }
+
                         return true;
                     }
                 });
 
                 timePickerDialog.setCanceledOnTouchOutside(false);
+
+                UIUtil.hideKeyboard(Main.this);
 
                 timePickerDialog.show();
 
@@ -334,7 +339,58 @@ public class Main extends AppCompatActivity
             }
         });
 
-        //Setting up sortbuttons
+        addCardColorMenuMaterialButton.setOnClickListener((view) ->
+        {
+            PopupMenu popupMenu=new PopupMenu(getApplicationContext(), view);
+
+            popupMenu.getMenuInflater().inflate(R.menu.color_change_menu,popupMenu.getMenu());
+
+            try
+            {
+                //Complex reflection stuff to achieve that in lower android versions the color images in the popup menu are shown
+                Field fieldMPopup=popupMenu.getClass().getDeclaredField("mPopup");
+                fieldMPopup.setAccessible(true);
+                Object mPopup=fieldMPopup.get(popupMenu);
+                mPopup.getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(mPopup, true);
+            }catch(Exception exception){}
+
+            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
+            {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem)
+                {
+                    chosenColor=colorChangeMenuMenuItemToColor(menuItem);
+                    addCardMaterialCardView.setCardBackgroundColor(chosenColor);
+
+                    return true;
+                }
+            });
+
+            popupMenu.show();
+        });
+
+        addCardRemindMaterialButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                reminding=!reminding;
+
+                Drawable drawable;
+
+                if(reminding)
+                {
+                    drawable=getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme());
+                }
+                else
+                {
+                    drawable=getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme());
+                }
+
+                addCardRemindMaterialButton.setIcon(drawable);
+            }
+        });
+
+        //Setting up sort buttons
         changeDirectionMaterialButton.setOnMenuItemClickListener((menuItem) ->
         {
             switch(getSortDirection())
@@ -364,11 +420,13 @@ public class Main extends AppCompatActivity
                 case TEXT:
                 {
                     changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_clock, Main.this.getTheme()));
+
                     setSortCriterium(Criterium.DEADLINE);
                 }break;
                 case DEADLINE:
                 {
                     changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_palette, Main.this.getTheme()));
+
                     setSortCriterium(Criterium.COLOR);
 
                 }break;
@@ -382,6 +440,7 @@ public class Main extends AppCompatActivity
                     temp.setAlpha(255);
                     changeDirectionMaterialButton.setIcon(temp);
                     changeDirectionMaterialButton.setEnabled(true);
+
                     setSortDirection(Direction.DOWN);
                 }break;
             }
@@ -389,41 +448,13 @@ public class Main extends AppCompatActivity
             if(getSortDirection()==Direction.NONE)
             {
                 changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
+
                 setSortDirection(Direction.DOWN);
             }
 
             entryRecyclerViewAdapter.sortEntries();
 
             return true;
-        });
-
-        addCardColorMenuMaterialButton.setOnClickListener((view) ->
-        {
-                PopupMenu popupMenu=new PopupMenu(getApplicationContext(), view);
-
-                popupMenu.getMenuInflater().inflate(R.menu.color_change_menu,popupMenu.getMenu());
-
-                try
-                {
-                    //Nobody understands this
-                    Field fieldMPopup=popupMenu.getClass().getDeclaredField("mPopup");
-                    fieldMPopup.setAccessible(true);
-                    Object mPopup=fieldMPopup.get(popupMenu);
-                    mPopup.getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(mPopup, true);
-                }catch(Exception e){}
-
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
-                {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem)
-                    {
-                        chosenColor=colorChangeMenuMenuItemToColor(menuItem);
-                        addCardMaterialCardView.setCardBackgroundColor(chosenColor);
-                        return true;
-                    }
-                });
-
-                popupMenu.show();
         });
 
         setupLayout();
@@ -433,6 +464,7 @@ public class Main extends AppCompatActivity
     public void onBackPressed()
     {
         addCardMaterialCardView.setVisibility(View.GONE);
+
         startButton.show();
         bottomAppBar.performShow();
     }
@@ -441,23 +473,48 @@ public class Main extends AppCompatActivity
     {
         switch(getSortDirection())
         {
-            case UP:{changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, Main.this.getTheme()));}break;
-            case DOWN:{changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));}break;
+            case UP:
+            {
+                changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, this.getTheme()));
+            }
+            break;
+            case DOWN:
+            {
+                changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, this.getTheme()));
+            }
+            break;
             case NONE:
             {
                 Drawable temp = getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme());
                 temp.setAlpha(128);
                 changeDirectionMaterialButton.setIcon(temp);
                 changeDirectionMaterialButton.setEnabled(false);
-            }break;
+            }
+            break;
         }
 
         switch(getSortCriterium())
         {
-            case TEXT:{changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_alpha, Main.this.getTheme()));}break;
-            case DEADLINE:{changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_clock, Main.this.getTheme()));}break;
-            case COLOR:{changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_palette, Main.this.getTheme()));}break;
-            case NONE:{changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));}break;
+            case TEXT:
+            {
+                changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_alpha, this.getTheme()));
+            }
+            break;
+            case DEADLINE:
+            {
+                changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_clock, this.getTheme()));
+            }
+            break;
+            case COLOR:
+            {
+                changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_palette, this.getTheme()));
+            }
+            break;
+            case NONE:
+            {
+                changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, this.getTheme()));
+            }
+            break;
         }
     }
 
@@ -469,16 +526,15 @@ public class Main extends AppCompatActivity
             notificationChannel.setDescription("Tolle Erinnerungen");
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-
             notificationManager.createNotificationChannel(notificationChannel);
         }
     }
 
     public void addCard(View view)
     {
-        Entry temp;
+        Entry entry;
 
-        if(!(addCardContentEditText.getText().toString().trim().length() > 0))
+        if(!(addCardContentEditText.getText().toString().trim().length()>0))
         {
             return;
         }
@@ -491,16 +547,16 @@ public class Main extends AppCompatActivity
             {
                 if(chosenTime!=null)
                 {
-                    temp=new Entry(refreshedContent, chosenDate, chosenTime, chosenColor, reminding);
+                    entry=new Entry(refreshedContent, chosenDate, chosenTime, chosenColor, reminding);
                 }
                 else
                 {
-                    temp=new Entry(refreshedContent, chosenDate, chosenColor, reminding);
+                    entry=new Entry(refreshedContent, chosenDate, chosenColor, reminding);
                 }
             }
             else
             {
-                temp=new Entry(refreshedContent, chosenColor, reminding);
+                entry=new Entry(refreshedContent, chosenColor, reminding);
             }
         }
         else
@@ -509,16 +565,16 @@ public class Main extends AppCompatActivity
             {
                 if(chosenTime!=null)
                 {
-                    temp=new Entry(refreshedContent, chosenDate, chosenTime, reminding);
+                    entry=new Entry(refreshedContent, chosenDate, chosenTime, reminding);
                 }
                 else
                 {
-                    temp=new Entry(refreshedContent, chosenDate, reminding);
+                    entry=new Entry(refreshedContent, chosenDate, reminding);
                 }
             }
             else
             {
-                temp=new Entry(refreshedContent, reminding);
+                entry=new Entry(refreshedContent, reminding);
             }
         }
 
@@ -528,13 +584,13 @@ public class Main extends AppCompatActivity
         setSortDirection(Direction.NONE);
         setSortCriterium(Criterium.NONE);
 
-        addCardContentEditText.getText().clear();
+        entryRecyclerViewAdapter.insertEntry(entry);
 
-        entryRecyclerViewAdapter.insertEntry(temp);
+        addCardContentEditText.getText().clear();
 
         if(reminding)
         {
-            NotificationHelper.planAndSendNotification(temp);
+            planAndSendNotification(entry);
         }
     }
 
@@ -542,10 +598,12 @@ public class Main extends AppCompatActivity
     {
         bottomAppBar.performHide();
         startButton.hide();
+
         addCardMaterialCardView.setVisibility(View.VISIBLE);
+
         addCardContentEditText.requestFocus();
 
-        InputMethodManager inputMethodManager=(InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager inputMethodManager=(InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
 }
