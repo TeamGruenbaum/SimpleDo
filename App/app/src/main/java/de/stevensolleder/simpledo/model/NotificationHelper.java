@@ -1,7 +1,10 @@
 package de.stevensolleder.simpledo.model;
 
-import android.app.*;
-import android.content.*;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+
+import android.content.Context;
+import android.content.Intent;
 
 import java.util.Calendar;
 
@@ -11,13 +14,14 @@ public class NotificationHelper
     {
         Calendar calendar=Calendar.getInstance();
 
+        //Determine the exact point in time for the notification
         if(entry.getTime()!=null)
         {
             calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay(), entry.getTime().getHour(), entry.getTime().getMinute(), 0);
         }
         else
         {
-            calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay());
+            calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay(), 8, 0, 0);
         }
 
         Intent intent=new Intent(SimpleDo.getAppContext(), ReminderBroadcastReceiver.class);

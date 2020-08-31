@@ -1,15 +1,19 @@
 package de.stevensolleder.simpledo.model;
 
-import android.app.*;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+
 import android.content.Intent;
+
 import android.os.IBinder;
 
-import androidx.core.app.*;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import de.stevensolleder.simpledo.R;
+
 import de.stevensolleder.simpledo.controller.Main;
-import de.stevensolleder.simpledo.model.IdentificationHelper;
-import de.stevensolleder.simpledo.model.SimpleDo;
 
 public class ReminderService extends Service {
 

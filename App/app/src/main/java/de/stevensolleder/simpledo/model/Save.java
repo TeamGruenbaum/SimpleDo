@@ -13,7 +13,7 @@ public class Save
     {
         entries=new ArrayList<Entry>();
 
-        //By default their values are set to NONE because the list is unsorted
+        //By default the ArrayList is unsorted
         sortDirection=Direction.NONE;
         sortCriterium=Criterium.NONE;
     }

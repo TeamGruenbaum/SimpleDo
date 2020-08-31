@@ -1,6 +1,7 @@
 package de.stevensolleder.simpledo.model;
 
 import android.graphics.Color;
+
 import android.view.MenuItem;
 
 import de.stevensolleder.simpledo.R;

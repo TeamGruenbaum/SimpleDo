@@ -24,19 +24,24 @@ public class Time implements Comparable<Time>
         return hour+":"+minute;
     }
 
+    //Method for sorting by deadline
     @Override
-    public int compareTo(Time comparingTime) {
+    public int compareTo(Time comparingTime)
+    {
         if ((hour - comparingTime.hour) == 0) {
             return (minute - comparingTime.minute);
         }
         return (hour - comparingTime.hour);
     }
 
-    public int getHour() {
+
+    public int getHour()
+    {
         return hour;
     }
 
-    public int getMinute() {
+    public int getMinute()
+    {
         return minute;
     }
 }
