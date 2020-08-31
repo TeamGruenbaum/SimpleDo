@@ -63,7 +63,6 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             {
                 entryViewViewHolder.getTimeTextView().setVisibility(View.GONE);
             }
-
         }
         else
         {
