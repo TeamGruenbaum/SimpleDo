@@ -187,6 +187,8 @@ public class Main extends AppCompatActivity
                 });
 
                 snackbar.show();
+
+                setupSortLayout();
             }
 
             //This contains the current dragged card
@@ -484,9 +486,9 @@ public class Main extends AppCompatActivity
             break;
             case NONE:
             {
-                Drawable temp = getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme());
-                temp.setAlpha(128);
-                changeDirectionMaterialButton.setIcon(temp);
+                Drawable drawable = getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
+                drawable.setAlpha(128);
+                changeDirectionMaterialButton.setIcon(drawable);
                 changeDirectionMaterialButton.setEnabled(false);
             }
             break;
@@ -514,6 +516,37 @@ public class Main extends AppCompatActivity
                 changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, this.getTheme()));
             }
             break;
+        }
+
+        setupSortLayout();
+    }
+
+    public void setupSortLayout()
+    {
+        if(getEntriesSize()<=1)
+        {
+            Drawable drawable=getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
+            drawable.setAlpha(128);
+            changeDirectionMaterialButton.setIcon(drawable);
+            changeDirectionMaterialButton.setEnabled(false);
+
+            drawable=getResources().getDrawable(R.drawable.ic_sort, this.getTheme());
+            drawable.setAlpha(128);
+            changeCriteriumMaterialButton.setIcon(drawable);
+            changeCriteriumMaterialButton.setEnabled(false);
+        }
+        else
+        {
+            System.out.println("ELSE");
+            Drawable drawable=getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
+            drawable.setAlpha(255);
+            changeDirectionMaterialButton.setIcon(drawable);
+            changeDirectionMaterialButton.setEnabled(true);
+
+            drawable=getResources().getDrawable(R.drawable.ic_sort, this.getTheme());
+            drawable.setAlpha(255);
+            changeCriteriumMaterialButton.setIcon(drawable);
+            changeCriteriumMaterialButton.setEnabled(true);
         }
     }
 
@@ -584,6 +617,8 @@ public class Main extends AppCompatActivity
         setSortCriterium(Criterium.NONE);
 
         entryRecyclerViewAdapter.insertEntry(entry);
+
+        setupSortLayout();
 
         addCardContentEditText.getText().clear();
 
