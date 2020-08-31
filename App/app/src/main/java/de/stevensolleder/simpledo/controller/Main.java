@@ -1,5 +1,6 @@
 package de.stevensolleder.simpledo.controller;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.NotificationChannel;
@@ -175,15 +176,12 @@ public class Main extends AppCompatActivity
                     snackbar.setAnchorView(startButton);
                 }
 
-                snackbar.setAction("Ja", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view)
+                snackbar.setAction("Ja", (view) ->
+                {
+                    entryRecyclerViewAdapter.insertEntry(entry, adapterPosition);
+                    if(entry.getDate()!=null)
                     {
-                        entryRecyclerViewAdapter.insertEntry(entry, adapterPosition);
-                        if(entry.getDate()!=null)
-                        {
-                            planAndSendNotification(entry);
-                        }
+                        planAndSendNotification(entry);
                     }
                 });
 
@@ -231,62 +229,50 @@ public class Main extends AppCompatActivity
         }).attachToRecyclerView(entryRecyclerView);
 
         //Setting up date-, time- and color picker and remind button
-        addCardDatePickerMaterialButton.setOnClickListener((View view) ->
+        addCardDatePickerMaterialButton.setOnClickListener((view) ->
         {
             DatePickerDialog datePickerDialog=new DatePickerDialog(Main.this);
 
-            datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Übernehmen", new DialogInterface.OnClickListener()
+            datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Übernehmen", (dialogInterface, i)->
             {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i)
+                DatePicker temp=datePickerDialog.getDatePicker();
+
+                chosenDate=new Date(temp.getDayOfMonth(), temp.getMonth(), temp.getYear());
+
+                addCardTimePickerMaterialButton.setVisibility(View.VISIBLE);
+                addCardDeadlineLinearLayout.setVisibility(View.VISIBLE);
+                addCardDateTextView.setText(chosenDate.toString());
+                addCardDivider.setVisibility(View.VISIBLE);
+                addCardRemindMaterialButton.setVisibility(View.VISIBLE);
+                addCardRemindMaterialButton.setEnabled(true);
+
+                UIUtil.showKeyboard(Main.this, addCardContentEditText);
+            });
+
+            datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen", (dialogInterface, i)->
+            {
+                chosenDate=null;
+                chosenTime=null;
+
+                addCardTimePickerMaterialButton.setVisibility(View.GONE);
+                addCardDeadlineLinearLayout.setVisibility(View.GONE);
+                addCardDivider.setVisibility(View.GONE);
+                addCardRemindMaterialButton.setVisibility(View.GONE);
+                addCardRemindMaterialButton.setEnabled(false);
+
+                UIUtil.showKeyboard(Main.this, addCardContentEditText);
+            });
+
+            datePickerDialog.setOnKeyListener((DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent)->
+            {
+                if (keyCode == KeyEvent.KEYCODE_BACK)
                 {
-                    DatePicker temp=datePickerDialog.getDatePicker();
-
-                    chosenDate=new Date(temp.getDayOfMonth(), temp.getMonth(), temp.getYear());
-
-                    addCardTimePickerMaterialButton.setVisibility(View.VISIBLE);
-                    addCardDeadlineLinearLayout.setVisibility(View.VISIBLE);
-                    addCardDateTextView.setText(chosenDate.toString());
-                    addCardDivider.setVisibility(View.VISIBLE);
-                    addCardRemindMaterialButton.setVisibility(View.VISIBLE);
-                    addCardRemindMaterialButton.setEnabled(true);
+                    datePickerDialog.dismiss();
 
                     UIUtil.showKeyboard(Main.this, addCardContentEditText);
                 }
-            });
 
-            datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen", new DialogInterface.OnClickListener()
-            {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i)
-                {
-                    chosenDate=null;
-                    chosenTime=null;
-
-                    addCardTimePickerMaterialButton.setVisibility(View.GONE);
-                    addCardDeadlineLinearLayout.setVisibility(View.GONE);
-                    addCardDivider.setVisibility(View.GONE);
-                    addCardRemindMaterialButton.setVisibility(View.GONE);
-                    addCardRemindMaterialButton.setEnabled(false);
-
-                    UIUtil.showKeyboard(Main.this, addCardContentEditText);
-                }
-            });
-
-            datePickerDialog.setOnKeyListener(new Dialog.OnKeyListener()
-            {
-                @Override
-                public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event)
-                {
-                    if (keyCode == KeyEvent.KEYCODE_BACK)
-                    {
-                        datePickerDialog.dismiss();
-
-                        UIUtil.showKeyboard(Main.this, addCardContentEditText);
-                    }
-
-                    return true;
-                }
+                return true;
             });
 
             datePickerDialog.setCanceledOnTouchOutside(false);
@@ -296,67 +282,51 @@ public class Main extends AppCompatActivity
             datePickerDialog.show();
         });
 
-        addCardTimePickerMaterialButton.setOnClickListener(new View.OnClickListener()
+        addCardTimePickerMaterialButton.setOnClickListener((view)->
         {
-            @Override
-            public void onClick(View view)
+            TimePickerDialog timePickerDialog=new TimePickerDialog(Main.this, (timePicker, hour, minute)->
             {
-                TimePickerDialog timePickerDialog=new TimePickerDialog(Main.this, new TimePickerDialog.OnTimeSetListener()
+                chosenTime=new Time(hour, minute);
+
+                addCardTimeTextView.setVisibility(View.VISIBLE);
+                addCardTimeTextView.setText(chosenTime.toString());
+
+                //UIUtil doesn't work in time picker so we use the direct methods
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(0,0);
+            }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
+
+            timePickerDialog.setOnCancelListener((dialogInterface)->
+            {
+                chosenTime=null;
+
+                addCardTimeTextView.setVisibility(View.GONE);
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(0,0);
+            });
+
+            timePickerDialog.setOnKeyListener((DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent)->
+            {
+                if (keyCode == KeyEvent.KEYCODE_BACK)
                 {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int hour, int minute)
-                    {
-                        chosenTime=new Time(hour, minute);
+                    timePickerDialog.dismiss();
 
-                        addCardTimeTextView.setVisibility(View.VISIBLE);
-                        addCardTimeTextView.setText(chosenTime.toString());
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(0,0);
+                }
 
-                        //UIUtil doesn't work in time picker so we use the direct methods
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.toggleSoftInput(0,0);
-                    }
-                }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
+                return true;
+            });
 
-                timePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener()
-                {
-                    @Override
-                    public void onCancel(DialogInterface dialogInterface)
-                    {
-                        chosenTime=null;
+            timePickerDialog.setCanceledOnTouchOutside(false);
 
-                        addCardTimeTextView.setVisibility(View.GONE);
+            UIUtil.hideKeyboard(Main.this);
 
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.toggleSoftInput(0,0);
-                    }
-                });
+            timePickerDialog.show();
 
-                timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener()
-                {
-                    @Override
-                    public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event)
-                    {
-                        if (keyCode == KeyEvent.KEYCODE_BACK)
-                        {
-                            timePickerDialog.dismiss();
-
-                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                            imm.toggleSoftInput(0,0);
-                        }
-
-                        return true;
-                    }
-                });
-
-                timePickerDialog.setCanceledOnTouchOutside(false);
-
-                UIUtil.hideKeyboard(Main.this);
-
-                timePickerDialog.show();
-
-                timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
-                timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Löschen");
-            }
+            timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
+            timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Löschen");
         });
 
         addCardColorMenuMaterialButton.setOnClickListener((view) ->
@@ -374,40 +344,33 @@ public class Main extends AppCompatActivity
                 mPopup.getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(mPopup, true);
             }catch(Exception exception){}
 
-            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
+            popupMenu.setOnMenuItemClickListener((menuItem)->
             {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem)
-                {
-                    chosenColor=colorChangeMenuMenuItemToColor(menuItem);
-                    addCardMaterialCardView.setCardBackgroundColor(chosenColor);
+                chosenColor=colorChangeMenuMenuItemToColor(menuItem);
+                addCardMaterialCardView.setCardBackgroundColor(chosenColor);
 
-                    return true;
-                }
+                return true;
             });
 
             popupMenu.show();
         });
 
-        addCardRemindMaterialButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
+        addCardRemindMaterialButton.setOnClickListener((view)->
+        {
+            reminding=!reminding;
+
+            Drawable drawable;
+
+            if(reminding)
             {
-                reminding=!reminding;
-
-                Drawable drawable;
-
-                if(reminding)
-                {
-                    drawable=getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme());
-                }
-                else
-                {
-                    drawable=getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme());
-                }
-
-                addCardRemindMaterialButton.setIcon(drawable);
+                drawable=getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme());
             }
+            else
+            {
+                drawable=getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme());
+            }
+
+            addCardRemindMaterialButton.setIcon(drawable);
         });
 
         //Setting up sort buttons
@@ -475,6 +438,47 @@ public class Main extends AppCompatActivity
             entryRecyclerViewAdapter.sortEntries();
 
             return true;
+        });
+
+        bottomAppBar.setNavigationOnClickListener((view)->
+        {
+            PopupMenu popupMenu=new PopupMenu(getApplicationContext(), view);
+
+            popupMenu.getMenuInflater().inflate(R.menu.settings_menu,popupMenu.getMenu());
+
+            popupMenu.getMenu().getItem(0).setOnMenuItemClickListener((menuItem)->
+            {
+
+                return false;
+            });
+
+            popupMenu.getMenu().getItem(2).setOnMenuItemClickListener((menuItem)->
+            {
+                AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
+                alertDialog.setPositiveButton("OK", (dialogInterface, i)->{});
+                alertDialog.setTitle("Developers");
+                alertDialog.setMessage("Steven Solleder \nIsabell Waas");
+                alertDialog.setCancelable(false);
+
+                alertDialog.show();
+
+                return false;
+            });
+
+            popupMenu.getMenu().getItem(3).setOnMenuItemClickListener((menuItem)->
+            {
+                AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
+                alertDialog.setPositiveButton("OK", (dialogInterface, i)->{});
+                alertDialog.setTitle("About");
+                alertDialog.setMessage("Version 1.0");
+                alertDialog.setCancelable(false);
+
+                alertDialog.show();
+
+                return false;
+            });
+
+            popupMenu.show();
         });
 
         setupLayout();

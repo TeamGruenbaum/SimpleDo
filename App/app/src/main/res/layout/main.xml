@@ -141,6 +141,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        app:navigationIcon="@drawable/ic_more_vert"
+        app:hideOnScroll="true"
         app:menu="@menu/app_bar_menu"
         app:backgroundTint="#FFFFFF"/>
 
