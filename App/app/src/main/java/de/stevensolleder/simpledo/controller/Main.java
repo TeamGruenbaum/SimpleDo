@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Contacts;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -272,7 +273,25 @@ public class Main extends AppCompatActivity
                 }
             });
 
-            UIUtil.hideKeyboard(Main.this);
+            datePickerDialog.setOnKeyListener(new Dialog.OnKeyListener()
+            {
+                @Override
+                public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event)
+                {
+                    if (keyCode == KeyEvent.KEYCODE_BACK)
+                    {
+                        datePickerDialog.dismiss();
+
+                        UIUtil.showKeyboard(Main.this, addCardContentEditText);
+                    }
+
+                    return true;
+                }
+            });
+
+            datePickerDialog.setCanceledOnTouchOutside(false);
+
+            UIUtil.hideKeyboard(this);
 
             datePickerDialog.show();
         });
@@ -296,7 +315,7 @@ public class Main extends AppCompatActivity
                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.toggleSoftInput(0,0);
                     }
-                }, Calendar.getInstance().get(Calendar.HOUR), Calendar.getInstance().get(Calendar.MINUTE), true);
+                }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
 
                 timePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener()
                 {

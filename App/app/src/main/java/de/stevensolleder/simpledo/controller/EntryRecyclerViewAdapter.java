@@ -280,6 +280,8 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     });
 
+                    datePickerDialog.setCanceledOnTouchOutside(false);
+
                     datePickerDialog.show();
 
                     datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
@@ -307,7 +309,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                                 NotificationHelper.planAndSendNotification(temp);
                             }
                         }
-                    }, Calendar.getInstance().get(Calendar.HOUR), Calendar.getInstance().get(Calendar.MINUTE), true);
+                    }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
 
                     timePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener()
                     {
@@ -335,17 +337,6 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                             {
                                 timePickerDialog.dismiss();
                             }
-
-                            return true;
-                        }
-                    });
-
-                    timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener()
-                    {
-                        @Override
-                        public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event)
-                        {
-                            if (keyCode == KeyEvent.KEYCODE_BACK){}
 
                             return true;
                         }
