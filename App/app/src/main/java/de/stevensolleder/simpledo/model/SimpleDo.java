@@ -1,7 +1,6 @@
 package de.stevensolleder.simpledo.model;
 
 import android.app.Application;
-
 import android.content.Context;
 
 public class SimpleDo extends Application
