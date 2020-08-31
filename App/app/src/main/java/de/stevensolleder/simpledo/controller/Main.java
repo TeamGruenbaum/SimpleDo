@@ -40,6 +40,7 @@ public class Main extends AppCompatActivity
     private MaterialButton addCardTimePickerMaterialButton;
     private MaterialButton addCardColorMenuMaterialButton;
     private MaterialButton addCardRemindMaterialButton;
+    private View addCardDivider;
     private LinearLayout addCardDeadlineLinearLayout;
     private TextView addCardDateTextView;
     private TextView addCardTimeTextView;
@@ -56,8 +57,6 @@ public class Main extends AppCompatActivity
     private int chosenColor=-1;
 
     private boolean reminding=false;
-
-    private View addCardDivider;
 
 
     @Override
@@ -82,6 +81,7 @@ public class Main extends AppCompatActivity
         addCardDatePickerMaterialButton=findViewById(R.id.dateButton);
         addCardTimePickerMaterialButton=findViewById(R.id.timeButton);
         addCardColorMenuMaterialButton=findViewById(R.id.colorButton);
+        addCardDivider=findViewById(R.id.divider1);
         addCardDeadlineLinearLayout=findViewById(R.id.addCardDeadline);
 
         addCardDateTextView=findViewById(R.id.addCardDate);
@@ -91,7 +91,7 @@ public class Main extends AppCompatActivity
 
         addCardRemindMaterialButton=findViewById(R.id.remindButton);
 
-        addCardDivider=findViewById(R.id.divider1);
+
 
         //Set attributes from entryRecyclerView
         entryRecyclerView.setHasFixedSize(true);
