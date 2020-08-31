@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
 
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
+
 import java.util.Calendar;
 
 import de.stevensolleder.simpledo.R;
@@ -226,31 +228,36 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
                 contextMenu.getItem(1).setOnMenuItemClickListener((item) ->
                 {
-                    DatePickerDialog picker = new DatePickerDialog(mainActivity, new DatePickerDialog.OnDateSetListener()
-                    {
+                    contentEditText.clearFocus();
+                    UIUtil.hideKeyboard(mainActivity);
+
+                    DatePickerDialog picker = new DatePickerDialog(mainActivity);
+
+                    picker.setButton(DialogInterface.BUTTON_POSITIVE, "Übernehmen", new DialogInterface.OnClickListener() {
                         @Override
-                        public void onDateSet(DatePicker view, int year, int month, int day)
-                        {
-                            Entry temp=SaveHelper.getEntry(getPosition());
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            DatePicker datePicker = picker.getDatePicker();
 
-                            temp.setDate(new Date(day, month, year));
-                            changeEntry(temp, getPosition());
+                            Entry entry = SaveHelper.getEntry(getPosition());
 
-                            if(temp.isNotifying())
-                            {
-                                NotificationHelper.planAndSendNotification(temp);
+                            entry.setDate(new Date(datePicker.getDayOfMonth(), datePicker.getMonth(), datePicker.getYear()));
+                            changeEntry(entry, getPosition());
+
+                            if (entry.isNotifying()) {
+                                NotificationHelper.planAndSendNotification(entry);
                             }
                         }
-                    }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+                    });
 
-                    picker.setOnCancelListener(new DialogInterface.OnCancelListener()
+                    picker.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen", new DialogInterface.OnClickListener()
                     {
                         @Override
-                        public void onCancel(DialogInterface dialogInterface)
+                        public void onClick(DialogInterface dialogInterface, int i)
                         {
                             Entry temp=SaveHelper.getEntry(getPosition());
 
                             temp.setDate(null);
+                            temp.setTime(null);
                             changeEntry(temp, getPosition());
 
                             if(temp.isNotifying())
@@ -270,6 +277,9 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
                 contextMenu.getItem(2).setOnMenuItemClickListener((item) ->
                 {
+                    contentEditText.clearFocus();
+                    UIUtil.hideKeyboard(mainActivity);
+
                     TimePickerDialog timePickerDialog=new TimePickerDialog(mainActivity, new TimePickerDialog.OnTimeSetListener()
                     {
                         @Override
@@ -303,6 +313,30 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                             }
                         }
                     });
+
+                    timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
+                        @Override
+                        public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event) {
+                            if (keyCode == KeyEvent.KEYCODE_BACK)
+                            {
+                                timePickerDialog.dismiss();
+                            }
+                            return true;
+                        }
+                    });
+
+                    timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
+                        @Override
+                        public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event) {
+                            if (keyCode == KeyEvent.KEYCODE_BACK)
+                            {
+
+                            }
+                            return true;
+                        }
+                    });
+
+                    timePickerDialog.setCanceledOnTouchOutside(false);
 
                     timePickerDialog.show();
 

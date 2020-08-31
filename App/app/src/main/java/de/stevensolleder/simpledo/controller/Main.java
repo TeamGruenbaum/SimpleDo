@@ -254,23 +254,23 @@ public class Main extends AppCompatActivity
                 }
             });
 
-            picker.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i)
-                        {
-                            chosenDate=null;
-                            chosenTime=null;
-                            addCardTimePickerMaterialButton.setVisibility(View.GONE);
-                            addCardDeadlineLinearLayout.setVisibility(View.GONE);
+            picker.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen", new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i)
+                {
+                    chosenDate=null;
+                    chosenTime=null;
+                    addCardTimePickerMaterialButton.setVisibility(View.GONE);
+                    addCardDeadlineLinearLayout.setVisibility(View.GONE);
 
-                            addCardDivider.setVisibility(View.GONE);
-                            addCardRemindMaterialButton.setVisibility(View.GONE);
-                            addCardRemindMaterialButton.setEnabled(false);
+                    addCardDivider.setVisibility(View.GONE);
+                    addCardRemindMaterialButton.setVisibility(View.GONE);
+                    addCardRemindMaterialButton.setEnabled(false);
 
-                            UIUtil.showKeyboard(Main.this, addCardContentEditText);
-                        }
-                    });
+                    UIUtil.showKeyboard(Main.this, addCardContentEditText);
+                }
+            });
 
             UIUtil.hideKeyboard(Main.this);
 
@@ -296,7 +296,8 @@ public class Main extends AppCompatActivity
                     }
                 }, Calendar.getInstance().get(Calendar.HOUR), Calendar.getInstance().get(Calendar.MINUTE), true);
 
-                timePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                timePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener()
+                {
                     @Override
                     public void onCancel(DialogInterface dialogInterface)
                     {
@@ -309,6 +310,22 @@ public class Main extends AppCompatActivity
                 });
 
                 UIUtil.hideKeyboard(Main.this);
+
+                timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener() {
+                    @Override
+                    public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event) {
+                        if (keyCode == KeyEvent.KEYCODE_BACK)
+                        {
+                            timePickerDialog.dismiss();
+
+                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.toggleSoftInput(0,0);
+                        }
+                        return true;
+                    }
+                });
+
+                timePickerDialog.setCanceledOnTouchOutside(false);
 
                 timePickerDialog.show();
 
