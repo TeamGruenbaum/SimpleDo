@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -452,7 +453,7 @@ public class Main extends AppCompatActivity
                 return false;
             });
 
-            popupMenu.getMenu().getItem(2).setOnMenuItemClickListener((menuItem)->
+            popupMenu.getMenu().getItem(1).setOnMenuItemClickListener((menuItem)->
             {
                 AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
                 alertDialog.setPositiveButton("OK", (dialogInterface, i)->{});
@@ -465,15 +466,11 @@ public class Main extends AppCompatActivity
                 return false;
             });
 
-            popupMenu.getMenu().getItem(3).setOnMenuItemClickListener((menuItem)->
+            popupMenu.getMenu().getItem(2).setOnMenuItemClickListener((menuItem)->
             {
-                AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
-                alertDialog.setPositiveButton("OK", (dialogInterface, i)->{});
-                alertDialog.setTitle("About");
-                alertDialog.setMessage("Version 1.0");
-                alertDialog.setCancelable(false);
+                Intent intent=new Intent(Main.this, DeveloperActivity.class);
 
-                alertDialog.show();
+                startActivity(intent);
 
                 return false;
             });
@@ -633,9 +630,23 @@ public class Main extends AppCompatActivity
             }
         }
 
+        if(reminding)
+        {
+            if(isInPast(entry))
+            {
+                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),"Notification liegt in der Vergangenheit", BaseTransientBottomBar.LENGTH_SHORT);
+                snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
+                snackbar.setAnchorView(R.id.addCard);
+                snackbar.show();
+
+                return;
+            }
+
+            planAndSendNotification(entry);
+        }
+
         changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme()));
         changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
-
         setSortDirection(Direction.NONE);
         setSortCriterium(Criterium.NONE);
 
@@ -647,11 +658,6 @@ public class Main extends AppCompatActivity
         addCardDeadlineLinearLayout.setVisibility(View.GONE);
         chosenDate=null;
         chosenTime=null;
-
-        if(reminding)
-        {
-            planAndSendNotification(entry);
-        }
     }
 
     public void start(View view)
@@ -665,5 +671,30 @@ public class Main extends AppCompatActivity
 
         InputMethodManager inputMethodManager=(InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+    }
+
+    private boolean isInPast (Entry entry)
+    {
+        Calendar calendar=Calendar.getInstance();
+
+        Date currentDate=new Date(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR));
+        Time currentTime=new Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+
+        Time allDayEventTime=new Time(11,0); //getAllDayEventTime()
+
+        if (entry.getDate()!=null && entry.getDate().compareTo(currentDate)==0)
+        {
+            if(entry.getTime()!=null)
+            {
+                return (entry.getTime().compareTo(currentTime))<0;
+            }
+            else
+            {
+                return allDayEventTime.compareTo(currentTime)<0;
+            }
+
+        }
+
+        return (entry.getDate().compareTo(currentDate))<0;
     }
 }

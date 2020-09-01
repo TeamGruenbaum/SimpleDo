@@ -9,16 +9,8 @@
         android:icon="@drawable/ic_yellow"
         android:title="Erscheinungsbild"
         app:showAsAction="ifRoom" />
-    <item android:id="@+id/orange"
-        android:icon="@drawable/ic_orange"
-        android:title="Entwickler und Kontakt"
-        app:showAsAction="ifRoom" />
     <item android:id="@+id/red"
         android:icon="@drawable/ic_red"
         android:title="Über"
-        app:showAsAction="ifRoom" />
-    <item android:id="@+id/red"
-        android:icon="@drawable/ic_red"
-        android:title="Open-Source Lizenzen"
         app:showAsAction="ifRoom" />
 </menu>
