@@ -6,9 +6,11 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,9 +40,9 @@ import static de.stevensolleder.simpledo.model.SaveHelper.*;
 
 public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder>
 {
-    Activity mainActivity;
+    Main mainActivity;
 
-    public EntryRecyclerViewAdapter(Activity activity)
+    public EntryRecyclerViewAdapter(Main activity)
     {
         mainActivity=activity;
     }
@@ -209,6 +211,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         contentEditText.setFocusable(true);
                         contentEditText.setFocusableInTouchMode(true);
                         contentEditText.setSelection(contentEditText.length());
+                        mainActivity.itemTouchHelperEnabled(false);
 
                         InputMethodManager inputMethodManager=(InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
@@ -219,11 +222,12 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         contentEditText.setCursorVisible(false);
                         contentEditText.setFocusable(false);
                         contentEditText.setFocusableInTouchMode(false);
+                        mainActivity.itemTouchHelperEnabled(true);
                     }
                 }
             });
 
-            itemView.setOnCreateContextMenuListener((contextMenu, v, menuInfo) ->
+            cardMaterialCardView.setOnCreateContextMenuListener((contextMenu, v, menuInfo) ->
             {
                 this.contextMenu=contextMenu;
 

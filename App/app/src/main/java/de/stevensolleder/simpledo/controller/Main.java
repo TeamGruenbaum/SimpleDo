@@ -77,6 +77,7 @@ public class Main extends AppCompatActivity
 
     private boolean reminding=false;
 
+    ItemTouchHelper itemTouchHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -122,7 +123,7 @@ public class Main extends AppCompatActivity
         createNotificationChannel();
 
         //Setting swipe gestures
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT)
+        itemTouchHelper=new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT)
         {
             //onMove() is called when a dragged card is dropped
             @Override
@@ -227,7 +228,8 @@ public class Main extends AppCompatActivity
                     }
                 }
             }
-        }).attachToRecyclerView(entryRecyclerView);
+        });
+        itemTouchHelper.attachToRecyclerView(entryRecyclerView);
 
         //Setting up date-, time- and color picker and remind button
         addCardDatePickerMaterialButton.setOnClickListener((view) ->
@@ -695,5 +697,17 @@ public class Main extends AppCompatActivity
         }
 
         return (entry.getDate().compareTo(currentDate))<0;
+    }
+
+    public void itemTouchHelperEnabled(boolean mode)
+    {
+        if(mode)
+        {
+            itemTouchHelper.attachToRecyclerView(entryRecyclerView);
+        }
+        else
+        {
+            itemTouchHelper.attachToRecyclerView(null);
+        }
     }
 }
