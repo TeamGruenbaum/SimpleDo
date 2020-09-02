@@ -22,6 +22,7 @@
             android:clickable="false"
             android:cursorVisible="false"
             android:focusable="false"
+            android:maxLength="500"
             android:focusableInTouchMode="false"
             style="@style/cardContentText"/>
 

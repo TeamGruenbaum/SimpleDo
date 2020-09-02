@@ -38,6 +38,7 @@
                 android:id="@+id/contentEditText"
                 style="@style/cardContentText"
                 android:layout_width="match_parent"
+                android:maxLength="500"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 

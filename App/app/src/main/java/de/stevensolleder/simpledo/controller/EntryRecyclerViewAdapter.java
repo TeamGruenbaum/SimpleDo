@@ -23,6 +23,8 @@ import android.widget.TimePicker;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Calendar;
 
@@ -174,11 +176,24 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             {
                 if(keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK && keyEvent.getAction() == KeyEvent.ACTION_UP)
                 {
-                    contentEditText.clearFocus();
+                    if(!(contentEditText.getText().toString().trim().length()>0))
+                    {
+                        Snackbar snackbar=Snackbar.make(mainActivity.findViewById(R.id.root),"Zu wenig Zeichen", BaseTransientBottomBar.LENGTH_SHORT);
+                        snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
+                        snackbar.setAnchorView(R.id.addCard);
+                        snackbar.show();
+                        return;
+                    }
+                    else
+                    {
+                        String refreshedContent=contentEditText.getText().toString().replaceAll("^\\s+|\\s+$", "");
 
-                    Entry entry = SaveHelper.getEntry(getPosition());
-                    entry.setContent(contentEditText.getText().toString());
-                    changeEntry(entry, getPosition());
+                        contentEditText.clearFocus();
+
+                        Entry entry = SaveHelper.getEntry(getPosition());
+                        entry.setContent(refreshedContent);
+                        changeEntry(entry, getPosition());
+                    }
                 }
             });
 
@@ -303,6 +318,8 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                             Entry temp=SaveHelper.getEntry(getPosition());
                             temp.setTime(new Time(hour, minute));
                             changeEntry(temp, getPosition());
+
+                            timePicker.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
 
                             if(temp.isNotifying())
                             {

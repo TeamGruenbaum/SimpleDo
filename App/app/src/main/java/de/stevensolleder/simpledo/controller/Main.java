@@ -449,7 +449,6 @@ public class Main extends AppCompatActivity
 
             popupMenu.getMenu().getItem(0).setOnMenuItemClickListener((menuItem)->
             {
-
                 return false;
             });
 
