@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -163,6 +164,8 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
         private ContextMenu contextMenu;
 
+        boolean contextMenuState=true;
+
         public EntryRecyclerViewViewHolder(View itemView)
         {
             super(itemView);
@@ -178,24 +181,11 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             {
                 if(keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK && keyEvent.getAction() == KeyEvent.ACTION_UP)
                 {
-                    if(!(contentEditText.getText().toString().trim().length()>0))
-                    {
-                        Snackbar snackbar=Snackbar.make(mainActivity.findViewById(R.id.root),"Zu wenig Zeichen", BaseTransientBottomBar.LENGTH_SHORT);
-                        snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
-                        snackbar.setAnchorView(R.id.addCard);
-                        snackbar.show();
-                        return;
-                    }
-                    else
-                    {
-                        String refreshedContent=contentEditText.getText().toString().replaceAll("^\\s+|\\s+$", "");
-
                         contentEditText.clearFocus();
 
                         Entry entry = SaveHelper.getEntry(getPosition());
-                        entry.setContent(refreshedContent);
+                        entry.setContent(contentEditText.getText().toString());
                         changeEntry(entry, getPosition());
-                    }
                 }
             });
 
@@ -212,6 +202,8 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         contentEditText.setFocusableInTouchMode(true);
                         contentEditText.setSelection(contentEditText.length());
                         mainActivity.itemTouchHelperEnabled(false);
+                        cardMaterialCardView.setLongClickable(false);
+                        contextMenuEnabled(false);
 
                         InputMethodManager inputMethodManager=(InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
@@ -223,12 +215,19 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         contentEditText.setFocusable(false);
                         contentEditText.setFocusableInTouchMode(false);
                         mainActivity.itemTouchHelperEnabled(true);
+                        cardMaterialCardView.setLongClickable(true);
+                        contextMenuEnabled(true);
                     }
                 }
             });
 
             cardMaterialCardView.setOnCreateContextMenuListener((contextMenu, v, menuInfo) ->
             {
+                if(!contextMenuState)
+                {
+                    return;
+                }
+
                 this.contextMenu=contextMenu;
 
                 MenuInflater menuInflater=new MenuInflater(SimpleDo.getAppContext());
@@ -314,7 +313,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                     contentEditText.clearFocus();
                     UIUtil.hideKeyboard(mainActivity);
 
-                    TimePickerDialog timePickerDialog=new TimePickerDialog(mainActivity, new TimePickerDialog.OnTimeSetListener()
+                    TimeTimePickerDialog timePickerDialog=new TimeTimePickerDialog(mainActivity, new TimePickerDialog.OnTimeSetListener()
                     {
                         @Override
                         public void onTimeSet(TimePicker timePicker, int hour, int minute)
@@ -349,19 +348,11 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     });
 
-                    timePickerDialog.setOnKeyListener(new Dialog.OnKeyListener()
+                    timePickerDialog.setOnBackPressed(()->
                     {
-                        @Override
-                        public boolean onKey(DialogInterface arg0, int keyCode, KeyEvent event)
-                        {
-                            if (keyCode == KeyEvent.KEYCODE_BACK)
-                            {
-                                timePickerDialog.dismiss();
-                            }
-
-                            return true;
-                        }
+                        timePickerDialog.dismiss();
                     });
+
 
                     timePickerDialog.setCanceledOnTouchOutside(false);
 
@@ -409,6 +400,11 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                     contextMenu.getItem(4).getSubMenu().getItem(i).setOnMenuItemClickListener(colorChanger);
                 }
             });
+        }
+
+        public void contextMenuEnabled(boolean newState)
+        {
+            contextMenuState=newState;
         }
 
         public MaterialCardView getCardMaterialCardView()

@@ -287,7 +287,7 @@ public class Main extends AppCompatActivity
 
         addCardTimePickerMaterialButton.setOnClickListener((view)->
         {
-            TimePickerDialog timePickerDialog=new TimePickerDialog(Main.this, (timePicker, hour, minute)->
+            TimeTimePickerDialog timePickerDialog=new TimeTimePickerDialog(Main.this, (timePicker, hour, minute)->
             {
                 chosenTime=new Time(hour, minute);
 
@@ -309,17 +309,12 @@ public class Main extends AppCompatActivity
                 imm.toggleSoftInput(0,0);
             });
 
-            timePickerDialog.setOnKeyListener((DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent)->
+            timePickerDialog.setOnBackPressed(() ->
             {
-                if (keyCode == KeyEvent.KEYCODE_BACK)
-                {
-                    timePickerDialog.dismiss();
+                timePickerDialog.dismiss();
 
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.toggleSoftInput(0,0);
-                }
-
-                return true;
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(0,0);
             });
 
             timePickerDialog.setCanceledOnTouchOutside(false);
@@ -587,29 +582,22 @@ public class Main extends AppCompatActivity
     {
         Entry entry;
 
-        if(!(addCardContentEditText.getText().toString().trim().length()>0))
-        {
-            return;
-        }
-
-        String refreshedContent=addCardContentEditText.getText().toString().replaceAll("^\\s+|\\s+$", "");
-
         if(chosenColor!=-1)
         {
             if(chosenDate!=null)
             {
                 if(chosenTime!=null)
                 {
-                    entry=new Entry(refreshedContent, chosenDate, chosenTime, chosenColor, reminding);
+                    entry=new Entry(addCardContentEditText.getText().toString(), chosenDate, chosenTime, chosenColor, reminding);
                 }
                 else
                 {
-                    entry=new Entry(refreshedContent, chosenDate, chosenColor, reminding);
+                    entry=new Entry(addCardContentEditText.getText().toString(), chosenDate, chosenColor, reminding);
                 }
             }
             else
             {
-                entry=new Entry(refreshedContent, chosenColor, reminding);
+                entry=new Entry(addCardContentEditText.getText().toString(), chosenColor, reminding);
             }
         }
         else
@@ -618,16 +606,16 @@ public class Main extends AppCompatActivity
             {
                 if(chosenTime!=null)
                 {
-                    entry=new Entry(refreshedContent, chosenDate, chosenTime, reminding);
+                    entry=new Entry(addCardContentEditText.getText().toString(), chosenDate, chosenTime, reminding);
                 }
                 else
                 {
-                    entry=new Entry(refreshedContent, chosenDate, reminding);
+                    entry=new Entry(addCardContentEditText.getText().toString(), chosenDate, reminding);
                 }
             }
             else
             {
-                entry=new Entry(refreshedContent, reminding);
+                entry=new Entry(addCardContentEditText.getText().toString(), reminding);
             }
         }
 
