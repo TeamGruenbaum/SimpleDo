@@ -77,7 +77,7 @@ public class Main extends AppCompatActivity
 
     private boolean reminding=false;
 
-    ItemTouchHelper itemTouchHelper;
+    private ItemTouchHelper itemTouchHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

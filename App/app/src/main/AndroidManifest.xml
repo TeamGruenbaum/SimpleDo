@@ -23,8 +23,7 @@
             android:exported="true"/>
 
         <activity
-            android:name=".controller.Main"
-            android:windowSoftInputMode="adjustResize">
+            android:name=".controller.Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

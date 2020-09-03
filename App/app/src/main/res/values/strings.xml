@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SimpleDo</string>
     <string name="add">Add</string>
-    <string name="linktosite">
-        <a href="https://stevensolleder.de">Steven Solleder</a>
-    </string>
+    <string name="steven_solleder" translatable="false">Steven Solleder</string>
+    <string name="isabell_waas" translatable="false">Isabell Waas</string>
+    <string name="contact">Kontakt</string>
 </resources>
