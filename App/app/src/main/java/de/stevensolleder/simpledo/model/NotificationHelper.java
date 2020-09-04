@@ -7,6 +7,8 @@ import android.content.Intent;
 
 import java.util.Calendar;
 
+import static de.stevensolleder.simpledo.model.SaveHelper.*;
+
 public class NotificationHelper
 {
     public static void planAndSendNotification(Entry entry)
@@ -20,7 +22,7 @@ public class NotificationHelper
         }
         else
         {
-            calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay(), 8, 0, 0);
+            calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay(), getAlldayTime().getHour(), getAlldayTime().getMinute(), 0);
         }
 
         Intent intent=new Intent(SimpleDo.getAppContext(), ReminderBroadcastReceiver.class);

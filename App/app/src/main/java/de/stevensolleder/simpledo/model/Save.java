@@ -9,6 +9,8 @@ public class Save
     private Direction sortDirection;
     private Criterium sortCriterium;
 
+    private Time alldayTime;
+
     public Save()
     {
         entries=new ArrayList<Entry>();
@@ -16,6 +18,8 @@ public class Save
         //By default the ArrayList is unsorted
         sortDirection=Direction.NONE;
         sortCriterium=Criterium.NONE;
+
+        alldayTime=new Time(8,0);
     }
 
     public ArrayList<Entry> getEntries()
@@ -41,5 +45,13 @@ public class Save
     public void setSortCriterium(Criterium newValue)
     {
         sortCriterium = newValue;
+    }
+
+    public Time getAlldayTime() {
+        return alldayTime;
+    }
+
+    public void setAlldayTime(Time alldayTime) {
+        this.alldayTime = alldayTime;
     }
 }

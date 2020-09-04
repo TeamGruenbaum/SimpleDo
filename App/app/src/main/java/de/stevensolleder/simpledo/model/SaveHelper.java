@@ -170,6 +170,18 @@ public class SaveHelper
         save(temporary);
     }
 
+    public static Time getAlldayTime()
+    {
+        return getSave().getAlldayTime();
+    }
+
+    public static void setAlldayTime(Time newValue)
+    {
+        Save temporary=getSave();
+        temporary.setAlldayTime(newValue);
+        save(temporary);
+    }
+
     //Methods for saving
     private static Save getSave()
     {

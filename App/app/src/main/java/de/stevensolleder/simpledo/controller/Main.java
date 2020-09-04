@@ -442,18 +442,44 @@ public class Main extends AppCompatActivity
 
             popupMenu.getMenu().getItem(0).setOnMenuItemClickListener((menuItem)->
             {
+                TimeTimePickerDialog timePickerDialog=new TimeTimePickerDialog(Main.this, (timePicker, hour, minute)->
+                {
+                    setAlldayTime(new Time(hour, minute));
+
+                    for(int i=0; i<getEntriesSize(); i++)
+                    {
+                        if(getEntry(i).getTime()!=null)
+                        {
+                            planAndSendNotification(getEntry(i));
+                        }
+                    }
+                }, getAlldayTime().getHour(), getAlldayTime().getMinute(), true);
+
+                timePickerDialog.setOnCancelListener((dialogInterface)->
+                {
+                    timePickerDialog.dismiss();
+                });
+
+                timePickerDialog.setOnBackPressed(() ->
+                {
+                    timePickerDialog.dismiss();
+                });
+
+                timePickerDialog.setCanceledOnTouchOutside(false);
+
+                UIUtil.hideKeyboard(Main.this);
+
+                timePickerDialog.show();
+
+                timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
+                timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Abbrechen");
+
                 return false;
             });
 
             popupMenu.getMenu().getItem(1).setOnMenuItemClickListener((menuItem)->
             {
-                AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
-                alertDialog.setPositiveButton("OK", (dialogInterface, i)->{});
-                alertDialog.setTitle("Developers");
-                alertDialog.setMessage("Steven Solleder \nIsabell Waas");
-                alertDialog.setCancelable(false);
 
-                alertDialog.show();
 
                 return false;
             });
@@ -665,7 +691,7 @@ public class Main extends AppCompatActivity
         Date currentDate=new Date(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR));
         Time currentTime=new Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
 
-        Time allDayEventTime=new Time(11,0); //getAllDayEventTime()
+        Time allDayEventTime=getAlldayTime();
 
         if (entry.getDate()!=null && entry.getDate().compareTo(currentDate)==0)
         {
