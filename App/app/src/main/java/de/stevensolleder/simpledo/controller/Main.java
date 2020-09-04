@@ -2,17 +2,14 @@ package de.stevensolleder.simpledo.controller;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Contacts;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +19,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.TimePicker;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -464,7 +460,7 @@ public class Main extends AppCompatActivity
 
             popupMenu.getMenu().getItem(2).setOnMenuItemClickListener((menuItem)->
             {
-                Intent intent=new Intent(Main.this, DeveloperActivity.class);
+                Intent intent=new Intent(Main.this, AboutActivity.class);
 
                 startActivity(intent);
 
