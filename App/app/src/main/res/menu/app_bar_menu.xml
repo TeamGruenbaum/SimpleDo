@@ -2,13 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:title="Direction"
         android:icon="@drawable/ic_arrow_downward"
+        android:tooltipText="@string/change_sort_direction"
         app:showAsAction="always"/>
 
     <item
-        android:title="Criterium
-"       android:icon="@drawable/ic_sort"
+        android:icon="@drawable/ic_sort"
+        android:tooltipText="@string/change_sort_criterion"
         app:showAsAction="always"/>
 
 </menu>

@@ -238,10 +238,10 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
                 if(SaveHelper.getEntry(getPosition()).isNotifying())
                 {
-                    contextMenu.getItem(3).setTitle("Deactivate Notif");
+                    contextMenu.getItem(3).setTitle(SimpleDo.getAppContext().getResources().getString(R.string.deactivate_notification));
                 }else
                 {
-                    contextMenu.getItem(3).setTitle("Activate Notif");
+                    contextMenu.getItem(3).setTitle(SimpleDo.getAppContext().getResources().getString(R.string.activate_notification));
                 }
 
                 contextMenu.getItem(0).setOnMenuItemClickListener((item) ->
@@ -260,7 +260,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
                     DatePickerDialog datePickerDialog=new DatePickerDialog(mainActivity);
 
-                    datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Übernehmen", new DialogInterface.OnClickListener()
+                    datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, SimpleDo.getAppContext().getResources().getString(R.string.apply), new DialogInterface.OnClickListener()
                     {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i)
@@ -278,7 +278,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     });
 
-                    datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen", new DialogInterface.OnClickListener()
+                    datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.delete), new DialogInterface.OnClickListener()
                     {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i)
@@ -299,8 +299,8 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
                     datePickerDialog.show();
 
-                    datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
-                    datePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Löschen");
+                    datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
+                    datePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
 
                     return true;
                 });
@@ -355,8 +355,8 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
                     timePickerDialog.show();
 
-                    timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
-                    timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Löschen");
+                    timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
+                    timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
 
                     return true;
                 });

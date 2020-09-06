@@ -85,6 +85,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/dateButton"
                     style="@style/cardButton"
+                    android:tooltipText="@string/set_date"
                     android:visibility="visible"
                     app:icon="@drawable/ic_calendar"/>
 
@@ -92,11 +93,13 @@
                     android:id="@+id/timeButton"
                     style="@style/cardButton"
                     android:visibility="gone"
+                    android:tooltipText="@string/set_time"
                     app:icon="@drawable/ic_alarm"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/colorButton"
                     style="@style/cardButton"
+                    android:tooltipText="@string/set_color"
                     android:visibility="visible"
                     app:icon="@drawable/ic_brush"/>
 
@@ -112,6 +115,7 @@
                     android:id="@+id/remindButton"
                     style="@style/cardButton"
                     android:visibility="gone"
+                    android:tooltipText="@string/set_notification"
                     android:enabled="false"
                     app:icon="@drawable/ic_notifications_off"/>
 
@@ -126,6 +130,7 @@
                     style="@style/cardButton"
                     android:layout_marginRight="10dp"
                     android:onClick="addCard"
+                    android:tooltipText="@string/add_entry"
                     android:visibility="visible"
                     app:icon="@drawable/ic_add"/>
 
@@ -153,6 +158,7 @@
         android:layout_height="wrap_content"
         app:layout_anchor="@id/bottomAppBar"
         app:srcCompat="@drawable/ic_add"
+        android:tooltipText="@string/start"
         android:onClick="start"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

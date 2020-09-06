@@ -41,7 +41,7 @@
             android:textSize="10dp"
             android:layout_marginBottom="20dp"
             android:layout_gravity="center"
-            android:text="Version 2020.1" />
+            android:text="@string/version" />
 
         <View
             android:layout_width="match_parent"
@@ -83,7 +83,7 @@
             android:onClick="contact"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_gravity="center"
-            android:text="@string/contact" />
+            android:text="@string/imprint" />
 
         <View
             android:layout_width="match_parent"
@@ -98,7 +98,7 @@
             android:textSize="10dp"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_gravity="center"
-            android:text="Open-Source Lizenzen" />
+            android:text="@string/open_source_licenses" />
 
 
     </LinearLayout>

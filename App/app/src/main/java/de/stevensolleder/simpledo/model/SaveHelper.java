@@ -61,7 +61,7 @@ public class SaveHelper
     {
         Save temporary=getSave();
 
-        switch(getSortCriterium())
+        switch(getSortCriterion())
         {
             case TEXT:
             {
@@ -158,15 +158,15 @@ public class SaveHelper
         save(temporary);
     }
 
-    public static Criterium getSortCriterium()
+    public static Criterion getSortCriterion()
     {
-        return getSave().getSortCriterium();
+        return getSave().getSortCriterion();
     }
 
-    public static void setSortCriterium(Criterium newValue)
+    public static void setSortCriterion(Criterion newValue)
     {
         Save temporary=getSave();
-        temporary.setSortCriterium(newValue);
+        temporary.setSortCriterion(newValue);
         save(temporary);
     }
 

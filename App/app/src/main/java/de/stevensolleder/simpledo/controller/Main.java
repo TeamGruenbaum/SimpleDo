@@ -1,6 +1,5 @@
 package de.stevensolleder.simpledo.controller;
 
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -63,7 +62,7 @@ public class Main extends AppCompatActivity
     private FloatingActionButton startButton;
 
     private MenuItem changeDirectionMaterialButton;
-    private MenuItem changeCriteriumMaterialButton;
+    private MenuItem changeCriterionMaterialButton;
 
     private BottomAppBar bottomAppBar;
 
@@ -88,7 +87,7 @@ public class Main extends AppCompatActivity
 
         bottomAppBar=findViewById(R.id.bottomAppBar);
         changeDirectionMaterialButton=bottomAppBar.getMenu().getItem(0);
-        changeCriteriumMaterialButton=bottomAppBar.getMenu().getItem(1);
+        changeCriterionMaterialButton=bottomAppBar.getMenu().getItem(1);
 
         addCardMaterialCardView=findViewById(R.id.addCard);
         addCardContentEditText=findViewById(R.id.contentEditText);
@@ -162,7 +161,7 @@ public class Main extends AppCompatActivity
                     cancelNotification(entry);
                 }
 
-                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),"Rückgängig machen?", BaseTransientBottomBar.LENGTH_SHORT);
+                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),SimpleDo.getAppContext().getResources().getString(R.string.entry_deleted), BaseTransientBottomBar.LENGTH_SHORT);
                 snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
 
                 if(addCardMaterialCardView.getVisibility()== View.VISIBLE)
@@ -174,7 +173,7 @@ public class Main extends AppCompatActivity
                     snackbar.setAnchorView(startButton);
                 }
 
-                snackbar.setAction("Ja", (view) ->
+                snackbar.setAction(SimpleDo.getAppContext().getResources().getString(R.string.undo), (view) ->
                 {
                     entryRecyclerViewAdapter.insertEntry(entry, adapterPosition);
                     if(entry.getDate()!=null)
@@ -217,8 +216,8 @@ public class Main extends AppCompatActivity
                         changeDirectionMaterialButton.setEnabled(false);
                         setSortDirection(Direction.NONE);
 
-                        changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
-                        setSortCriterium(Criterium.NONE);
+                        changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
+                        setSortCriterion(Criterion.NONE);
 
                         distance=0;
                     }
@@ -232,7 +231,7 @@ public class Main extends AppCompatActivity
         {
             DatePickerDialog datePickerDialog=new DatePickerDialog(Main.this);
 
-            datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Übernehmen", (dialogInterface, i)->
+            datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, SimpleDo.getAppContext().getResources().getString(R.string.apply), (dialogInterface, i)->
             {
                 DatePicker temp=datePickerDialog.getDatePicker();
 
@@ -248,7 +247,7 @@ public class Main extends AppCompatActivity
                 UIUtil.showKeyboard(Main.this, addCardContentEditText);
             });
 
-            datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Löschen", (dialogInterface, i)->
+            datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.delete), (dialogInterface, i)->
             {
                 chosenDate=null;
                 chosenTime=null;
@@ -319,8 +318,8 @@ public class Main extends AppCompatActivity
 
             timePickerDialog.show();
 
-            timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
-            timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Löschen");
+            timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
+            timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
         });
 
         addCardColorMenuMaterialButton.setOnClickListener((view) ->
@@ -390,28 +389,28 @@ public class Main extends AppCompatActivity
             return true;
         });
 
-        changeCriteriumMaterialButton.setOnMenuItemClickListener((menuItem) ->
+        changeCriterionMaterialButton.setOnMenuItemClickListener((menuItem) ->
         {
-            switch(getSortCriterium())
+            switch(getSortCriterion())
             {
                 case TEXT:
                 {
-                    changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_clock, Main.this.getTheme()));
+                    changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_clock, Main.this.getTheme()));
 
-                    setSortCriterium(Criterium.DEADLINE);
+                    setSortCriterion(Criterion.DEADLINE);
                 }break;
                 case DEADLINE:
                 {
-                    changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_palette, Main.this.getTheme()));
+                    changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_palette, Main.this.getTheme()));
 
-                    setSortCriterium(Criterium.COLOR);
+                    setSortCriterion(Criterion.COLOR);
 
                 }break;
                 case COLOR:
                 case NONE:
                 {
-                    changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_alpha, Main.this.getTheme()));
-                    setSortCriterium(Criterium.TEXT);
+                    changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_alpha, Main.this.getTheme()));
+                    setSortCriterion(Criterion.TEXT);
 
                     Drawable temp=getResources().getDrawable(R.drawable.ic_arrow_downward);
                     temp.setAlpha(255);
@@ -471,8 +470,8 @@ public class Main extends AppCompatActivity
 
                 timePickerDialog.show();
 
-                timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText("Übernehmen");
-                timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText("Abbrechen");
+                timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
+                timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.cancel));
 
                 return false;
             });
@@ -532,26 +531,26 @@ public class Main extends AppCompatActivity
             break;
         }
 
-        switch(getSortCriterium())
+        switch(getSortCriterion())
         {
             case TEXT:
             {
-                changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_alpha, this.getTheme()));
+                changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_alpha, this.getTheme()));
             }
             break;
             case DEADLINE:
             {
-                changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_clock, this.getTheme()));
+                changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_clock, this.getTheme()));
             }
             break;
             case COLOR:
             {
-                changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_palette, this.getTheme()));
+                changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_palette, this.getTheme()));
             }
             break;
             case NONE:
             {
-                changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, this.getTheme()));
+                changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, this.getTheme()));
             }
             break;
         }
@@ -570,12 +569,11 @@ public class Main extends AppCompatActivity
 
             drawable=getResources().getDrawable(R.drawable.ic_sort, this.getTheme());
             drawable.setAlpha(128);
-            changeCriteriumMaterialButton.setIcon(drawable);
-            changeCriteriumMaterialButton.setEnabled(false);
+            changeCriterionMaterialButton.setIcon(drawable);
+            changeCriterionMaterialButton.setEnabled(false);
         }
         else
         {
-            System.out.println("ELSE");
             Drawable drawable=getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
             drawable.setAlpha(255);
             changeDirectionMaterialButton.setIcon(drawable);
@@ -583,8 +581,8 @@ public class Main extends AppCompatActivity
 
             drawable=getResources().getDrawable(R.drawable.ic_sort, this.getTheme());
             drawable.setAlpha(255);
-            changeCriteriumMaterialButton.setIcon(drawable);
-            changeCriteriumMaterialButton.setEnabled(true);
+            changeCriterionMaterialButton.setIcon(drawable);
+            changeCriterionMaterialButton.setEnabled(true);
         }
     }
 
@@ -593,7 +591,7 @@ public class Main extends AppCompatActivity
         if(Build.VERSION.SDK_INT >= 26)
         {
             NotificationChannel notificationChannel=new NotificationChannel("main", "Erinnerungen", NotificationManager.IMPORTANCE_HIGH);
-            notificationChannel.setDescription("Tolle Erinnerungen");
+            notificationChannel.setDescription(SimpleDo.getAppContext().getResources().getString(R.string.reminders_description));
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(notificationChannel);
@@ -657,9 +655,9 @@ public class Main extends AppCompatActivity
         }
 
         changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme()));
-        changeCriteriumMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
+        changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
         setSortDirection(Direction.NONE);
-        setSortCriterium(Criterium.NONE);
+        setSortCriterion(Criterion.NONE);
 
         entryRecyclerViewAdapter.insertEntry(entry);
 

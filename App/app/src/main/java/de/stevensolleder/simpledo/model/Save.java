@@ -7,7 +7,7 @@ public class Save
     private ArrayList<Entry> entries;
 
     private Direction sortDirection;
-    private Criterium sortCriterium;
+    private Criterion sortCriterion;
 
     private Time alldayTime;
 
@@ -17,7 +17,7 @@ public class Save
 
         //By default the ArrayList is unsorted
         sortDirection=Direction.NONE;
-        sortCriterium=Criterium.NONE;
+        sortCriterion = Criterion.NONE;
 
         alldayTime=new Time(8,0);
     }
@@ -37,14 +37,14 @@ public class Save
         sortDirection = newValue;
     }
 
-    public Criterium getSortCriterium()
+    public Criterion getSortCriterion()
     {
-        return sortCriterium;
+        return sortCriterion;
     }
 
-    public void setSortCriterium(Criterium newValue)
+    public void setSortCriterion(Criterion newValue)
     {
-        sortCriterium = newValue;
+        sortCriterion = newValue;
     }
 
     public Time getAlldayTime() {

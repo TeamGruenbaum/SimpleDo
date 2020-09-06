@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.google.android.material.snackbar.Snackbar;
 
 import de.stevensolleder.simpledo.R;
+import de.stevensolleder.simpledo.model.SimpleDo;
 
 public class AboutActivity extends Activity
 {
@@ -35,9 +36,18 @@ public class AboutActivity extends Activity
 
     public void contact(View view)
     {
+        /*AlertDialog.Builder alertDialog=new AlertDialog.Builder(AboutActivity.this);
+        alertDialog.setPositiveButton("OK", (dialogInterface, i)->{});
+        alertDialog.setTitle(SimpleDo.getAppContext().getResources().getString(R.string.open_source_licenses));
+        alertDialog.setMessage(SimpleDo.getAppContext().getResources().getString(R.string.imprint_description));
+        alertDialog.setCancelable(false);
+
+        alertDialog.show();
+
         String mail="kontakt@stevensolleder.de";
 
         Intent intent=new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"+mail));
+
         try
         {
             startActivity(intent);
@@ -48,14 +58,14 @@ public class AboutActivity extends Activity
             View mView=mSnackbar.getView();
             ((TextView) mView.findViewById(com.google.android.material.R.id.snackbar_text)).setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             mSnackbar.show();
-        }
+        }*/
     }
 
     public void opensource(View view)
     {
         AlertDialog.Builder alertDialog=new AlertDialog.Builder(AboutActivity.this);
         alertDialog.setPositiveButton("OK", (dialogInterface, i)->{});
-        alertDialog.setTitle("Open-Source-Lizenzen");
+        alertDialog.setTitle(SimpleDo.getAppContext().getResources().getString(R.string.open_source_licenses));
         alertDialog.setMessage("GSON\nUIUtil");
         alertDialog.setCancelable(false);
 
