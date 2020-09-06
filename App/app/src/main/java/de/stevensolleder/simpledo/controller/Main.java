@@ -53,7 +53,7 @@ public class Main extends AppCompatActivity
     private EditText addCardContentEditText;
     private MaterialButton addCardDatePickerMaterialButton;
     private MaterialButton addCardTimePickerMaterialButton;
-    private MaterialButton addCardColorMenuMaterialButton;
+    private MaterialButton addCardColorMenuMaterialButton; //edgar by alex
     private MaterialButton addCardRemindMaterialButton;
     private View addCardDivider;
     private LinearLayout addCardDeadlineLinearLayout;
@@ -667,6 +667,8 @@ public class Main extends AppCompatActivity
 
         addCardContentEditText.getText().clear();
         addCardDeadlineLinearLayout.setVisibility(View.GONE);
+        addCardTimePickerMaterialButton.setVisibility(View.GONE);
+
         chosenDate=null;
         chosenTime=null;
     }

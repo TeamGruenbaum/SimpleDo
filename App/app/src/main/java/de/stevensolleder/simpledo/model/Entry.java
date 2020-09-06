@@ -11,7 +11,7 @@ public class Entry implements Serializable
     private Time time=null;
     private int color=Color.WHITE;
     private boolean notifying;
-    private int ID;
+    private final int ID;
 
     //Constructors for adding all kinds of cards to the RecyclerView
     public Entry(String content, boolean notifying)

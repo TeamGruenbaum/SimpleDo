@@ -37,7 +37,7 @@ public class AboutActivity extends Activity
     {
         String mail="kontakt@stevensolleder.de";
 
-        Intent intent=new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto://"+mail));
+        Intent intent=new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"+mail));
         try
         {
             startActivity(intent);
