@@ -10,7 +10,6 @@
         android:roundIcon="@drawable/ic_launcher_foreground"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".controller.AboutActivity"></activity>
 
         <receiver
             android:name=".model.ReminderBroadcastReceiver"

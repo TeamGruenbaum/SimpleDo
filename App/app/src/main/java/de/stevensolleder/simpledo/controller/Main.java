@@ -1,14 +1,18 @@
 package de.stevensolleder.simpledo.controller;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +24,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -312,7 +317,7 @@ public class Main extends AppCompatActivity
                 imm.toggleSoftInput(0,0);
             });
 
-            timePickerDialog.setCanceledOnTouchOutside(false);
+            //timePickerDialog.setCanceledOnTouchOutside(false);
 
             UIUtil.hideKeyboard(Main.this);
 
@@ -485,9 +490,49 @@ public class Main extends AppCompatActivity
 
             popupMenu.getMenu().getItem(2).setOnMenuItemClickListener((menuItem)->
             {
-                Intent intent=new Intent(Main.this, AboutActivity.class);
 
-                startActivity(intent);
+                Dialog dialog=new Dialog(Main.this);
+                dialog.setContentView(R.layout.about_activity);
+                //dialog.setContentView(LayoutInflater.from(this).inflate(R.layout.about_activity, null), new ViewGroup.LayoutParams(UnitHelper.dpToPx(500), UnitHelper.dpToPx(400)));
+
+                ((MaterialButton) dialog.findViewById(R.id.steven_solleder)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://stevensolleder.de"));
+                        startActivity(intent);
+                    }
+                });
+
+                ((MaterialButton) dialog.findViewById(R.id.isabellwaas)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/isabellwaas"));
+                        startActivity(intent);
+                    }
+                });
+
+                ((MaterialButton) dialog.findViewById(R.id.imprint)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+
+                        AlertDialog.Builder alertDialog=new AlertDialog.Builder(Main.this);
+                        alertDialog.setPositiveButton("OK", (dialogInterface, i)->{});
+                        alertDialog.setTitle(Html.fromHtml("<b>"+SimpleDo.getAppContext().getResources().getString(R.string.imprint)+"</b>"));
+                        alertDialog.setMessage(Html.fromHtml(SimpleDo.getAppContext().getResources().getString(R.string.imprint_description)));
+
+                        alertDialog.show();
+                    }
+                });
+
+                ((MaterialButton) dialog.findViewById(R.id.opensource)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        System.out.println("Hallo");
+                    }
+                });
+                dialog.show();
 
                 return false;
             });

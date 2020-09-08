@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:overScrollMode="never"
-        android:paddingBottom="100dp"
+        android:paddingBottom="150dp"
         android:scrollbars="vertical"/>
 
     <com.google.android.material.card.MaterialCardView

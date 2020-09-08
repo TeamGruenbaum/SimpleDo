@@ -38,4 +38,13 @@
     <string name="cancel">Cancel</string>
     <string name="reminders">Reminders</string>
     <string name="reminders_description">The reminders you set for your entries</string>
+    <string name="imprint_description">
+        &lt;b>According to § 5 TMG:&lt;/b>&lt;br/>
+        Name: Steven Solleder&lt;br/>
+        Address: Upon request&lt;br/>
+        Contact: contact@stevensolleder.de&lt;br/>&lt;br/>
+        &lt;b>Additional information according to § 55 Abs. 2 RStV:&lt;/b>&lt;br/>
+        Responsible for the content: Steven Solleder&lt;br/>
+        Address: Upon request
+    </string>
 </resources>

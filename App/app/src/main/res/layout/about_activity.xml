@@ -3,13 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/root_developer_activity"
-    tools:context=".controller.AboutActivity">
+    android:layout_width="350dp"
+    android:layout_height="550dp"
+    android:layout_gravity="center_horizontal|center_vertical"
+    android:id="@+id/root_developer_activity">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="220dp"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
@@ -19,8 +19,8 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:layout_width="158dp"
-            android:layout_height="168dp"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
             android:layout_gravity="center"
             android:elevation="10dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -31,6 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/TextAppearance.MaterialComponents.Body1"
+            android:textSize="20dp"
             android:layout_gravity="center"
             android:text="@string/app_name" />
 
@@ -38,64 +39,45 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/deadlineText"
-            android:textSize="10dp"
+            android:textSize="12dp"
             android:layout_marginBottom="20dp"
             android:layout_gravity="center"
             android:text="@string/version" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider" />
-
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/steven_solleder_textView"
+            android:id="@+id/steven_solleder"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_gravity="center"
-            android:layout_marginBottom="-6dp"
-            android:text="@string/steven_solleder"
-            android:onClick="stevensolleder"
-            android:textSize="10dp" />
+            android:layout_marginBottom="-4dp"
+            android:text="@string/steven_solleder"/>
 
         <com.google.android.material.button.MaterialButton
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_below="@id/steven_solleder_textView"
             android:layout_gravity="center"
-            android:layout_marginTop="-6dp"
+            android:layout_marginTop="-4dp"
+            android:layout_marginBottom="5dp"
             android:text="@string/isabell_waas"
-            android:onClick="isabellwaas"
-            android:textSize="10dp" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider" />
+            android:id="@+id/isabellwaas"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/contact_materialButton"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:textSize="10dp"
-            android:onClick="contact"
+            android:id="@+id/imprint"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_gravity="center"
+            android:layout_marginBottom="5dp"
             android:text="@string/imprint" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider" />
 
         <com.google.android.material.button.MaterialButton
             android:clickable="true"
+            android:id="@+id/opensource"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:onClick="opensource"
-            android:textSize="10dp"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_gravity="center"
             android:text="@string/open_source_licenses" />
