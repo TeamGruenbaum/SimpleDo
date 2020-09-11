@@ -10,13 +10,22 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.text.Html;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -44,6 +53,7 @@ import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 import de.stevensolleder.simpledo.*;
 import de.stevensolleder.simpledo.model.*;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static de.stevensolleder.simpledo.model.ColorHelper.*;
 import static de.stevensolleder.simpledo.model.NotificationHelper.*;
 import static de.stevensolleder.simpledo.model.SaveHelper.*;
@@ -236,7 +246,7 @@ public class Main extends AppCompatActivity
         {
             DatePickerDialog datePickerDialog=new DatePickerDialog(Main.this);
 
-            datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, SimpleDo.getAppContext().getResources().getString(R.string.apply), (dialogInterface, i)->
+            datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, SimpleDo.getAppContext().getResources().getString(R.string.ok), (dialogInterface, i)->
             {
                 DatePicker temp=datePickerDialog.getDatePicker();
 
@@ -252,6 +262,13 @@ public class Main extends AppCompatActivity
                 UIUtil.showKeyboard(Main.this, addCardContentEditText);
             });
 
+            Runnable runnable=()->
+            {
+                datePickerDialog.dismiss();
+
+                UIUtil.showKeyboard(Main.this, addCardContentEditText);
+            };
+
             datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.delete), (dialogInterface, i)->
             {
                 chosenDate=null;
@@ -266,19 +283,20 @@ public class Main extends AppCompatActivity
                 UIUtil.showKeyboard(Main.this, addCardContentEditText);
             });
 
+            datePickerDialog.setOnCancelListener((dialogInterface)->
+            {
+                runnable.run();
+            });
+
             datePickerDialog.setOnKeyListener((DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent)->
             {
                 if (keyCode == KeyEvent.KEYCODE_BACK)
                 {
-                    datePickerDialog.dismiss();
-
-                    UIUtil.showKeyboard(Main.this, addCardContentEditText);
+                    runnable.run();
                 }
 
                 return true;
             });
-
-            datePickerDialog.setCanceledOnTouchOutside(false);
 
             UIUtil.hideKeyboard(this);
 
@@ -299,7 +317,22 @@ public class Main extends AppCompatActivity
                 imm.toggleSoftInput(0,0);
             }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
 
+            Runnable runnable=()->
+            {
+                timePickerDialog.dismiss();
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(0,0);
+            };
+
             timePickerDialog.setOnCancelListener((dialogInterface)->
+            {
+                runnable.run();
+            });
+
+            timePickerDialog.setOnBackPressed(runnable);
+
+            timePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getResources().getString(R.string.delete), (dialogInterface, which)->
             {
                 chosenTime=null;
 
@@ -309,22 +342,11 @@ public class Main extends AppCompatActivity
                 imm.toggleSoftInput(0,0);
             });
 
-            timePickerDialog.setOnBackPressed(() ->
-            {
-                timePickerDialog.dismiss();
-
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(0,0);
-            });
-
-            //timePickerDialog.setCanceledOnTouchOutside(false);
-
             UIUtil.hideKeyboard(Main.this);
 
             timePickerDialog.show();
 
-            timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
-            timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
+            timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.ok));
         });
 
         addCardColorMenuMaterialButton.setOnClickListener((view) ->
@@ -464,18 +486,21 @@ public class Main extends AppCompatActivity
                     timePickerDialog.dismiss();
                 });
 
+                timePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.cancel), (dialogInterface, which)->
+                {
+                    timePickerDialog.dismiss();
+                });
+
                 timePickerDialog.setOnBackPressed(() ->
                 {
                     timePickerDialog.dismiss();
                 });
 
-                timePickerDialog.setCanceledOnTouchOutside(false);
-
                 UIUtil.hideKeyboard(Main.this);
 
                 timePickerDialog.show();
 
-                timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
+                timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.ok));
                 timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.cancel));
 
                 return false;
@@ -483,17 +508,28 @@ public class Main extends AppCompatActivity
 
             popupMenu.getMenu().getItem(1).setOnMenuItemClickListener((menuItem)->
             {
-
-
                 return false;
             });
 
+            //TODO: Finish battery ignoring
             popupMenu.getMenu().getItem(2).setOnMenuItemClickListener((menuItem)->
             {
+                //PowerManager powerManager = (PowerManager) Main.this.getSystemService(Context.POWER_SERVICE);
 
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                //intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                intent.setData(Uri.parse("package:" + Main.this.getPackageName()));
+                Main.this.startActivity(intent);
+
+
+                return true;
+            });
+
+            popupMenu.getMenu().getItem(3).setOnMenuItemClickListener((menuItem)->
+            {
                 Dialog dialog=new Dialog(Main.this);
                 dialog.setContentView(R.layout.about_activity);
-                //dialog.setContentView(LayoutInflater.from(this).inflate(R.layout.about_activity, null), new ViewGroup.LayoutParams(UnitHelper.dpToPx(500), UnitHelper.dpToPx(400)));
 
                 ((MaterialButton) dialog.findViewById(R.id.steven_solleder)).setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -517,10 +553,32 @@ public class Main extends AppCompatActivity
                     public void onClick(View view) {
                         dialog.dismiss();
 
-                        AlertDialog.Builder alertDialog=new AlertDialog.Builder(Main.this);
-                        alertDialog.setPositiveButton("OK", (dialogInterface, i)->{});
-                        alertDialog.setTitle(Html.fromHtml("<b>"+SimpleDo.getAppContext().getResources().getString(R.string.imprint)+"</b>"));
-                        alertDialog.setMessage(Html.fromHtml(SimpleDo.getAppContext().getResources().getString(R.string.imprint_description)));
+                        AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
+                        //alertDialogBuilder.setTitle(Html.fromHtml("<b>"+SimpleDo.getAppContext().getResources().getString(R.string.imprint)+"</b>"));
+                        alertDialogBuilder.setMessage(Html.fromHtml(SimpleDo.getAppContext().getResources().getString(R.string.imprint_description)));
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+
+                        Runnable runnable=()->
+                        {
+                            alertDialog.dismiss();
+                            dialog.show();
+                        };
+
+                        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getResources().getString(R.string.ok), (dialogInterface, i)->
+                        {
+                            runnable.run();
+                        });
+
+                        alertDialog.setOnKeyListener((DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent)->
+                        {
+                            if (keyCode == KeyEvent.KEYCODE_BACK)
+                            {
+                                runnable.run();
+                            }
+
+                            return true;
+                        });
+
 
                         alertDialog.show();
                     }
@@ -528,10 +586,56 @@ public class Main extends AppCompatActivity
 
                 ((MaterialButton) dialog.findViewById(R.id.opensource)).setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View view) {
-                        System.out.println("Hallo");
+                    public void onClick(View view)
+                    {
+                        dialog.dismiss();
+
+                        AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
+                        //alertDialogBuilder.setTitle(Html.fromHtml("<b>"+SimpleDo.getAppContext().getResources().getString(R.string.open_source_licenses)+"</b>"));
+                        WebView webView=new WebView(Main.this);
+                        webView.loadUrl("file:///android_asset/licenses.html");
+                        webView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                        alertDialogBuilder.setView(webView);
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+
+                        webView.setWebChromeClient(new WebChromeClient()
+                        {
+                            @Override
+                            public void onProgressChanged(WebView view, int progress)
+                            {
+                                if (progress == 100)
+                                {
+                                    new Handler().postDelayed(()->{alertDialog.show();}, 100);
+                                }
+                            }
+                        });
+
+                        Runnable runnable=()->
+                        {
+                            alertDialog.dismiss();
+                            dialog.show();
+                        };
+
+                        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getResources().getString(R.string.ok), (dialogInterface, i)->
+                        {
+                            runnable.run();
+                        });
+
+                        alertDialog.setOnKeyListener((DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent)->
+                        {
+                            if (keyCode == KeyEvent.KEYCODE_BACK)
+                            {
+                                runnable.run();
+                            }
+
+                            return true;
+                        });
+
+
                     }
                 });
+
+
                 dialog.show();
 
                 return false;

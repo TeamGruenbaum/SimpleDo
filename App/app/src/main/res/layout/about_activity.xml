@@ -82,7 +82,6 @@
             android:layout_gravity="center"
             android:text="@string/open_source_licenses" />
 
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

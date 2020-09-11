@@ -2,15 +2,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/white"
-        android:icon="@drawable/ic_white"
         android:title="@string/allday_reminder_time"
         app:showAsAction="ifRoom" />
     <item android:id="@+id/yellow"
-        android:icon="@drawable/ic_yellow"
         android:title="@string/theme"
         app:showAsAction="ifRoom" />
+    <item android:id="@+id/blue"
+        android:title="BATTERY"
+        app:showAsAction="ifRoom" />
     <item android:id="@+id/red"
-        android:icon="@drawable/ic_red"
         android:title="@string/about"
         app:showAsAction="ifRoom" />
 </menu>

@@ -36,4 +36,13 @@
     <string name="cancel">Abbrechen</string>
     <string name="reminders">Erinnerungen</string>
     <string name="reminders_description">Die Erinnerungen, welche du für deine Einträge gesetzt hast</string>
+    <string name="imprint_description">
+        &lt;b>Angaben gemäß § 5 TMG:&lt;/b>&lt;br/>
+        Name: Steven Solleder&lt;br/>
+        Anschrift: Herausgabe bei Nachfrage&lt;br/>
+        Kontaktaufnahme: contact@stevensolleder.de&lt;br/>&lt;br/>
+        &lt;b>Zusätzliche Angaben gemäß § 55 Abs. 2 RStV:&lt;/b>&lt;br/>
+        Verantwortlich für den Inhalt: Steven Solleder&lt;br/>
+        Anschrift: Herausgabe bei Nachfrage
+    </string>
 </resources>

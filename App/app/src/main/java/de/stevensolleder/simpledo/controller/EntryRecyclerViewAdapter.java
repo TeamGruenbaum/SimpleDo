@@ -1,6 +1,5 @@
 package de.stevensolleder.simpledo.controller;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -22,11 +21,8 @@ import android.widget.TimePicker;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Calendar;
-import java.util.logging.Handler;
 
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 
@@ -278,6 +274,8 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     });
 
+                    datePickerDialog.setOnCancelListener((dialogInterface)->{});
+
                     datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.delete), new DialogInterface.OnClickListener()
                     {
                         @Override
@@ -295,12 +293,9 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     });
 
-                    datePickerDialog.setCanceledOnTouchOutside(false);
-
                     datePickerDialog.show();
 
-                    datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
-                    datePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
+                    datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.ok));
 
                     return true;
                 });
@@ -328,21 +323,22 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
 
-                    timePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener()
+                    timePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.delete), (dialogInterface, which)->
                     {
-                        @Override
-                        public void onCancel(DialogInterface dialogInterface)
+                        Entry temp=SaveHelper.getEntry(getPosition());
+
+                        temp.setTime(null);
+                        changeEntry(temp, getPosition());
+
+                        if(temp.isNotifying())
                         {
-                            Entry temp=SaveHelper.getEntry(getPosition());
-
-                            temp.setTime(null);
-                            changeEntry(temp, getPosition());
-
-                            if(temp.isNotifying())
-                            {
-                                NotificationHelper.planAndSendNotification(temp);
-                            }
+                            NotificationHelper.planAndSendNotification(temp);
                         }
+                    });
+
+                    timePickerDialog.setOnCancelListener((dialogInterface)->
+                    {
+                        timePickerDialog.dismiss();
                     });
 
                     timePickerDialog.setOnBackPressed(()->
@@ -351,12 +347,9 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                     });
 
 
-                    timePickerDialog.setCanceledOnTouchOutside(false);
-
                     timePickerDialog.show();
 
-                    timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
-                    timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
+                    timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.ok));
 
                     return true;
                 });

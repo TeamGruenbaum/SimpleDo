@@ -47,4 +47,5 @@
         Responsible for the content: Steven Solleder&lt;br/>
         Address: Upon request
     </string>
+    <string name="ok" translatable="false">Ok</string>
 </resources>
