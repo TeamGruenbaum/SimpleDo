@@ -1,16 +1,28 @@
 <menu
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/white"
-        android:title="@string/allday_reminder_time"
-        app:showAsAction="ifRoom" />
-    <item android:id="@+id/yellow"
-        android:title="@string/theme"
-        app:showAsAction="ifRoom" />
-    <item android:id="@+id/blue"
-        android:title="BATTERY"
-        app:showAsAction="ifRoom" />
-    <item android:id="@+id/red"
-        android:title="@string/about"
-        app:showAsAction="ifRoom" />
+    <group
+        android:id="@+id/group0">
+        <item
+            android:title="@string/allday_reminder_time"
+            app:showAsAction="ifRoom" />
+        <item
+            android:title="@string/theme"
+            app:showAsAction="ifRoom" />
+        <item
+            android:title="@string/battery_optimization"
+            app:showAsAction="ifRoom"/>
+    </group>
+    <group
+        android:id="@+id/group1">
+        <item
+            android:title="@string/imprint"
+            app:showAsAction="ifRoom"/>
+        <item
+            android:title="@string/open_source_licenses"
+            app:showAsAction="ifRoom"/>
+        <item
+            android:title="@string/about"
+            app:showAsAction="ifRoom"/>
+    </group>
 </menu>

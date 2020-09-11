@@ -43,9 +43,11 @@
         Name: Steven Solleder&lt;br/>
         Address: Upon request&lt;br/>
         Contact: contact@stevensolleder.de&lt;br/>&lt;br/>
-        &lt;b>Additional information according to § 55 Abs. 2 RStV:&lt;/b>&lt;br/>
+        &lt;b>Additional information according to § 18 Abs. 2 MStV:&lt;/b>&lt;br/>
         Responsible for the content: Steven Solleder&lt;br/>
         Address: Upon request
     </string>
     <string name="ok" translatable="false">Ok</string>
+    <string name="battery_optimization">Battery Optimization</string>
+    <string name="battery_optimization_description">Please select \"All Apps\", search for \"SimpleDo\" and deactivate \"battery optimization\" in order to make sure that the app\'s notifcations work properly.</string>
 </resources>

@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.Html;
@@ -34,6 +35,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.MenuCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -416,7 +418,7 @@ public class Main extends AppCompatActivity
             return true;
         });
 
-        changeCriterionMaterialButton.setOnMenuItemClickListener((menuItem) ->
+        changeCriterionMaterialButton.setOnMenuItemClickListener((menuItem)->
         {
             switch(getSortCriterion())
             {
@@ -464,6 +466,8 @@ public class Main extends AppCompatActivity
         {
             PopupMenu popupMenu=new PopupMenu(getApplicationContext(), view);
 
+            MenuCompat.setGroupDividerEnabled(popupMenu.getMenu(), true);
+
             popupMenu.getMenuInflater().inflate(R.menu.settings_menu,popupMenu.getMenu());
 
             popupMenu.getMenu().getItem(0).setOnMenuItemClickListener((menuItem)->
@@ -508,25 +512,58 @@ public class Main extends AppCompatActivity
 
             popupMenu.getMenu().getItem(1).setOnMenuItemClickListener((menuItem)->
             {
+                //TODO: Theme switcher
+
                 return false;
             });
 
-            //TODO: Finish battery ignoring
             popupMenu.getMenu().getItem(2).setOnMenuItemClickListener((menuItem)->
             {
-                //PowerManager powerManager = (PowerManager) Main.this.getSystemService(Context.POWER_SERVICE);
+                AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
+                alertDialogBuilder.setMessage(R.string.battery_optimization_description);
+                alertDialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, which)->
+                {
+                    Main.this.startActivity(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS));
+                });
 
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-                //intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-                intent.setData(Uri.parse("package:" + Main.this.getPackageName()));
-                Main.this.startActivity(intent);
-
+                alertDialogBuilder.show();
 
                 return true;
             });
 
             popupMenu.getMenu().getItem(3).setOnMenuItemClickListener((menuItem)->
+            {
+                AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
+                alertDialogBuilder.setMessage(Html.fromHtml(SimpleDo.getAppContext().getResources().getString(R.string.imprint_description)));
+                alertDialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, which)->{});
+                alertDialogBuilder.show();
+
+                return true;
+            });
+
+            popupMenu.getMenu().getItem(4).setOnMenuItemClickListener((menuItem)->
+            {
+                AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
+                WebView webView=new WebView(Main.this);
+                webView.loadUrl("file:///android_asset/licenses.html");
+                webView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                webView.setVerticalScrollBarEnabled(false);
+                alertDialogBuilder.setView(webView);
+                alertDialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, which)->{});
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                webView.setWebViewClient(new WebViewClient()
+                {
+                    @Override
+                    public void onPageFinished (WebView view, String url)
+                    {
+                        new Handler().postDelayed(()->{alertDialog.show();}, 200);
+                    }
+                });
+
+                return true;
+            });
+
+            popupMenu.getMenu().getItem(5).setOnMenuItemClickListener((menuItem)->
             {
                 Dialog dialog=new Dialog(Main.this);
                 dialog.setContentView(R.layout.about_activity);
@@ -548,97 +585,9 @@ public class Main extends AppCompatActivity
                     }
                 });
 
-                ((MaterialButton) dialog.findViewById(R.id.imprint)).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.dismiss();
-
-                        AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
-                        //alertDialogBuilder.setTitle(Html.fromHtml("<b>"+SimpleDo.getAppContext().getResources().getString(R.string.imprint)+"</b>"));
-                        alertDialogBuilder.setMessage(Html.fromHtml(SimpleDo.getAppContext().getResources().getString(R.string.imprint_description)));
-                        AlertDialog alertDialog = alertDialogBuilder.create();
-
-                        Runnable runnable=()->
-                        {
-                            alertDialog.dismiss();
-                            dialog.show();
-                        };
-
-                        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getResources().getString(R.string.ok), (dialogInterface, i)->
-                        {
-                            runnable.run();
-                        });
-
-                        alertDialog.setOnKeyListener((DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent)->
-                        {
-                            if (keyCode == KeyEvent.KEYCODE_BACK)
-                            {
-                                runnable.run();
-                            }
-
-                            return true;
-                        });
-
-
-                        alertDialog.show();
-                    }
-                });
-
-                ((MaterialButton) dialog.findViewById(R.id.opensource)).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view)
-                    {
-                        dialog.dismiss();
-
-                        AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
-                        //alertDialogBuilder.setTitle(Html.fromHtml("<b>"+SimpleDo.getAppContext().getResources().getString(R.string.open_source_licenses)+"</b>"));
-                        WebView webView=new WebView(Main.this);
-                        webView.loadUrl("file:///android_asset/licenses.html");
-                        webView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                        alertDialogBuilder.setView(webView);
-                        AlertDialog alertDialog = alertDialogBuilder.create();
-
-                        webView.setWebChromeClient(new WebChromeClient()
-                        {
-                            @Override
-                            public void onProgressChanged(WebView view, int progress)
-                            {
-                                if (progress == 100)
-                                {
-                                    new Handler().postDelayed(()->{alertDialog.show();}, 100);
-                                }
-                            }
-                        });
-
-                        Runnable runnable=()->
-                        {
-                            alertDialog.dismiss();
-                            dialog.show();
-                        };
-
-                        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getResources().getString(R.string.ok), (dialogInterface, i)->
-                        {
-                            runnable.run();
-                        });
-
-                        alertDialog.setOnKeyListener((DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent)->
-                        {
-                            if (keyCode == KeyEvent.KEYCODE_BACK)
-                            {
-                                runnable.run();
-                            }
-
-                            return true;
-                        });
-
-
-                    }
-                });
-
-
                 dialog.show();
 
-                return false;
+                return true;
             });
 
             popupMenu.show();

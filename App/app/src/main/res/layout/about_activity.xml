@@ -63,25 +63,6 @@
             android:text="@string/isabell_waas"
             android:id="@+id/isabellwaas"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:id="@+id/imprint"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_gravity="center"
-            android:layout_marginBottom="5dp"
-            android:text="@string/imprint" />
-
-        <com.google.android.material.button.MaterialButton
-            android:clickable="true"
-            android:id="@+id/opensource"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:onClick="opensource"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_gravity="center"
-            android:text="@string/open_source_licenses" />
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

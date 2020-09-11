@@ -41,8 +41,10 @@
         Name: Steven Solleder&lt;br/>
         Anschrift: Herausgabe bei Nachfrage&lt;br/>
         Kontaktaufnahme: contact@stevensolleder.de&lt;br/>&lt;br/>
-        &lt;b>Zusätzliche Angaben gemäß § 55 Abs. 2 RStV:&lt;/b>&lt;br/>
+        &lt;b>Zusätzliche Angaben gemäß § 18 Abs. 2 MStV:&lt;/b>&lt;br/>
         Verantwortlich für den Inhalt: Steven Solleder&lt;br/>
         Anschrift: Herausgabe bei Nachfrage
     </string>
+    <string name="battery_optimization">Batterieoptimierung</string>
+    <string name="battery_optimization_description">Wähle „Alle Apps\", suche „SimpleDo\" und deaktiviere „Akkuverbrauch optimieren\", um sicherzustellen, dass die Benachrichtigungen der App ordnungsgemäß funktionieren.</string>
 </resources>
