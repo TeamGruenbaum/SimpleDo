@@ -31,6 +31,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -543,20 +544,26 @@ public class Main extends AppCompatActivity
 
             popupMenu.getMenu().getItem(4).setOnMenuItemClickListener((menuItem)->
             {
-                AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
                 WebView webView=new WebView(Main.this);
-                webView.loadUrl("file:///android_asset/licenses.html");
-                webView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 webView.setVerticalScrollBarEnabled(false);
-                alertDialogBuilder.setView(webView);
+                webView.loadUrl("file:///android_asset/licenses.html");
+
+                RelativeLayout relativeLayout=new RelativeLayout(Main.this);
+                relativeLayout.setGravity(RelativeLayout.CENTER_VERTICAL|RelativeLayout.CENTER_VERTICAL);
+                relativeLayout.addView(webView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+                AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
                 alertDialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, which)->{});
                 AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.setView(relativeLayout);
+
                 webView.setWebViewClient(new WebViewClient()
                 {
                     @Override
                     public void onPageFinished (WebView view, String url)
                     {
-                        new Handler().postDelayed(()->{alertDialog.show();}, 200);
+                        super.onPageFinished(view, url);
+                        alertDialog.show();
                     }
                 });
 
