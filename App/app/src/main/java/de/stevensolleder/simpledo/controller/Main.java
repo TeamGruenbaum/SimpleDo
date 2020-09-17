@@ -546,6 +546,7 @@ public class Main extends AppCompatActivity
             {
                 WebView webView=new WebView(Main.this);
                 webView.setVerticalScrollBarEnabled(false);
+                webView.setHorizontalScrollBarEnabled(false);
                 webView.loadUrl("file:///android_asset/licenses.html");
 
                 RelativeLayout relativeLayout=new RelativeLayout(Main.this);
