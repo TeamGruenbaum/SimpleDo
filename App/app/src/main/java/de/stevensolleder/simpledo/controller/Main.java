@@ -1,10 +1,12 @@
 package de.stevensolleder.simpledo.controller;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -53,7 +55,7 @@ import static de.stevensolleder.simpledo.model.ColorHelper.*;
 import static de.stevensolleder.simpledo.model.NotificationHelper.*;
 import static de.stevensolleder.simpledo.model.SaveHelper.*;
 
-public class Main extends AppCompatActivity
+public class Main extends Activity
 {
     private RecyclerView entryRecyclerView;
     private EntryRecyclerViewAdapter entryRecyclerViewAdapter;
@@ -69,12 +71,14 @@ public class Main extends AppCompatActivity
     private TextView addCardDateTextView;
     private TextView addCardTimeTextView;
 
-    private FloatingActionButton startButton;
+    private FloatingActionButton startFloatingActionButton;
 
     private MenuItem changeDirectionMaterialButton;
     private MenuItem changeCriterionMaterialButton;
 
     private BottomAppBar bottomAppBar;
+
+    private ItemTouchHelper itemTouchHelper;
 
     private Date chosenDate=null;
     private Time chosenTime=null;
@@ -82,7 +86,6 @@ public class Main extends AppCompatActivity
 
     private boolean reminding=false;
 
-    private ItemTouchHelper itemTouchHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -110,7 +113,7 @@ public class Main extends AppCompatActivity
         addCardDateTextView=findViewById(R.id.addCardDate);
         addCardTimeTextView=findViewById(R.id.addCardTime);
 
-        startButton=findViewById(R.id.start);
+        startFloatingActionButton=findViewById(R.id.start);
 
         addCardRemindMaterialButton=findViewById(R.id.remindButton);
 
@@ -180,7 +183,7 @@ public class Main extends AppCompatActivity
                 }
                 else
                 {
-                    snackbar.setAnchorView(startButton);
+                    snackbar.setAnchorView(startFloatingActionButton);
                 }
 
                 snackbar.setAction(SimpleDo.getAppContext().getResources().getString(R.string.undo), (view) ->
@@ -194,7 +197,7 @@ public class Main extends AppCompatActivity
 
                 snackbar.show();
 
-                setupSortLayout();
+                setupLayoutClickability();
             }
 
             //This contains the current dragged card
@@ -300,7 +303,7 @@ public class Main extends AppCompatActivity
 
         addCardTimePickerMaterialButton.setOnClickListener((view)->
         {
-            TimeTimePickerDialog timePickerDialog=new TimeTimePickerDialog(Main.this, (timePicker, hour, minute)->
+            TimePickerDialog timePickerDialog=new TimePickerDialog(Main.this, (timePicker, hour, minute)->
             {
                 chosenTime=new Time(hour, minute);
 
@@ -310,22 +313,25 @@ public class Main extends AppCompatActivity
                 //UIUtil doesn't work in time picker so we use the direct methods
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.toggleSoftInput(0,0);
-            }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
+            }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true)
+            {
+                @Override
+                public void onBackPressed()
+                {
+                    this.dismiss();
 
-            Runnable runnable=()->
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(0,0);
+                }
+            };
+
+            timePickerDialog.setOnCancelListener((dialogInterface)->
             {
                 timePickerDialog.dismiss();
 
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.toggleSoftInput(0,0);
-            };
-
-            timePickerDialog.setOnCancelListener((dialogInterface)->
-            {
-                runnable.run();
             });
-
-            timePickerDialog.setOnBackPressed(runnable);
 
             timePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getResources().getString(R.string.delete), (dialogInterface, which)->
             {
@@ -465,7 +471,7 @@ public class Main extends AppCompatActivity
 
             popupMenu.getMenu().getItem(0).setOnMenuItemClickListener((menuItem)->
             {
-                TimeTimePickerDialog timePickerDialog=new TimeTimePickerDialog(Main.this, (timePicker, hour, minute)->
+                TimePickerDialog timePickerDialog=new TimePickerDialog(Main.this, (timePicker, hour, minute)->
                 {
                     setAlldayTime(new Time(hour, minute));
 
@@ -476,7 +482,14 @@ public class Main extends AppCompatActivity
                             planAndSendNotification(getEntry(i));
                         }
                     }
-                }, getAlldayTime().getHour(), getAlldayTime().getMinute(), true);
+                }, getAlldayTime().getHour(), getAlldayTime().getMinute(), true)
+                {
+                    @Override
+                    public void onBackPressed()
+                    {
+                        this.dismiss();
+                    }
+                };
 
                 timePickerDialog.setOnCancelListener((dialogInterface)->
                 {
@@ -484,11 +497,6 @@ public class Main extends AppCompatActivity
                 });
 
                 timePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.cancel), (dialogInterface, which)->
-                {
-                    timePickerDialog.dismiss();
-                });
-
-                timePickerDialog.setOnBackPressed(() ->
                 {
                     timePickerDialog.dismiss();
                 });
@@ -601,7 +609,7 @@ public class Main extends AppCompatActivity
     {
         addCardMaterialCardView.setVisibility(View.GONE);
 
-        startButton.show();
+        startFloatingActionButton.show();
         bottomAppBar.performShow();
     }
 
@@ -653,10 +661,10 @@ public class Main extends AppCompatActivity
             break;
         }
 
-        setupSortLayout();
+        setupLayoutClickability();
     }
 
-    public void setupSortLayout()
+    private void setupLayoutClickability()
     {
         if(getEntriesSize()<=1)
         {
@@ -694,6 +702,19 @@ public class Main extends AppCompatActivity
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(notificationChannel);
         }
+    }
+
+    public void start(View view)
+    {
+        bottomAppBar.performHide();
+        startFloatingActionButton.hide();
+
+        addCardMaterialCardView.setVisibility(View.VISIBLE);
+
+        addCardContentEditText.requestFocus();
+
+        InputMethodManager inputMethodManager=(InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
 
     public void addCard(View view)
@@ -759,7 +780,7 @@ public class Main extends AppCompatActivity
 
         entryRecyclerViewAdapter.insertEntry(entry);
 
-        setupSortLayout();
+        setupLayoutClickability();
 
         addCardContentEditText.getText().clear();
         addCardDeadlineLinearLayout.setVisibility(View.GONE);
@@ -769,20 +790,7 @@ public class Main extends AppCompatActivity
         chosenTime=null;
     }
 
-    public void start(View view)
-    {
-        bottomAppBar.performHide();
-        startButton.hide();
-
-        addCardMaterialCardView.setVisibility(View.VISIBLE);
-
-        addCardContentEditText.requestFocus();
-
-        InputMethodManager inputMethodManager=(InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-    }
-
-    private boolean isInPast (Entry entry)
+    private boolean isInPast(Entry entry)
     {
         Calendar calendar=Calendar.getInstance();
 

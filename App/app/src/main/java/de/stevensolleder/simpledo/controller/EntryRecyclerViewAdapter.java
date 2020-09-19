@@ -54,11 +54,11 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
 
         if(getEntry(position).isNotifying())
         {
-            entryViewViewHolder.bell.setVisibility(View.VISIBLE);
+            entryViewViewHolder.bellImageView.setVisibility(View.VISIBLE);
         }
         else
         {
-            entryViewViewHolder.bell.setVisibility(View.GONE);
+            entryViewViewHolder.bellImageView.setVisibility(View.GONE);
         }
 
         if(getEntry(position).getDate()!=null)
@@ -153,7 +153,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
         private LinearLayout deadlineLinearLayout;
         private TextView dateTextView;
         private TextView timeTextView;
-        private ImageView bell;
+        private ImageView bellImageView;
 
         private ContextMenu contextMenu;
 
@@ -168,7 +168,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             deadlineLinearLayout=itemView.findViewById(R.id.deadline);
             dateTextView=itemView.findViewById(R.id.date);
             timeTextView=itemView.findViewById(R.id.time);
-            bell=itemView.findViewById(R.id.bell);
+            bellImageView=itemView.findViewById(R.id.bell);
 
             contentEditText.setKeyPreImeAction((keyCode, keyEvent) ->
             {
@@ -196,7 +196,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         contentEditText.setSelection(contentEditText.length());
                         mainActivity.itemTouchHelperEnabled(false);
                         cardMaterialCardView.setLongClickable(false);
-                        contextMenuEnabled(false);
+                        setContextMenuEnabled(false);
 
                         InputMethodManager inputMethodManager=(InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
@@ -209,7 +209,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         contentEditText.setFocusableInTouchMode(false);
                         mainActivity.itemTouchHelperEnabled(true);
                         cardMaterialCardView.setLongClickable(true);
-                        contextMenuEnabled(true);
+                        setContextMenuEnabled(true);
                     }
                 }
             });
@@ -305,7 +305,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                     contentEditText.clearFocus();
                     UIUtil.hideKeyboard(mainActivity);
 
-                    TimeTimePickerDialog timePickerDialog=new TimeTimePickerDialog(mainActivity, new TimePickerDialog.OnTimeSetListener()
+                    TimePickerDialog timePickerDialog=new TimePickerDialog(mainActivity, new TimePickerDialog.OnTimeSetListener()
                     {
                         @Override
                         public void onTimeSet(TimePicker timePicker, int hour, int minute)
@@ -321,7 +321,14 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                                 NotificationHelper.planAndSendNotification(temp);
                             }
                         }
-                    }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
+                    }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true)
+                    {
+                        @Override
+                        public void onBackPressed()
+                        {
+                            this.dismiss();
+                        }
+                    };
 
                     timePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.delete), (dialogInterface, which)->
                     {
@@ -337,11 +344,6 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                     });
 
                     timePickerDialog.setOnCancelListener((dialogInterface)->
-                    {
-                        timePickerDialog.dismiss();
-                    });
-
-                    timePickerDialog.setOnBackPressed(()->
                     {
                         timePickerDialog.dismiss();
                     });
@@ -392,7 +394,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
             });
         }
 
-        public void contextMenuEnabled(boolean newState)
+        public void setContextMenuEnabled(boolean newState)
         {
             contextMenuState=newState;
         }
