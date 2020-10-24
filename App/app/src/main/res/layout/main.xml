@@ -142,7 +142,6 @@
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
-        style="@style/Widget.MaterialComponents.BottomAppBar.Colored"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
@@ -154,11 +153,11 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/start"
         android:layout_width="wrap_content"
-        app:backgroundTint="@color/secondaryColor"
         android:layout_height="wrap_content"
         app:layout_anchor="@id/bottomAppBar"
         app:srcCompat="@drawable/ic_add"
         android:tooltipText="@string/start"
+        style="@style/floatingActionButton"
         android:onClick="start"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

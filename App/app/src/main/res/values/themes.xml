@@ -7,7 +7,7 @@
         <item name="colorAccent">@color/secondaryColor</item>
     </style>
 
-    <style name="cardButton" parent="@style/Widget.MaterialComponents.Button.TextButton">
+    <style name="cardButtonBase" parent="@style/Widget.MaterialComponents.Button.TextButton">
         <item name="android:layout_width">45dp</item>
         <item name="android:layout_height">45dp</item>
         <item name="android:gravity">center</item>
@@ -31,5 +31,10 @@
         <item name="android:layout_marginLeft">10dp</item>
         <item name="android:layout_marginBottom">10dp</item>
     </style>
+
+    <style name="floatingActionButtonBase" parent="Widget.MaterialComponents.FloatingActionButton">
+    </style>
+
+    <style name="appBottomBarBase" parent="Widget.MaterialComponents.BottomAppBar.Colored"></style>
 
 </resources>

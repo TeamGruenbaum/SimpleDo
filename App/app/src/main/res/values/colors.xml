@@ -3,9 +3,13 @@
     <color name="primaryColor">#212121</color>
     <color name="primaryLightColor">#484848</color>
     <color name="primaryDarkColor">#000000</color>
+
     <color name="secondaryColor">#558b2f</color>
     <color name="secondaryLightColor">#85bb5c</color>
     <color name="secondaryDarkColor">#255d00</color>
+
+    <color name="colorSurface">#FFFFFF</color>
+
     <color name="primaryTextColor">#ffffff</color>
     <color name="secondaryTextColor">#000000</color>
 </resources>

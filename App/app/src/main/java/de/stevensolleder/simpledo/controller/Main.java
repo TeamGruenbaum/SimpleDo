@@ -10,6 +10,7 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -31,6 +32,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.MenuCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -51,11 +53,12 @@ import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 import de.stevensolleder.simpledo.*;
 import de.stevensolleder.simpledo.model.*;
 
+import static android.content.res.Configuration.UI_MODE_NIGHT_MASK;
 import static de.stevensolleder.simpledo.model.ColorHelper.*;
 import static de.stevensolleder.simpledo.model.NotificationHelper.*;
 import static de.stevensolleder.simpledo.model.SaveHelper.*;
 
-public class Main extends Activity
+public class Main extends AppCompatActivity
 {
     private RecyclerView entryRecyclerView;
     private EntryRecyclerViewAdapter entryRecyclerViewAdapter;
@@ -513,7 +516,7 @@ public class Main extends Activity
 
             popupMenu.getMenu().getItem(1).setOnMenuItemClickListener((menuItem)->
             {
-                //TODO: Theme switcher
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
                 return false;
             });

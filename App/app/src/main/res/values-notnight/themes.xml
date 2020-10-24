@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="cardButton" parent="cardButtonBase"></style>
+
+    <style name="floatingActionButton" parent="floatingActionButtonBase">
+        <item name="backgroundTint">@color/secondaryColor</item>
+    </style>
+
+    <style name="appBottomBar" parent="appBottomBarBase"></style>
+</resources>
