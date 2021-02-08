@@ -8,7 +8,4 @@
         <item name="backgroundTint">@color/secondaryLightColor</item>
     </style>
 
-    <style name="appBottomBar" parent="Theme.S">
-        <item name="color">?</item>
-    </style>
 </resources>

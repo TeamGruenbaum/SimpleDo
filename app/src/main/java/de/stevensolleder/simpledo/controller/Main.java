@@ -612,7 +612,11 @@ public class Main extends AppCompatActivity
     {
         addCardMaterialCardView.setVisibility(View.GONE);
 
+        entryRecyclerView.setPadding(0,0,0,(int) (100*getResources().getDisplayMetrics().density+0.5f));
+
         startFloatingActionButton.show();
+
+        bottomAppBar.setVisibility(View.VISIBLE);
         bottomAppBar.performShow();
     }
 
@@ -709,19 +713,34 @@ public class Main extends AppCompatActivity
 
     public void start(View view)
     {
-        bottomAppBar.performHide();
-        startFloatingActionButton.hide();
+        int[] location = new int[2];
+        addCardMaterialCardView.getLocationOnScreen(location);
+        int x = location[0];
+        int y = location[1];
 
+        System.out.println(y);
+
+        startFloatingActionButton.hide();
+        bottomAppBar.setVisibility(View.GONE);
         addCardMaterialCardView.setVisibility(View.VISIBLE);
 
         addCardContentEditText.requestFocus();
 
         InputMethodManager inputMethodManager=(InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
+        entryRecyclerView.setPadding(0, 0, 0, 400);
     }
 
     public void addCard(View view)
     {
+
+        int[] location = new int[2];
+        addCardMaterialCardView.getLocationOnScreen(location);
+        int x = location[0];
+        int y = location[1];
+
+        System.out.println(y);
         Entry entry;
 
         if(chosenColor!=-1)
