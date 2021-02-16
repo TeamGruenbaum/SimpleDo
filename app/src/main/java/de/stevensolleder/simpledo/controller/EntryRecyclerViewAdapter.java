@@ -18,10 +18,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
@@ -427,6 +429,39 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
         public ContextMenu getContextMenu()
         {
             return contextMenu;
+        }
+
+
+        class RecyclerViewDiffUtilCallback extends DiffUtil.Callback
+        {
+            private ArrayList<Entry> oldEntryList;
+            private ArrayList<Entry> newEntryList;
+
+            public RecyclerViewDiffUtilCallback(ArrayList<Entry> oldEntryList, ArrayList<Entry> newEntryList)
+            {
+                this.oldEntryList=oldEntryList;
+                this.newEntryList=newEntryList;
+            }
+
+            @Override
+            public int getOldListSize() {
+                return oldEntryList.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newEntryList.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldEntryPosition, int newEntryPosition) {
+                return oldEntryList.get(oldEntryPosition).getID()==newEntryList.get(newEntryPosition).getID();
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldEntryPosition, int newEntryPosition) {
+                return oldEntryList.get(oldEntryPosition)==newEntryList.get(newEntryPosition);
+            }
         }
     }
 }

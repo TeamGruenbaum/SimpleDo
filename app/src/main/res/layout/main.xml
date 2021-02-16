@@ -145,19 +145,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:navigationIcon="@drawable/ic_more_vert"
+        app:backgroundTint="#FFFFFF"
         app:hideOnScroll="true"
         app:menu="@menu/app_bar_menu"
-        app:backgroundTint="#FFFFFF"/>
+        app:navigationIcon="@drawable/ic_more_vert" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/start"
+    <com.skydoves.transformationlayout.TransformationLayout
+        android:id="@+id/transformationLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:layout_anchorGravity="center"
+        android:layout_marginBottom="30dp"
         app:layout_anchor="@id/bottomAppBar"
-        app:srcCompat="@drawable/ic_add"
-        android:tooltipText="@string/start"
-        style="@style/floatingActionButton"
-        android:onClick="start"/>
+        app:transformation_duration="700"
+        app:transformation_targetView="@+id/addCard">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/start"
+            style="@style/floatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="start"
+            android:tooltipText="@string/start"
+            app:srcCompat="@drawable/ic_add" />
+
+    </com.skydoves.transformationlayout.TransformationLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

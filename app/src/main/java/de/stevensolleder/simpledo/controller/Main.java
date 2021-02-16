@@ -44,6 +44,8 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+import com.skydoves.transformationlayout.OnTransformFinishListener;
+import com.skydoves.transformationlayout.TransformationLayout;
 
 import java.lang.reflect.Field;
 import java.util.Calendar;
@@ -89,6 +91,8 @@ public class Main extends AppCompatActivity
 
     private boolean reminding=false;
 
+    private TransformationLayout transformationLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -127,8 +131,9 @@ public class Main extends AppCompatActivity
         entryRecyclerView.setAdapter(entryRecyclerViewAdapter);
 
         //Create and set Animator
-        //EntryListAnimator entryListAnimator=new EntryListAnimator();
-        //entryRecyclerView.setItemAnimator(entryListAnimator);
+        EntryListAnimator entryListAnimator=new EntryListAnimator();
+        entryRecyclerView.setItemAnimator(entryListAnimator);
+        transformationLayout=findViewById(R.id.transformationLayout);
 
         //Create notifcationchannel for reminders
         createNotificationChannel();
@@ -140,7 +145,7 @@ public class Main extends AppCompatActivity
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)
             {
-                //Sometimes getContextMenu() return null, to avoid a crash we use try-catch
+                //Sometimes getContextMenu() returns null. To avoid a crash we use try-catch.
                 try
                 {
                     ((EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder)viewHolder).getContextMenu().close();
@@ -152,10 +157,10 @@ public class Main extends AppCompatActivity
                 return viewHolder.getAdapterPosition()!=target.getAdapterPosition();
             }
 
-            //distance contains how many cards were passed after dropping the card after a dragging the card
+            //distance contains how many cards were passed after dropping the card after dragging the card
             int distance=0;
 
-            //onMoved() is called when a card is in drag mode and changed the position with another card
+            //onMoved() is called when a card is in drag mode and swapped the position with another card
             @Override
             public void onMoved(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, int fromPos, RecyclerView.ViewHolder target, int toPos, int x, int y)
             {
@@ -206,7 +211,7 @@ public class Main extends AppCompatActivity
             //This contains the current dragged card
             EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder entryRecyclerViewViewHolder;
 
-            //onSelectedChanged() is called when the state of the current dragged card
+            //onSelectedChanged() is called when the state of the current dragged card changes
             @Override
             public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState)
             {
@@ -610,7 +615,8 @@ public class Main extends AppCompatActivity
     @Override
     public void onBackPressed()
     {
-        addCardMaterialCardView.setVisibility(View.GONE);
+        transformationLayout.finishTransform();
+        bottomAppBar.performShow();
 
         entryRecyclerView.setPadding(0,0,0,(int) (100*getResources().getDisplayMetrics().density+0.5f));
 
@@ -713,21 +719,20 @@ public class Main extends AppCompatActivity
 
     public void start(View view)
     {
-        int[] location = new int[2];
-        addCardMaterialCardView.getLocationOnScreen(location);
-        int x = location[0];
-        int y = location[1];
-
-        System.out.println(y);
-
-        startFloatingActionButton.hide();
-        bottomAppBar.setVisibility(View.GONE);
-        addCardMaterialCardView.setVisibility(View.VISIBLE);
+        transformationLayout.startTransform();
+        bottomAppBar.performHide();
 
         addCardContentEditText.requestFocus();
 
-        InputMethodManager inputMethodManager=(InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        transformationLayout.onTransformFinishListener=new OnTransformFinishListener() {
+            @Override public void onFinish(boolean isTransformed) {
+                if(isTransformed) {
+                    InputMethodManager inputMethodManager = (InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+                }
+            }
+        };
+
 
         entryRecyclerView.setPadding(0, 0, 0, 400);
     }
