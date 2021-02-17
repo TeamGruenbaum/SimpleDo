@@ -1,5 +1,8 @@
 package de.stevensolleder.simpledo.controller;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -21,6 +24,8 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -49,6 +54,9 @@ import com.skydoves.transformationlayout.TransformationLayout;
 
 import java.lang.reflect.Field;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 
@@ -719,10 +727,22 @@ public class Main extends AppCompatActivity
 
     public void start(View view)
     {
-        transformationLayout.startTransform();
-        bottomAppBar.performHide();
+        //transformationLayout.startTransform();
+        //bottomAppBar.performHide();
 
-        addCardContentEditText.requestFocus();
+
+        ObjectAnimator scaleX=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleY", 1.5F).setDuration(1000);
+        ObjectAnimator scaleY=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleX", 5F).setDuration(1000);
+        ObjectAnimator 
+
+        AnimatorSet as=new AnimatorSet();
+        as.play(scaleX).with(scaleY);
+
+
+
+        as.start();
+
+        /*addCardContentEditText.requestFocus();
 
         transformationLayout.onTransformFinishListener=new OnTransformFinishListener() {
             @Override public void onFinish(boolean isTransformed) {
@@ -734,7 +754,7 @@ public class Main extends AppCompatActivity
         };
 
 
-        entryRecyclerView.setPadding(0, 0, 0, 400);
+        entryRecyclerView.setPadding(0, 0, 0, 400);*/
     }
 
     public void addCard(View view)

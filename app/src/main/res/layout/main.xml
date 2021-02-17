@@ -158,8 +158,9 @@
         app:layout_anchorGravity="center"
         android:layout_marginBottom="30dp"
         app:layout_anchor="@id/bottomAppBar"
-        app:transformation_duration="700"
-        app:transformation_targetView="@+id/addCard">
+        app:transformation_duration="500"
+        app:transformation_targetView="@+id/addCard"
+        app:transformation_fadeMode="cross">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/start"
