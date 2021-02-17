@@ -14,12 +14,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.opengl.Visibility;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.Html;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,9 +36,11 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.MenuCompat;
@@ -99,8 +104,6 @@ public class Main extends AppCompatActivity
 
     private boolean reminding=false;
 
-    private TransformationLayout transformationLayout;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -141,10 +144,10 @@ public class Main extends AppCompatActivity
         //Create and set Animator
         EntryListAnimator entryListAnimator=new EntryListAnimator();
         entryRecyclerView.setItemAnimator(entryListAnimator);
-        transformationLayout=findViewById(R.id.transformationLayout);
 
         //Create notifcationchannel for reminders
         createNotificationChannel();
+
 
         //Setting swipe gestures
         itemTouchHelper=new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT)
@@ -479,7 +482,7 @@ public class Main extends AppCompatActivity
 
         bottomAppBar.setNavigationOnClickListener((view)->
         {
-            PopupMenu popupMenu=new PopupMenu(getApplicationContext(), view);
+            PopupMenu popupMenu=new PopupMenu(getApplicationContext(), view, Gravity.END, 0, R.style.MyPopupMenu);
 
             MenuCompat.setGroupDividerEnabled(popupMenu.getMenu(), true);
 
@@ -529,13 +532,6 @@ public class Main extends AppCompatActivity
 
             popupMenu.getMenu().getItem(1).setOnMenuItemClickListener((menuItem)->
             {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-
-                return false;
-            });
-
-            popupMenu.getMenu().getItem(2).setOnMenuItemClickListener((menuItem)->
-            {
                 AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
                 alertDialogBuilder.setMessage(R.string.battery_optimization_description);
                 alertDialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, which)->
@@ -544,6 +540,33 @@ public class Main extends AppCompatActivity
                 });
 
                 alertDialogBuilder.show();
+
+                return true;
+            });
+
+            popupMenu.getMenu().getItem(2).setOnMenuItemClickListener((menuItem)->
+            {
+                Dialog dialog=new Dialog(Main.this);
+                dialog.setContentView(R.layout.about_activity);
+
+                ((MaterialButton) dialog.findViewById(R.id.steven_solleder)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://stevensolleder.de"));
+                        startActivity(intent);
+                    }
+                });
+
+                ((MaterialButton) dialog.findViewById(R.id.isabellwaas)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/isabellwaas"));
+                        startActivity(intent);
+                    }
+                });
+
+                dialog.show();
 
                 return true;
             });
@@ -587,51 +610,54 @@ public class Main extends AppCompatActivity
                 return true;
             });
 
-            popupMenu.getMenu().getItem(5).setOnMenuItemClickListener((menuItem)->
-            {
-                Dialog dialog=new Dialog(Main.this);
-                dialog.setContentView(R.layout.about_activity);
-
-                ((MaterialButton) dialog.findViewById(R.id.steven_solleder)).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view)
-                    {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://stevensolleder.de"));
-                        startActivity(intent);
-                    }
-                });
-
-                ((MaterialButton) dialog.findViewById(R.id.isabellwaas)).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/isabellwaas"));
-                        startActivity(intent);
-                    }
-                });
-
-                dialog.show();
-
-                return true;
-            });
-
             popupMenu.show();
         });
 
         setupLayout();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBackPressed()
     {
-        transformationLayout.finishTransform();
-        bottomAppBar.performShow();
+        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleY", 1F).setDuration(500);
+        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleX", 1F).setDuration(500);
+        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(startFloatingActionButton, "alpha", 1F).setDuration(500);
+        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(startFloatingActionButton,"visibility", View.VISIBLE).setDuration(500);
 
-        entryRecyclerView.setPadding(0,0,0,(int) (100*getResources().getDisplayMetrics().density+0.5f));
+        AnimatorSet floatingActionButtonAnimatorSet=new AnimatorSet();
+        floatingActionButtonAnimatorSet.play(floatingActionButtonScaleX).with(floatingActionButtonScaleY).with(floatingActionButtonAlpha).with(floatingActionButtonVisibility);
+        floatingActionButtonAnimatorSet.setStartDelay(100);
 
-        startFloatingActionButton.show();
+        ObjectAnimator addCardVisibility=ObjectAnimator.ofInt(addCardMaterialCardView,"visibility", View.GONE).setDuration(10);
+        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleY", 1F, 0.2F).setDuration(500);
+        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleX", 1F, 0.2F).setDuration(500);
+        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(addCardMaterialCardView, "alpha", 1F, 0F).setDuration(500);
+        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(addCardMaterialCardView, "radius", 4, 100).setDuration(500);
 
-        bottomAppBar.setVisibility(View.VISIBLE);
-        bottomAppBar.performShow();
+        AnimatorSet addCardAnimatorSet=new AnimatorSet();
+        addCardAnimatorSet.play(addCardScaleY).with(addCardScaleX).with(addCardAlpha).with(addCardRadius).before(addCardVisibility);
+
+        addCardAnimatorSet.start();
+        floatingActionButtonAnimatorSet.start();
+
+        floatingActionButtonAnimatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation){}
+
+            @Override
+            public void onAnimationEnd(Animator animation)
+            {
+                bottomAppBar.performShow();
+                bottomAppBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation){}
+
+            @Override
+            public void onAnimationRepeat(Animator animation){}
+        });
     }
 
     private void setupLayout()
@@ -727,34 +753,49 @@ public class Main extends AppCompatActivity
 
     public void start(View view)
     {
-        //transformationLayout.startTransform();
-        //bottomAppBar.performHide();
+        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleY", 1.5F).setDuration(500);
+        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleX", 5F).setDuration(500);
+        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(startFloatingActionButton, "alpha", 0F).setDuration(500);
+        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(startFloatingActionButton,"visibility", View.GONE).setDuration(500);
+
+        AnimatorSet floatingActionButtonAnimatorSet=new AnimatorSet();
+        floatingActionButtonAnimatorSet.play(floatingActionButtonScaleX).with(floatingActionButtonScaleY).with(floatingActionButtonAlpha).with(floatingActionButtonVisibility);
 
 
-        ObjectAnimator scaleX=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleY", 1.5F).setDuration(1000);
-        ObjectAnimator scaleY=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleX", 5F).setDuration(1000);
-        ObjectAnimator 
+        ObjectAnimator addCardVisibility=ObjectAnimator.ofInt(addCardMaterialCardView,"visibility", View.VISIBLE).setDuration(10);
+        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleY", 0.2F, 1F).setDuration(500);
+        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleX", 0.2F, 1F).setDuration(500);
+        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(addCardMaterialCardView, "alpha", 0F, 1F).setDuration(500);
+        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(addCardMaterialCardView, "radius", 100, 4).setDuration(500);
 
-        AnimatorSet as=new AnimatorSet();
-        as.play(scaleX).with(scaleY);
+        AnimatorSet addCardAnimatorSet=new AnimatorSet();
+        addCardAnimatorSet.play(addCardVisibility).with(addCardScaleY).with(addCardScaleX).with(addCardAlpha).with(addCardRadius);
+        addCardAnimatorSet.setStartDelay(100);
+
+        floatingActionButtonAnimatorSet.start();
+        addCardAnimatorSet.start();
 
 
+        floatingActionButtonAnimatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {}
 
-        as.start();
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                bottomAppBar.performHide();
+                bottomAppBar.setVisibility(View.GONE);
 
-        /*addCardContentEditText.requestFocus();
-
-        transformationLayout.onTransformFinishListener=new OnTransformFinishListener() {
-            @Override public void onFinish(boolean isTransformed) {
-                if(isTransformed) {
-                    InputMethodManager inputMethodManager = (InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-                }
+                InputMethodManager inputMethodManager = (InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+                addCardContentEditText.requestFocus();
             }
-        };
 
+            @Override
+            public void onAnimationCancel(Animator animation) {}
 
-        entryRecyclerView.setPadding(0, 0, 0, 400);*/
+            @Override
+            public void onAnimationRepeat(Animator animation) {}
+        });
     }
 
     public void addCard(View view)

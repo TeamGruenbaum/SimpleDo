@@ -7,9 +7,6 @@
             android:title="@string/allday_reminder_time"
             app:showAsAction="ifRoom" />
         <item
-            android:title="@string/theme"
-            app:showAsAction="ifRoom" />
-        <item
             android:title="@string/battery_optimization"
             app:showAsAction="ifRoom"/>
     </group>

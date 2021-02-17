@@ -37,4 +37,8 @@
 
     <style name="appBottomBarBase" parent="Widget.MaterialComponents.BottomAppBar.Colored"></style>
 
+    <style name="MyPopupMenu" parent="@style/Widget.AppCompat.PopupMenu">
+        <item name="android:dropDownVerticalOffset">-70dp</item>
+    </style>
+
 </resources>
