@@ -38,6 +38,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation "com.github.skydoves:transformationlayout:1.0.7"
+    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'com.github.judemanutd:autostarter:1.0.8'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

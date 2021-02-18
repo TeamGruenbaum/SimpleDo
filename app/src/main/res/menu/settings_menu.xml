@@ -13,13 +13,13 @@
     <group
         android:id="@+id/group1">
         <item
+            android:title="@string/about"
+            app:showAsAction="ifRoom"/>
+        <item
             android:title="@string/imprint"
             app:showAsAction="ifRoom"/>
         <item
-            android:title="@string/open_source_licenses"
-            app:showAsAction="ifRoom"/>
-        <item
-            android:title="@string/about"
+            android:title="@string/open_source_licences"
             app:showAsAction="ifRoom"/>
     </group>
 </menu>

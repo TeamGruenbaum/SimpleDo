@@ -28,7 +28,7 @@
     <string name="edit_color">Edit color</string>
     <string name="activate_notification">Activate notification</string>
     <string name="deactivate_notification">Deactivate notification</string>
-    <string name="open_source_licenses">Open-source licenses</string>
+    <string name="open_source_licences">Open-source licences</string>
     <string name="version">Version 2020.1</string>
     <string name="apply">Apply</string>
     <string name="delete">Delete</string>
@@ -38,16 +38,11 @@
     <string name="cancel">Cancel</string>
     <string name="reminders">Reminders</string>
     <string name="reminders_description">The reminders you set for your entries</string>
-    <string name="imprint_description">
-        &lt;b>According to § 5 TMG:&lt;/b>&lt;br/>
-        Name: Steven Solleder&lt;br/>
-        Address: Upon request&lt;br/>
-        Contact: contact@stevensolleder.de&lt;br/>&lt;br/>
-        &lt;b>Additional information according to § 18 Abs. 2 MStV:&lt;/b>&lt;br/>
-        Responsible for the content: Steven Solleder&lt;br/>
-        Address: Upon request
-    </string>
-    <string name="ok" translatable="false">Ok</string>
+    <string name="ok">Ok</string>
     <string name="battery_optimization">Battery Optimization</string>
-    <string name="battery_optimization_description">Please select \"All Apps\", search for \"SimpleDo\" and deactivate \"battery optimization\" in order to make sure that the app\'s notifcations work properly.</string>
+    <string name="battery_optimization_description">"Because the operating systems of most manufacturers compulsively terminate applications that run in the background, we recommend you to exclude the application SimpleDo of this in order to prevent yourself from missing your own reminders. "</string>
+    <string name="information">Information</string>
+    <string name="open_settings">Open settings</string>
+    <string name="battery_optimization_hint">Please contact your manufacturer in order to disable this functionality.</string>
+    <string name="battery_optimization_button_hint">The following button leads you right to the corresponding settings of your device.</string>
 </resources>

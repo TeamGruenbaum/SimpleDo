@@ -22,12 +22,27 @@
             android:exported="true"/>-->
 
         <activity
-            android:name=".controller.Main">
+            android:name=".controller.Main"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".controller.SettingsActivity"
+            android:label="Settings"
+            android:parentActivityName=".controller.Main">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".controller.Main"/>
+        </activity>
+
+        <activity android:name=".controller.BatteryOptimizationActivity"/>
+        <activity android:name=".controller.AboutActivity"/>
+        <activity android:name=".controller.LicencesActivity"/>
+
     </application>
 </manifest>

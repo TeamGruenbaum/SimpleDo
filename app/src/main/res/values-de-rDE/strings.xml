@@ -26,7 +26,7 @@
     <string name="edit_text">Text bearbeiten</string>
     <string name="edit_date">Datum bearbeiten</string>
     <string name="edit_time">Zeit bearbeiten</string>
-    <string name="open_source_licenses">Open-Source-Lizenzen</string>
+    <string name="open_source_licences">Open-Source-Lizenzen</string>
     <string name="version">Version 2020.1</string>
     <string name="delete">Löschen</string>
     <string name="apply">Übernehmen</string>
@@ -36,15 +36,11 @@
     <string name="cancel">Abbrechen</string>
     <string name="reminders">Erinnerungen</string>
     <string name="reminders_description">Die Erinnerungen, welche du für deine Einträge gesetzt hast</string>
-    <string name="imprint_description">
-        &lt;b>Angaben gemäß § 5 TMG:&lt;/b>&lt;br/>
-        Name: Steven Solleder&lt;br/>
-        Anschrift: Herausgabe bei Nachfrage&lt;br/>
-        Kontaktaufnahme: contact@stevensolleder.de&lt;br/>&lt;br/>
-        &lt;b>Zusätzliche Angaben gemäß § 18 Abs. 2 MStV:&lt;/b>&lt;br/>
-        Verantwortlich für den Inhalt: Steven Solleder&lt;br/>
-        Anschrift: Herausgabe bei Nachfrage
-    </string>
     <string name="battery_optimization">Batterieoptimierung</string>
-    <string name="battery_optimization_description">Wähle „Alle Apps\", suche „SimpleDo\" und deaktiviere „Akkuverbrauch optimieren\", um sicherzustellen, dass die Benachrichtigungen der App ordnungsgemäß funktionieren.</string>
+    <string name="battery_optimization_description">Da die Betriebssysteme der meisten Hersteller Anwendungen, die im Hintergrund laufen, zwanghaft beenden, empfehlen wir Dir die Anwendung SimpleDo hiervon auszunehmen, um zu verhindern, dass Du von Dir gesetzte Erinnerungen verpasst.</string>
+    <string name="ok">Ok</string>
+    <string name="information">Information</string>
+    <string name="open_settings">Einstellungen öffnen</string>
+    <string name="battery_optimization_hint">Bitte wende Dich an deinen Hersteller, um diese Funktion zu deaktivieren.</string>
+    <string name="battery_optimization_button_hint">"Der folgende Button führt Dich gleich zu den entsprechenden Einstellungen Deines Gerätes. "</string>
 </resources>

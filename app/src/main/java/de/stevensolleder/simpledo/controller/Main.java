@@ -32,9 +32,11 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -58,6 +60,8 @@ import com.skydoves.transformationlayout.OnTransformFinishListener;
 import com.skydoves.transformationlayout.TransformationLayout;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -482,7 +486,11 @@ public class Main extends AppCompatActivity
 
         bottomAppBar.setNavigationOnClickListener((view)->
         {
-            PopupMenu popupMenu=new PopupMenu(getApplicationContext(), view, Gravity.END, 0, R.style.MyPopupMenu);
+            //TODO Settings
+            Intent intent=new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+
+            /*PopupMenu popupMenu=new PopupMenu(getApplicationContext(), view, Gravity.END, 0, R.style.MyPopupMenu);
 
             MenuCompat.setGroupDividerEnabled(popupMenu.getMenu(), true);
 
@@ -574,7 +582,6 @@ public class Main extends AppCompatActivity
             popupMenu.getMenu().getItem(3).setOnMenuItemClickListener((menuItem)->
             {
                 AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
-                alertDialogBuilder.setMessage(Html.fromHtml(SimpleDo.getAppContext().getResources().getString(R.string.imprint_description)));
                 alertDialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, which)->{});
                 alertDialogBuilder.show();
 
@@ -610,7 +617,7 @@ public class Main extends AppCompatActivity
                 return true;
             });
 
-            popupMenu.show();
+            popupMenu.show();*/
         });
 
         setupLayout();
