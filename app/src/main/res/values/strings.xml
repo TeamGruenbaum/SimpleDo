@@ -39,10 +39,14 @@
     <string name="reminders">Reminders</string>
     <string name="reminders_description">The reminders you set for your entries</string>
     <string name="ok">Ok</string>
-    <string name="battery_optimization">Battery Optimization</string>
+    <string name="battery_optimization">Disable battery optimization</string>
     <string name="battery_optimization_description">"Because the operating systems of most manufacturers compulsively terminate applications that run in the background, we recommend you to exclude the application SimpleDo of this in order to prevent yourself from missing your own reminders. "</string>
     <string name="information">Information</string>
     <string name="open_settings">Open settings</string>
     <string name="battery_optimization_hint">Please contact your manufacturer in order to disable this functionality.</string>
     <string name="battery_optimization_button_hint">The following button leads you right to the corresponding settings of your device.</string>
+    <string name="battery_optimization_summary">Make sure you do not miss any reminders by allowing SimpleDo to always run in the background.</string>
+    <string name="about_summary">Some information about the current App Version and the developers.</string>
+    <string name="imprint_summary">A link to the imprint of the App.</string>
+    <string name="licences_summary">The licences of the libraries used in the code of the App.</string>
 </resources>

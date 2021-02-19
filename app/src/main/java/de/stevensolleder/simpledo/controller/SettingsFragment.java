@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -31,6 +32,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey)
     {
         addPreferencesFromResource(R.xml.settings_preference);
+
+        findPreference("allday_reminder_time_key").setSummary(getAlldayTime().toString());
     }
 
     @Override
@@ -41,6 +44,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         switch(preferenceKey)
         {
             case "allday_reminder_time_key":
+                //bitte im TimePicker setzen
+                preference.setSummary(getAlldayTime().toString());
+                
                 /*TimePickerDialog timePickerDialog=new TimePickerDialog(SimpleDo.getAppContext(), (timePicker, hour, minute)->
                 {
                     setAlldayTime(new Time(hour, minute));

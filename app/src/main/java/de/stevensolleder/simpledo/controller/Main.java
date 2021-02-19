@@ -486,7 +486,6 @@ public class Main extends AppCompatActivity
 
         bottomAppBar.setNavigationOnClickListener((view)->
         {
-            //TODO Settings
             Intent intent=new Intent(this, SettingsActivity.class);
             startActivity(intent);
 
