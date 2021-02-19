@@ -98,7 +98,7 @@ public class Main extends AppCompatActivity
 
     private boolean reminding=false;
 
-    private boolean keyboardOpen;
+    private static boolean keyboardOpen;
 
 
     @Override
@@ -961,11 +961,11 @@ public class Main extends AppCompatActivity
         return calendar.getTimeInMillis();
     }
 
-    private void openKeyboardIfClosed()
+    public static void openKeyboardIfClosed()
     {
         if(!keyboardOpen)
         {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.toggleSoftInput(0,0);
         }
     }

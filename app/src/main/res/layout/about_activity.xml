@@ -25,7 +25,7 @@
             android:elevation="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:srcCompat="@tools:sample/avatars" />
+            android:src="@mipmap/ic" />
 
         <TextView
             android:layout_width="wrap_content"
