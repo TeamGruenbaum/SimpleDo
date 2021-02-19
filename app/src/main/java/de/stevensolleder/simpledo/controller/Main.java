@@ -865,6 +865,7 @@ public class Main extends AppCompatActivity
             }
 
             planAndSendNotification(entry);
+
         }
 
         changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme()));
@@ -879,6 +880,10 @@ public class Main extends AppCompatActivity
         addCardContentEditText.getText().clear();
         addCardDeadlineLinearLayout.setVisibility(View.GONE);
         addCardTimePickerMaterialButton.setVisibility(View.GONE);
+        addCardDivider.setVisibility(View.GONE);
+        addCardRemindMaterialButton.setVisibility(View.GONE);
+        addCardRemindMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme()));
+        reminding=false;
 
         chosenDate=null;
         chosenTime=null;
