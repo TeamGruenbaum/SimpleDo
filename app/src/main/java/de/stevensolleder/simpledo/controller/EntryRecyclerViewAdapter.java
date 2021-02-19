@@ -266,7 +266,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                             DatePicker datePicker=datePickerDialog.getDatePicker();
 
                             Entry entry = SaveHelper.getEntry(getPosition());
-                            entry.setDate(new Date(datePicker.getDayOfMonth(), datePicker.getMonth(), datePicker.getYear()));
+                            entry.setDate(new Date(datePicker.getDayOfMonth(), datePicker.getMonth()+1, datePicker.getYear()));
                             changeEntry(entry, getPosition());
 
                             if (entry.isNotifying())

@@ -50,4 +50,6 @@
     <string name="ok" translatable="false">Ok</string>
     <string name="battery_optimization">Battery Optimization</string>
     <string name="battery_optimization_description">Please select \"All Apps\", search for \"SimpleDo\" and deactivate \"battery optimization\" in order to make sure that the app\'s notifcations work properly.</string>
+    <string override="true" name="mtrl_picker_cancel">Delete</string>
+    <string override="true" name="mtrl_picker_confirm">Apply</string>
 </resources>

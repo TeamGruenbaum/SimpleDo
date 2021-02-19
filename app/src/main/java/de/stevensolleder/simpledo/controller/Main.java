@@ -3,9 +3,7 @@ package de.stevensolleder.simpledo.controller;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -13,36 +11,31 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.opengl.Visibility;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.Html;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.DatePicker;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.MenuCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -51,24 +44,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
-import com.skydoves.transformationlayout.OnTransformFinishListener;
-import com.skydoves.transformationlayout.TransformationLayout;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 
 import java.lang.reflect.Field;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 
 import de.stevensolleder.simpledo.*;
 import de.stevensolleder.simpledo.model.*;
 
-import static android.content.res.Configuration.UI_MODE_NIGHT_MASK;
 import static de.stevensolleder.simpledo.model.ColorHelper.*;
 import static de.stevensolleder.simpledo.model.NotificationHelper.*;
 import static de.stevensolleder.simpledo.model.SaveHelper.*;
@@ -104,6 +97,8 @@ public class Main extends AppCompatActivity
 
     private boolean reminding=false;
 
+    private boolean keyboardOpen;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -111,6 +106,16 @@ public class Main extends AppCompatActivity
         //Initialize main.xml
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        //Initialize keyboard listener
+        KeyboardVisibilityEvent.setEventListener(
+                Main.this,
+                new KeyboardVisibilityEventListener() {
+                    @Override
+                    public void onVisibilityChanged(boolean isOpen) {
+                        keyboardOpen=isOpen;
+                    }
+                });
 
         //Initialize all attributes from main.xml
         entryRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -193,7 +198,7 @@ public class Main extends AppCompatActivity
                     cancelNotification(entry);
                 }
 
-                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),SimpleDo.getAppContext().getResources().getString(R.string.entry_deleted), BaseTransientBottomBar.LENGTH_SHORT);
+                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),SimpleDo.getAppContext().getResources().getString(R.string.entry_deleted),BaseTransientBottomBar.LENGTH_SHORT);
                 snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
 
                 if(addCardMaterialCardView.getVisibility()== View.VISIBLE)
@@ -213,6 +218,7 @@ public class Main extends AppCompatActivity
                         planAndSendNotification(entry);
                     }
                 });
+
 
                 snackbar.show();
 
@@ -261,112 +267,97 @@ public class Main extends AppCompatActivity
         //Setting up date-, time- and color picker and remind button
         addCardDatePickerMaterialButton.setOnClickListener((view) ->
         {
-            DatePickerDialog datePickerDialog=new DatePickerDialog(Main.this);
+            UIUtil.hideKeyboard(Main.this);
 
-            datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, SimpleDo.getAppContext().getResources().getString(R.string.ok), (dialogInterface, i)->
-            {
-                DatePicker temp=datePickerDialog.getDatePicker();
+            MaterialDatePicker<Long> materialDatePicker=MaterialDatePicker.Builder
+                    .datePicker()
+                    .setTheme(R.style.MaterialCalendarTheme)
+                    .setSelection(chosenDate==null?Calendar.getInstance().getTimeInMillis():fromDateInMilis(chosenDate))
+                    .build();
 
-                chosenDate=new Date(temp.getDayOfMonth(), temp.getMonth(), temp.getYear());
 
-                addCardTimePickerMaterialButton.setVisibility(View.VISIBLE);
-                addCardDeadlineLinearLayout.setVisibility(View.VISIBLE);
-                addCardDateTextView.setText(chosenDate.toString());
-                addCardDivider.setVisibility(View.VISIBLE);
-                addCardRemindMaterialButton.setVisibility(View.VISIBLE);
-                addCardRemindMaterialButton.setEnabled(true);
 
-                UIUtil.showKeyboard(Main.this, addCardContentEditText);
-            });
+            materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
+                @Override
+                public void onPositiveButtonClick(Long selection) {
 
-            Runnable runnable=()->
-            {
-                datePickerDialog.dismiss();
+                    chosenDate=fromMilisInDate(selection);
 
-                UIUtil.showKeyboard(Main.this, addCardContentEditText);
-            };
+                    addCardTimePickerMaterialButton.setVisibility(View.VISIBLE);
+                    addCardDeadlineLinearLayout.setVisibility(View.VISIBLE);
+                    addCardDateTextView.setText(chosenDate.toString());
+                    addCardDivider.setVisibility(View.VISIBLE);
+                    addCardRemindMaterialButton.setVisibility(View.VISIBLE);
+                    addCardRemindMaterialButton.setEnabled(true);
 
-            datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.delete), (dialogInterface, i)->
-            {
-                chosenDate=null;
-                chosenTime=null;
-
-                addCardTimePickerMaterialButton.setVisibility(View.GONE);
-                addCardDeadlineLinearLayout.setVisibility(View.GONE);
-                addCardDivider.setVisibility(View.GONE);
-                addCardRemindMaterialButton.setVisibility(View.GONE);
-                addCardRemindMaterialButton.setEnabled(false);
-
-                UIUtil.showKeyboard(Main.this, addCardContentEditText);
-            });
-
-            datePickerDialog.setOnCancelListener((dialogInterface)->
-            {
-                runnable.run();
-            });
-
-            datePickerDialog.setOnKeyListener((DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent)->
-            {
-                if (keyCode == KeyEvent.KEYCODE_BACK)
-                {
-                    runnable.run();
+                    openKeyboardIfClosed();
                 }
-
-                return true;
             });
 
-            UIUtil.hideKeyboard(this);
+            materialDatePicker.addOnNegativeButtonClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v)
+                {
+                    chosenDate=null;
+                    chosenTime=null;
 
-            datePickerDialog.show();
+                    addCardTimePickerMaterialButton.setVisibility(View.GONE);
+                    addCardDeadlineLinearLayout.setVisibility(View.GONE);
+                    addCardDivider.setVisibility(View.GONE);
+                    addCardRemindMaterialButton.setVisibility(View.GONE);
+                    addCardRemindMaterialButton.setEnabled(false);
+
+                    openKeyboardIfClosed();
+                }
+            });
+
+            materialDatePicker.addOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog)
+                {
+                    openKeyboardIfClosed();
+                }
+            });
+            //materialDatePicker.getView().<Button>findViewById(com.google.android.material.R.id.confirm_button).setText("Test");
+            materialDatePicker.show(getSupportFragmentManager(), "null");
+
+
         });
 
         addCardTimePickerMaterialButton.setOnClickListener((view)->
         {
-            TimePickerDialog timePickerDialog=new TimePickerDialog(Main.this, (timePicker, hour, minute)->
+            MaterialTimePicker materialTimePicker=new MaterialTimePicker.Builder()
+                    .setTimeFormat(TimeFormat.CLOCK_24H)
+                    .setHour(chosenTime==null?Calendar.getInstance().get(Calendar.HOUR_OF_DAY):chosenTime.getHour())
+                    .setMinute(chosenTime==null?Calendar.getInstance().get(Calendar.MINUTE):chosenTime.getHour())
+                    .build();
+
+            materialTimePicker.addOnPositiveButtonClickListener(v ->
             {
-                chosenTime=new Time(hour, minute);
+                chosenTime=new Time(materialTimePicker.getHour(), materialTimePicker.getMinute());
 
                 addCardTimeTextView.setVisibility(View.VISIBLE);
                 addCardTimeTextView.setText(chosenTime.toString());
 
-                //UIUtil doesn't work in time picker so we use the direct methods
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(0,0);
-            }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true)
-            {
-                @Override
-                public void onBackPressed()
-                {
-                    this.dismiss();
-
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.toggleSoftInput(0,0);
-                }
-            };
-
-            timePickerDialog.setOnCancelListener((dialogInterface)->
-            {
-                timePickerDialog.dismiss();
-
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(0,0);
+                openKeyboardIfClosed();
             });
 
-            timePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getResources().getString(R.string.delete), (dialogInterface, which)->
+
+            materialTimePicker.addOnCancelListener(dialog ->
             {
+                openKeyboardIfClosed();
+            });
+
+            materialTimePicker.addOnNegativeButtonClickListener(dialog ->
+            {
+                addCardTimeTextView.setVisibility(View.GONE);
                 chosenTime=null;
 
-                addCardTimeTextView.setVisibility(View.GONE);
-
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(0,0);
+                openKeyboardIfClosed();
             });
 
-            UIUtil.hideKeyboard(Main.this);
 
-            timePickerDialog.show();
-
-            timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.ok));
+            materialTimePicker.show(getSupportFragmentManager(), null);
         });
 
         addCardColorMenuMaterialButton.setOnClickListener((view) ->
@@ -620,34 +611,56 @@ public class Main extends AppCompatActivity
     @Override
     public void onBackPressed()
     {
-        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleY", 1F).setDuration(500);
-        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleX", 1F).setDuration(500);
-        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(startFloatingActionButton, "alpha", 1F).setDuration(500);
-        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(startFloatingActionButton,"visibility", View.VISIBLE).setDuration(500);
+        int duration=400;
+        int interpolatorFactor=2;
+
+        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleY", 1F).setDuration(duration);
+        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleX", 1F).setDuration(duration);
+        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(startFloatingActionButton, "alpha", 1F).setDuration(duration);
+        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(startFloatingActionButton,"visibility", View.VISIBLE).setDuration(duration);
 
         AnimatorSet floatingActionButtonAnimatorSet=new AnimatorSet();
         floatingActionButtonAnimatorSet.play(floatingActionButtonScaleX).with(floatingActionButtonScaleY).with(floatingActionButtonAlpha).with(floatingActionButtonVisibility);
-        floatingActionButtonAnimatorSet.setStartDelay(100);
+        floatingActionButtonAnimatorSet.setStartDelay((long) (duration/1.2));
+        floatingActionButtonAnimatorSet.setInterpolator(new DecelerateInterpolator(interpolatorFactor));
 
         ObjectAnimator addCardVisibility=ObjectAnimator.ofInt(addCardMaterialCardView,"visibility", View.GONE).setDuration(10);
-        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleY", 1F, 0.2F).setDuration(500);
-        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleX", 1F, 0.2F).setDuration(500);
-        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(addCardMaterialCardView, "alpha", 1F, 0F).setDuration(500);
-        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(addCardMaterialCardView, "radius", 4, 100).setDuration(500);
+        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleY", 1F, 0.2F).setDuration(duration);
+        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleX", 1F, 0.2F).setDuration(duration);
+        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(addCardMaterialCardView, "alpha", 1F, 0F).setDuration(duration);
+        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(addCardMaterialCardView, "radius", 4, 100).setDuration(duration);
 
         AnimatorSet addCardAnimatorSet=new AnimatorSet();
         addCardAnimatorSet.play(addCardScaleY).with(addCardScaleX).with(addCardAlpha).with(addCardRadius).before(addCardVisibility);
+        addCardAnimatorSet.setInterpolator(new AccelerateInterpolator(interpolatorFactor));
 
-        addCardAnimatorSet.start();
-        floatingActionButtonAnimatorSet.start();
+
+        addCardAnimatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation)
+            {
+                addCardContentEditText.setEnabled(false);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation){}
+
+            @Override
+            public void onAnimationCancel(Animator animation){}
+
+            @Override
+            public void onAnimationRepeat(Animator animation){}
+        });
 
         floatingActionButtonAnimatorSet.addListener(new Animator.AnimatorListener() {
             @Override
-            public void onAnimationStart(Animator animation){}
+            public void onAnimationStart(Animator animation) {}
 
             @Override
             public void onAnimationEnd(Animator animation)
             {
+                addCardContentEditText.setEnabled(true);
+
                 bottomAppBar.performShow();
                 bottomAppBar.setVisibility(View.VISIBLE);
             }
@@ -658,6 +671,9 @@ public class Main extends AppCompatActivity
             @Override
             public void onAnimationRepeat(Animator animation){}
         });
+
+        addCardAnimatorSet.start();
+        floatingActionButtonAnimatorSet.start();
     }
 
     private void setupLayout()
@@ -753,35 +769,42 @@ public class Main extends AppCompatActivity
 
     public void start(View view)
     {
-        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleY", 1.5F).setDuration(500);
-        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleX", 5F).setDuration(500);
-        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(startFloatingActionButton, "alpha", 0F).setDuration(500);
-        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(startFloatingActionButton,"visibility", View.GONE).setDuration(500);
+        int duration=400;
+        int interpolatorFactor=2;
+
+        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleY", 1.5F).setDuration(duration);
+        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleX", 5F).setDuration(duration);
+        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(startFloatingActionButton, "alpha", 0F).setDuration(duration);
+        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(startFloatingActionButton,"visibility", View.GONE).setDuration(duration);
 
         AnimatorSet floatingActionButtonAnimatorSet=new AnimatorSet();
         floatingActionButtonAnimatorSet.play(floatingActionButtonScaleX).with(floatingActionButtonScaleY).with(floatingActionButtonAlpha).with(floatingActionButtonVisibility);
-
+        floatingActionButtonAnimatorSet.setInterpolator(new AccelerateInterpolator(interpolatorFactor));
 
         ObjectAnimator addCardVisibility=ObjectAnimator.ofInt(addCardMaterialCardView,"visibility", View.VISIBLE).setDuration(10);
-        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleY", 0.2F, 1F).setDuration(500);
-        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleX", 0.2F, 1F).setDuration(500);
-        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(addCardMaterialCardView, "alpha", 0F, 1F).setDuration(500);
-        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(addCardMaterialCardView, "radius", 100, 4).setDuration(500);
+        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleY", 0.2F, 1F).setDuration(duration);
+        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleX", 0.2F, 1F).setDuration(duration);
+        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(addCardMaterialCardView, "alpha", 0F, 1F).setDuration(duration);
+        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(addCardMaterialCardView, "radius", 100, 4).setDuration(duration);
 
         AnimatorSet addCardAnimatorSet=new AnimatorSet();
         addCardAnimatorSet.play(addCardVisibility).with(addCardScaleY).with(addCardScaleX).with(addCardAlpha).with(addCardRadius);
-        addCardAnimatorSet.setStartDelay(100);
-
-        floatingActionButtonAnimatorSet.start();
-        addCardAnimatorSet.start();
+        addCardAnimatorSet.setStartDelay((long) (duration/1.2));
+        addCardAnimatorSet.setInterpolator(new DecelerateInterpolator(interpolatorFactor));
 
 
-        floatingActionButtonAnimatorSet.addListener(new Animator.AnimatorListener() {
+        addCardAnimatorSet.addListener(new Animator.AnimatorListener() {
             @Override
-            public void onAnimationStart(Animator animation) {}
+            public void onAnimationStart(Animator animation)
+            {
+                addCardContentEditText.setEnabled(false);
+            }
 
             @Override
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationEnd(Animator animation)
+            {
+                addCardContentEditText.setEnabled(true);
+
                 bottomAppBar.performHide();
                 bottomAppBar.setVisibility(View.GONE);
 
@@ -796,17 +819,13 @@ public class Main extends AppCompatActivity
             @Override
             public void onAnimationRepeat(Animator animation) {}
         });
+
+        floatingActionButtonAnimatorSet.start();
+        addCardAnimatorSet.start();
     }
 
     public void addCard(View view)
     {
-
-        int[] location = new int[2];
-        addCardMaterialCardView.getLocationOnScreen(location);
-        int x = location[0];
-        int y = location[1];
-
-        System.out.println(y);
         Entry entry;
 
         if(chosenColor!=-1)
@@ -876,13 +895,15 @@ public class Main extends AppCompatActivity
 
         chosenDate=null;
         chosenTime=null;
+
+        entryRecyclerView.scrollToPosition(SaveHelper.getEntriesSize()-1);
     }
 
     private boolean isInPast(Entry entry)
     {
         Calendar calendar=Calendar.getInstance();
 
-        Date currentDate=new Date(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR));
+        Date currentDate=new Date(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
         Time currentTime=new Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
 
         Time allDayEventTime=getAlldayTime();
@@ -912,6 +933,32 @@ public class Main extends AppCompatActivity
         else
         {
             itemTouchHelper.attachToRecyclerView(null);
+        }
+    }
+
+    private Date fromMilisInDate(long milis)
+    {
+        java.util.Date jDate=new java.util.Date(milis);
+        Calendar calendar=Calendar.getInstance();
+        calendar.setTime(jDate);
+
+        return new Date(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
+    }
+
+    private long fromDateInMilis(Date date)
+    {
+        Calendar calendar=Calendar.getInstance();
+        calendar.set(date.getYear(), date.getMonth()-1, date.getDay());
+
+        return calendar.getTimeInMillis();
+    }
+
+    private void openKeyboardIfClosed()
+    {
+        if(!keyboardOpen)
+        {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(0,0);
         }
     }
 }

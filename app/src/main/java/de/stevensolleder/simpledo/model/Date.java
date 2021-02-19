@@ -9,7 +9,7 @@ public class Date implements Comparable<Date>
     public Date(int day, int month, int year)
     {
         this.day=day;
-        this.month=month+1;
+        this.month=month;
         this.year=year;
     }
 

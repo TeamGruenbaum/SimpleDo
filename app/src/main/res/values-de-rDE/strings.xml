@@ -47,4 +47,6 @@
     </string>
     <string name="battery_optimization">Batterieoptimierung</string>
     <string name="battery_optimization_description">Wähle „Alle Apps\", suche „SimpleDo\" und deaktiviere „Akkuverbrauch optimieren\", um sicherzustellen, dass die Benachrichtigungen der App ordnungsgemäß funktionieren.</string>
+    <string name="mtrl_picker_cancel">Löschen</string>
+    <string name="mtrl_picker_confirm">Übernehmen</string>
 </resources>

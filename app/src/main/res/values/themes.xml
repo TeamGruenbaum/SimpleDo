@@ -3,7 +3,7 @@
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="colorPrimaryDark">@color/primaryColor</item>
         <item name="colorAccent">@color/secondaryColor</item>
     </style>
 
@@ -39,6 +39,18 @@
 
     <style name="MyPopupMenu" parent="@style/Widget.AppCompat.PopupMenu">
         <item name="android:dropDownVerticalOffset">-70dp</item>
+    </style>
+
+    <style name="MaterialCalendarTheme" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="colorPrimary">@color/secondaryColor</item>
+        <item name="colorPrimaryDark">@color/secondaryColor</item>
+        <item name="colorAccent">@color/secondaryColor</item>
+    </style>
+
+    <style name="TimePicker" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <item name="colorPrimary">@color/secondaryColor</item>
+        <item name="colorPrimaryDark">@color/secondaryColor</item>
+        <item name="colorAccent">@color/secondaryColor</item>
     </style>
 
 </resources>
