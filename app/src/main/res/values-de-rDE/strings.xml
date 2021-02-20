@@ -49,4 +49,5 @@
     <string name="licences_summary">Die Lizenzen der Bibliotheken, die im Code der App verwendet werden.</string>
     <string name="mtrl_picker_cancel">Löschen</string>
     <string name="mtrl_picker_confirm">Übernehmen</string>
+    <string name="past_notification">Die Benachrichtigung liegt in der Vergangenheit.</string>
 </resources>
