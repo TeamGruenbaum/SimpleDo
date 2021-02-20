@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -346,6 +347,9 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                     });
 
                     materialTimePicker.show(mainActivity.getSupportFragmentManager(), "null");
+                    materialTimePicker.getFragmentManager().executePendingTransactions();
+                    materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_ok_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
+                    materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_cancel_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
 
                     return true;
                 });

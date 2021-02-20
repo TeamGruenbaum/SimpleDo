@@ -362,8 +362,10 @@ public class Main extends AppCompatActivity
                 openKeyboardIfClosed();
             });
 
-
             materialTimePicker.show(getSupportFragmentManager(), null);
+            materialTimePicker.getFragmentManager().executePendingTransactions();
+            materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_ok_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
+            materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_cancel_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
         });
 
         addCardColorMenuMaterialButton.setOnClickListener((view) ->
