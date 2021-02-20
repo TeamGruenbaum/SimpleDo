@@ -476,135 +476,6 @@ public class Main extends AppCompatActivity
         {
             Intent intent=new Intent(this, SettingsActivity.class);
             startActivity(intent);
-
-            /*PopupMenu popupMenu=new PopupMenu(getApplicationContext(), view, Gravity.END, 0, R.style.MyPopupMenu);
-
-            MenuCompat.setGroupDividerEnabled(popupMenu.getMenu(), true);
-
-            popupMenu.getMenuInflater().inflate(R.menu.settings_menu,popupMenu.getMenu());
-
-            popupMenu.getMenu().getItem(0).setOnMenuItemClickListener((menuItem)->
-            {
-                TimePickerDialog timePickerDialog=new TimePickerDialog(Main.this, (timePicker, hour, minute)->
-                {
-                    setAlldayTime(new Time(hour, minute));
-
-                    for(int i=0; i<getEntriesSize(); i++)
-                    {
-                        if(getEntry(i).getTime()!=null)
-                        {
-                            planAndSendNotification(getEntry(i));
-                        }
-                    }
-                }, getAlldayTime().getHour(), getAlldayTime().getMinute(), true)
-                {
-                    @Override
-                    public void onBackPressed()
-                    {
-                        this.dismiss();
-                    }
-                };
-
-                timePickerDialog.setOnCancelListener((dialogInterface)->
-                {
-                    timePickerDialog.dismiss();
-                });
-
-                timePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.cancel), (dialogInterface, which)->
-                {
-                    timePickerDialog.dismiss();
-                });
-
-                UIUtil.hideKeyboard(Main.this);
-
-                timePickerDialog.show();
-
-                timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.ok));
-                timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.cancel));
-
-                return false;
-            });
-
-            popupMenu.getMenu().getItem(1).setOnMenuItemClickListener((menuItem)->
-            {
-                AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
-                alertDialogBuilder.setMessage(R.string.battery_optimization_description);
-                alertDialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, which)->
-                {
-                    Main.this.startActivity(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS));
-                });
-
-                alertDialogBuilder.show();
-
-                return true;
-            });
-
-            popupMenu.getMenu().getItem(2).setOnMenuItemClickListener((menuItem)->
-            {
-                Dialog dialog=new Dialog(Main.this);
-                dialog.setContentView(R.layout.about_activity);
-
-                ((MaterialButton) dialog.findViewById(R.id.steven_solleder)).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view)
-                    {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://stevensolleder.de"));
-                        startActivity(intent);
-                    }
-                });
-
-                ((MaterialButton) dialog.findViewById(R.id.isabellwaas)).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/isabellwaas"));
-                        startActivity(intent);
-                    }
-                });
-
-                dialog.show();
-
-                return true;
-            });
-
-            popupMenu.getMenu().getItem(3).setOnMenuItemClickListener((menuItem)->
-            {
-                AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
-                alertDialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, which)->{});
-                alertDialogBuilder.show();
-
-                return true;
-            });
-
-            popupMenu.getMenu().getItem(4).setOnMenuItemClickListener((menuItem)->
-            {
-                WebView webView=new WebView(Main.this);
-                webView.setVerticalScrollBarEnabled(false);
-                webView.setHorizontalScrollBarEnabled(false);
-                webView.loadUrl("file:///android_asset/licenses.html");
-
-                RelativeLayout relativeLayout=new RelativeLayout(Main.this);
-                relativeLayout.setGravity(RelativeLayout.CENTER_VERTICAL|RelativeLayout.CENTER_VERTICAL);
-                relativeLayout.addView(webView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-                AlertDialog.Builder alertDialogBuilder=new AlertDialog.Builder(Main.this);
-                alertDialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, which)->{});
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.setView(relativeLayout);
-
-                webView.setWebViewClient(new WebViewClient()
-                {
-                    @Override
-                    public void onPageFinished (WebView view, String url)
-                    {
-                        super.onPageFinished(view, url);
-                        alertDialog.show();
-                    }
-                });
-
-                return true;
-            });
-
-            popupMenu.show();*/
         });
 
         setupLayout();
@@ -944,7 +815,7 @@ public class Main extends AppCompatActivity
         }
     }
 
-    private Date fromMilisInDate(long milis)
+    public static Date fromMilisInDate(long milis)
     {
         java.util.Date jDate=new java.util.Date(milis);
         Calendar calendar=Calendar.getInstance();
@@ -953,7 +824,7 @@ public class Main extends AppCompatActivity
         return new Date(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
     }
 
-    private long fromDateInMilis(Date date)
+    public static long fromDateInMilis(Date date)
     {
         Calendar calendar=Calendar.getInstance();
         calendar.set(date.getYear(), date.getMonth()-1, date.getDay());

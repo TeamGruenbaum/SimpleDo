@@ -22,6 +22,10 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -256,17 +260,20 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                     contentEditText.clearFocus();
                     UIUtil.hideKeyboard(mainActivity);
 
-                    DatePickerDialog datePickerDialog=new DatePickerDialog(mainActivity);
+                    Date date=SaveHelper.getEntry(getPosition()).getDate();
 
-                    datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, SimpleDo.getAppContext().getResources().getString(R.string.apply), new DialogInterface.OnClickListener()
-                    {
+                    MaterialDatePicker<Long> materialDatePicker=MaterialDatePicker.Builder
+                            .datePicker()
+                            .setTheme(R.style.MaterialCalendarTheme)
+                            .setSelection(date==null?Calendar.getInstance().getTimeInMillis():Main.fromDateInMilis(date))
+                            .build();
+
+                    materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
                         @Override
-                        public void onClick(DialogInterface dialogInterface, int i)
+                        public void onPositiveButtonClick(Long selection)
                         {
-                            DatePicker datePicker=datePickerDialog.getDatePicker();
-
                             Entry entry = SaveHelper.getEntry(getPosition());
-                            entry.setDate(new Date(datePicker.getDayOfMonth(), datePicker.getMonth()+1, datePicker.getYear()));
+                            entry.setDate(Main.fromMilisInDate(selection));
                             changeEntry(entry, getPosition());
 
                             if (entry.isNotifying())
@@ -276,13 +283,9 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     });
 
-                    datePickerDialog.setOnCancelListener((dialogInterface)->{});
-
-                    datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.delete), new DialogInterface.OnClickListener()
-                    {
+                    materialDatePicker.addOnNegativeButtonClickListener(new View.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialogInterface, int i)
-                        {
+                        public void onClick(View v) {
                             Entry temp=SaveHelper.getEntry(getPosition());
                             temp.setDate(null);
                             temp.setTime(null);
@@ -295,9 +298,7 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                         }
                     });
 
-                    datePickerDialog.show();
-
-                    datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.ok));
+                    materialDatePicker.show(mainActivity.getSupportFragmentManager(), "null");
 
                     return true;
                 });
@@ -307,53 +308,44 @@ public class EntryRecyclerViewAdapter extends RecyclerView.Adapter<EntryRecycler
                     contentEditText.clearFocus();
                     UIUtil.hideKeyboard(mainActivity);
 
-                    TimePickerDialog timePickerDialog=new TimePickerDialog(mainActivity, new TimePickerDialog.OnTimeSetListener()
-                    {
-                        @Override
-                        public void onTimeSet(TimePicker timePicker, int hour, int minute)
-                        {
-                            Entry temp=SaveHelper.getEntry(getPosition());
-                            temp.setTime(new Time(hour, minute));
-                            changeEntry(temp, getPosition());
+                    Time time=SaveHelper.getEntry(getPosition()).getTime();
 
-                            timePicker.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+                    MaterialTimePicker materialTimePicker=new MaterialTimePicker.Builder()
+                            .setTimeFormat(TimeFormat.CLOCK_24H)
+                            .setHour(time==null?Calendar.getInstance().get(Calendar.HOUR_OF_DAY):time.getHour())
+                            .setMinute(time==null?Calendar.getInstance().get(Calendar.MINUTE):time.getHour())
+                            .build();
+
+                    materialTimePicker.addOnPositiveButtonClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Entry temp=SaveHelper.getEntry(getPosition());
+                            temp.setTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
+                            changeEntry(temp, getPosition());
 
                             if(temp.isNotifying())
                             {
                                 NotificationHelper.planAndSendNotification(temp);
                             }
                         }
-                    }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true)
-                    {
+                    });
+
+                    materialTimePicker.addOnNegativeButtonClickListener(new View.OnClickListener() {
                         @Override
-                        public void onBackPressed()
-                        {
-                            this.dismiss();
-                        }
-                    };
+                        public void onClick(View v) {
+                            Entry temp=SaveHelper.getEntry(getPosition());
 
-                    timePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.delete), (dialogInterface, which)->
-                    {
-                        Entry temp=SaveHelper.getEntry(getPosition());
+                            temp.setTime(null);
+                            changeEntry(temp, getPosition());
 
-                        temp.setTime(null);
-                        changeEntry(temp, getPosition());
-
-                        if(temp.isNotifying())
-                        {
-                            NotificationHelper.planAndSendNotification(temp);
+                            if(temp.isNotifying())
+                            {
+                                NotificationHelper.planAndSendNotification(temp);
+                            }
                         }
                     });
 
-                    timePickerDialog.setOnCancelListener((dialogInterface)->
-                    {
-                        timePickerDialog.dismiss();
-                    });
-
-
-                    timePickerDialog.show();
-
-                    timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.ok));
+                    materialTimePicker.show(mainActivity.getSupportFragmentManager(), "null");
 
                     return true;
                 });
