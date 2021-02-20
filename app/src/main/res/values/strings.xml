@@ -51,4 +51,5 @@
     <string name="licences_summary">The licences of the libraries used in the code of the App.</string>
     <string override="true" name="mtrl_picker_cancel">Delete</string>
     <string override="true" name="mtrl_picker_confirm">Apply</string>
+    <string name="past_notification">The notification lies in the past.</string>
 </resources>

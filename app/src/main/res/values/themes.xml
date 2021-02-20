@@ -7,6 +7,7 @@
         <item name="colorAccent">@color/secondaryColor</item>
 
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+        <item name="materialTimePickerTheme">@style/TimePicker</item>
     </style>
 
     <style name="cardButtonBase" parent="@style/Widget.MaterialComponents.Button.TextButton">

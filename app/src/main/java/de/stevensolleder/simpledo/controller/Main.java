@@ -25,6 +25,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -332,6 +333,10 @@ public class Main extends AppCompatActivity
                     .setHour(chosenTime==null?Calendar.getInstance().get(Calendar.HOUR_OF_DAY):chosenTime.getHour())
                     .setMinute(chosenTime==null?Calendar.getInstance().get(Calendar.MINUTE):chosenTime.getHour())
                     .build();
+
+            /*geht nicht:
+            Button b=materialTimePicker.getView().findViewById(R.id.material_timepicker_ok_button);
+            b.setText("Steven");*/
 
             materialTimePicker.addOnPositiveButtonClickListener(v ->
             {
@@ -743,7 +748,7 @@ public class Main extends AppCompatActivity
         {
             if(isInPast(entry))
             {
-                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),"Notification liegt in der Vergangenheit", BaseTransientBottomBar.LENGTH_SHORT);
+                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),this.getResources().getString(R.string.past_notification), BaseTransientBottomBar.LENGTH_SHORT);
                 snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
                 snackbar.setAnchorView(R.id.addCard);
                 snackbar.show();
