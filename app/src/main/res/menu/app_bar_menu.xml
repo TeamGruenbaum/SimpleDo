@@ -4,11 +4,13 @@
     <item
         android:icon="@drawable/ic_arrow_downward"
         android:tooltipText="@string/change_sort_direction"
+        android:onClick="changeSortDirection"
         app:showAsAction="always"/>
 
     <item
         android:icon="@drawable/ic_sort"
         android:tooltipText="@string/change_sort_criterion"
+        android:onClick="changeSortCriterion"
         app:showAsAction="always"/>
 
 </menu>

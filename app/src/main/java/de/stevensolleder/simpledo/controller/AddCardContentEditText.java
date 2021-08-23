@@ -3,11 +3,11 @@ package de.stevensolleder.simpledo.controller;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
-import android.widget.EditText;
+import androidx.appcompat.widget.AppCompatEditText;
 
 import java.util.function.BiConsumer;
 
-public class AddCardContentEditText extends EditText
+public class AddCardContentEditText extends AppCompatEditText
 {
     private BiConsumer<Integer, KeyEvent> action;
 

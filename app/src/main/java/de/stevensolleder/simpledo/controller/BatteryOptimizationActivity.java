@@ -2,7 +2,6 @@ package de.stevensolleder.simpledo.controller;
 
 import android.os.Bundle;
 import android.text.Html;
-import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -23,19 +22,17 @@ public class BatteryOptimizationActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.battery_optimization_activity);
 
-        TextView batteryOptimizationTextView=(TextView) findViewById(R.id.batteryOptimizationTextView);
+        TextView batteryOptimizationTextView=findViewById(R.id.batteryOptimizationTextView);
         batteryOptimizationTextView.setText(Html.fromHtml(SimpleDo.getAppContext().getResources().getString(R.string.battery_optimization_description)));
 
-
-        MaterialButton autostartManagerButton=(MaterialButton) findViewById(R.id.autostartManagerButton);
-        TextView autostartManagerTextView=(TextView) findViewById(R.id.autostartManagerTextView);
+        MaterialButton autostartManagerButton=findViewById(R.id.autostartManagerButton);
 
         autostartManagerButton.setOnClickListener(view ->
         {
             if(AutoStartPermissionHelper.getInstance().getAutoStartPermission(BatteryOptimizationActivity.this)==false)
             {
                 (new AlertDialog.Builder(BatteryOptimizationActivity.this)).setMessage(R.string.battery_optimization_hint).show();
-            };
+            }
         });
 
     }

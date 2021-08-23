@@ -1,13 +1,18 @@
 package de.stevensolleder.simpledo.model;
 
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
 import java.util.Calendar;
 
 import static de.stevensolleder.simpledo.model.SaveHelper.*;
+
+import de.stevensolleder.simpledo.R;
 
 public class NotificationHelper
 {
@@ -40,5 +45,17 @@ public class NotificationHelper
 
         AlarmManager alarmManager = (AlarmManager) SimpleDo.getAppContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
+    }
+
+    public static void createNotificationChannel()
+    {
+        if(Build.VERSION.SDK_INT >= 26)
+        {
+            NotificationChannel notificationChannel=new NotificationChannel("main", "Erinnerungen", NotificationManager.IMPORTANCE_HIGH);
+            notificationChannel.setDescription(SimpleDo.getAppContext().getResources().getString(R.string.reminders_description));
+
+            NotificationManager notificationManager = SimpleDo.getAppContext().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
     }
 }

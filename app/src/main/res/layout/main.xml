@@ -87,12 +87,14 @@
                     android:id="@+id/dateButton"
                     style="@style/cardButton"
                     android:tooltipText="@string/set_date"
+                    android:onClick="selectDate"
                     android:visibility="visible"
                     app:icon="@drawable/ic_calendar"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/timeButton"
                     style="@style/cardButton"
+                    android:onClick="selectTime"
                     android:visibility="gone"
                     android:tooltipText="@string/set_time"
                     app:icon="@drawable/ic_alarm"/>
@@ -101,6 +103,7 @@
                     android:id="@+id/colorButton"
                     style="@style/cardButton"
                     android:tooltipText="@string/set_color"
+                    android:onClick="selectColor"
                     android:visibility="visible"
                     app:icon="@drawable/ic_brush"/>
 
@@ -116,6 +119,7 @@
                     android:id="@+id/remindButton"
                     style="@style/cardButton"
                     android:visibility="gone"
+                    android:onClick="toggleNotification"
                     android:tooltipText="@string/set_notification"
                     android:enabled="false"
                     app:icon="@drawable/ic_notifications_off"/>

@@ -1,39 +1,23 @@
 package de.stevensolleder.simpledo.controller;
 
-import android.app.AlertDialog;
-import android.app.TimePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Html;
-import android.view.View;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
-import com.judemanutd.autostarter.AutoStartPermissionHelper;
-
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
-
-import java.util.Calendar;
 
 import de.stevensolleder.simpledo.R;
 import de.stevensolleder.simpledo.model.SaveHelper;
 import de.stevensolleder.simpledo.model.SimpleDo;
 import de.stevensolleder.simpledo.model.Time;
 
-import static de.stevensolleder.simpledo.controller.Main.openKeyboardIfClosed;
-import static de.stevensolleder.simpledo.model.NotificationHelper.planAndSendNotification;
 import static de.stevensolleder.simpledo.model.SaveHelper.getAlldayTime;
-import static de.stevensolleder.simpledo.model.SaveHelper.getEntriesSize;
-import static de.stevensolleder.simpledo.model.SaveHelper.getEntry;
-import static de.stevensolleder.simpledo.model.SaveHelper.setAlldayTime;
 
-public class SettingsFragment extends PreferenceFragmentCompat implements PreferenceManager.OnPreferenceTreeClickListener
+public class SettingsFragment extends PreferenceFragmentCompat
 {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey)
