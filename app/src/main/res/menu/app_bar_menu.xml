@@ -3,12 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:icon="@drawable/ic_arrow_downward"
+        android:onClick="changeSortDirection"
         android:tooltipText="@string/change_sort_direction"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"
+        android:title="" />
 
     <item
         android:icon="@drawable/ic_sort"
+        android:onClick="changeSortCriterion"
         android:tooltipText="@string/change_sort_criterion"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"
+        android:title="" />
 
 </menu>

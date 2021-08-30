@@ -41,7 +41,7 @@
                 style="@style/cardContentText"
                 android:layout_width="match_parent"
                 android:maxLength="500"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1" />
 
             <LinearLayout
@@ -58,7 +58,7 @@
 
                 <TextView
                     style="@style/deadlineText"
-                    android:text=" " />
+                    android:text="" />
 
                 <TextView
                     android:id="@+id/addCardTime"
@@ -79,13 +79,14 @@
                 android:id="@+id/deadline"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
-                android:gravity="right"
+                android:gravity="end"
                 android:orientation="horizontal"
                 android:padding="0dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/dateButton"
                     style="@style/cardButton"
+                    android:onClick="selectDate"
                     android:tooltipText="@string/set_date"
                     android:visibility="visible"
                     app:icon="@drawable/ic_calendar"/>
@@ -93,6 +94,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/timeButton"
                     style="@style/cardButton"
+                    android:onClick="selectTime"
                     android:visibility="gone"
                     android:tooltipText="@string/set_time"
                     app:icon="@drawable/ic_alarm"/>
@@ -100,8 +102,9 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/colorButton"
                     style="@style/cardButton"
-                    android:tooltipText="@string/set_color"
+                    android:onClick="selectColor"
                     android:visibility="visible"
+                    android:tooltipText="@string/set_color"
                     app:icon="@drawable/ic_brush"/>
 
                 <View
@@ -115,6 +118,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/remindButton"
                     style="@style/cardButton"
+                    android:onClick="toggleReminding"
                     android:visibility="gone"
                     android:tooltipText="@string/set_notification"
                     android:enabled="false"
@@ -129,11 +133,11 @@
 
                 <com.google.android.material.button.MaterialButton
                     style="@style/cardButton"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginEnd="10dp"
                     android:onClick="addCard"
                     android:tooltipText="@string/add_entry"
                     android:visibility="visible"
-                    app:icon="@drawable/ic_add"/>
+                    app:icon="@drawable/ic_send"/>
 
             </LinearLayout>
 

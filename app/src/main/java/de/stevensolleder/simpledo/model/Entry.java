@@ -2,107 +2,87 @@ package de.stevensolleder.simpledo.model;
 
 import android.graphics.Color;
 
-import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
-public class Entry implements Serializable
+
+public class Entry
 {
+    private final int id;
     private String content;
     private Date date=null;
     private Time time=null;
     private int color=Color.WHITE;
     private boolean notifying;
-    private final int ID;
 
-    //Constructors for adding all kinds of cards to the RecyclerView
-    public Entry(String content, boolean notifying)
+    public Entry()
     {
-        this.content=content;
-        this.notifying=notifying;
-        this.ID=IdentificationHelper.createUniqueID();
+        this.id=new SimpleDateFormat("ddHHmmssSS",  Locale.US).format(new java.util.Date()).hashCode();
     }
 
-    public Entry(String content, Date date, boolean notifying)
-    {
-        this(content, notifying);
-        this.date=date;
+    public int getId() {
+        return id;
     }
 
-    public Entry(String content, Date date,  Time time, boolean notifying)
-    {
-        this(content, date, notifying);
-        this.time=time;
-    }
-
-    public Entry(String content, int color, boolean notifying)
-    {
-        this(content, notifying);
-        this.color=color;
-    }
-
-    public Entry(String content, Date date,  int color, boolean notifying)
-    {
-        this(content, date, notifying);
-        this.color=color;
-    }
-
-    public Entry(String content, Date date, Time time, int color, boolean notifying)
-    {
-        this(content, date, color, notifying);
-        this.time=time;
-    }
-
-
-    public String getContent()
-    {
+    public String getContent() {
         return content;
     }
 
-    public void setContent(String newValue)
-    {
-        content = newValue;
+    public void setContent(String content) {
+        this.content = content;
     }
 
-    public Date getDate()
-    {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(Date newValue)
-    {
-        date = newValue;
+    public void setDate(Date date) {
+        this.date = date;
     }
 
-    public Time getTime()
-    {
+    public Time getTime() {
         return time;
     }
 
-    public void setTime(Time newValue)
-    {
-        time = newValue;
+    public void setTime(Time time) {
+        this.time = time;
     }
 
-    public int getColor()
-    {
+    public int getColor() {
         return color;
     }
 
-    public void setColor(int newValue)
-    {
-        color = newValue;
+    public void setColor(int color) {
+        this.color = color;
     }
 
     public boolean isNotifying() {
         return notifying;
     }
 
-    public void setNotifying(boolean newValue)
-    {
-        this.notifying = newValue;
+    public void setNotifying(boolean notifying) {
+        this.notifying = notifying;
     }
 
-    public int getID()
+    public boolean isInPast(Time alldayTime)
     {
-        return ID;
+        Calendar calendar=Calendar.getInstance();
+        Date currentDate=new Date(Calendar.DAY_OF_MONTH, calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
+        Time currentTime=new Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+
+        if (this.date!=null && this.date.compareTo(currentDate)==0)
+        {
+            if(this.time!=null)
+            {
+                return (this.time.compareTo(currentTime))<0;
+            }
+            else
+            {
+                return alldayTime.compareTo(currentTime)<0;
+            }
+        }
+
+        return (this.date.compareTo(currentDate))<0;
     }
 }

@@ -3,158 +3,83 @@ package de.stevensolleder.simpledo.controller;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.text.Html;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.PopupMenu;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.view.MenuCompat;
+
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomappbar.BottomAppBar;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
-
 import de.stevensolleder.simpledo.*;
+import de.stevensolleder.simpledo.databinding.MainActivityBinding;
 import de.stevensolleder.simpledo.model.*;
 
-import static de.stevensolleder.simpledo.model.ColorHelper.*;
-import static de.stevensolleder.simpledo.model.NotificationHelper.*;
-import static de.stevensolleder.simpledo.model.SaveHelper.*;
+
 
 public class Main extends AppCompatActivity
 {
-    private RecyclerView entryRecyclerView;
-    private EntryRecyclerViewAdapter entryRecyclerViewAdapter;
+    private MainActivityBinding mainBinding;
+    private DataAccessor dataAccessor;
 
-    private MaterialCardView addCardMaterialCardView;
-    private EditText addCardContentEditText;
-    private MaterialButton addCardDatePickerMaterialButton;
-    private MaterialButton addCardTimePickerMaterialButton;
-    private MaterialButton addCardColorMenuMaterialButton; //edgar by alex
-    private MaterialButton addCardRemindMaterialButton;
-    private View addCardDivider;
-    private LinearLayout addCardDeadlineLinearLayout;
-    private TextView addCardDateTextView;
-    private TextView addCardTimeTextView;
-
-    private FloatingActionButton startFloatingActionButton;
-
-    private MenuItem changeDirectionMaterialButton;
-    private MenuItem changeCriterionMaterialButton;
-
-    private BottomAppBar bottomAppBar;
-
+    private EntryAdapter entryAdapter;
     private ItemTouchHelper itemTouchHelper;
+    private NotificationHelper<Entry> notificationHelper;
+    private KeyboardHelper keyboardHelper;
 
     private Date chosenDate=null;
     private Time chosenTime=null;
     private int chosenColor=-1;
-
     private boolean reminding=false;
-
-    private boolean keyboardOpen;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        //Initialize main.xml
+        //Initialize main_activity.xml
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-
-        //Initialize keyboard listener
-        KeyboardVisibilityEvent.setEventListener(
-                Main.this,
-                new KeyboardVisibilityEventListener() {
-                    @Override
-                    public void onVisibilityChanged(boolean isOpen) {
-                        keyboardOpen=isOpen;
-                    }
-                });
-
-        //Initialize all attributes from main.xml
-        entryRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-        entryRecyclerViewAdapter=new EntryRecyclerViewAdapter(this);
-
-        bottomAppBar=findViewById(R.id.bottomAppBar);
-        changeDirectionMaterialButton=bottomAppBar.getMenu().getItem(0);
-        changeCriterionMaterialButton=bottomAppBar.getMenu().getItem(1);
-
-        addCardMaterialCardView=findViewById(R.id.addCard);
-        addCardContentEditText=findViewById(R.id.contentEditText);
-        addCardDatePickerMaterialButton=findViewById(R.id.dateButton);
-        addCardTimePickerMaterialButton=findViewById(R.id.timeButton);
-        addCardColorMenuMaterialButton=findViewById(R.id.colorButton);
-        addCardDivider=findViewById(R.id.divider1);
-        addCardDeadlineLinearLayout=findViewById(R.id.addCardDeadline);
-
-        addCardDateTextView=findViewById(R.id.addCardDate);
-        addCardTimeTextView=findViewById(R.id.addCardTime);
-
-        startFloatingActionButton=findViewById(R.id.start);
-
-        addCardRemindMaterialButton=findViewById(R.id.remindButton);
+        mainBinding=MainActivityBinding.inflate(getLayoutInflater());
+        setContentView(mainBinding.getRoot());
+        dataAccessor=new CustomDataAccessor(SimpleDo.getAppContext().getSharedPreferences("settings", Context.MODE_PRIVATE));
 
         //Set attributes from entryRecyclerView and set Adapter
-        entryRecyclerView.setHasFixedSize(true);
-        entryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        entryRecyclerView.setVerticalScrollBarEnabled(false);
-        entryRecyclerView.setAdapter(entryRecyclerViewAdapter);
+        entryAdapter=new EntryAdapter(this, dataAccessor);
+        mainBinding.myRecyclerView.setHasFixedSize(true);
+        mainBinding.myRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mainBinding.myRecyclerView.setVerticalScrollBarEnabled(false);
+        mainBinding.myRecyclerView.setAdapter(entryAdapter);
 
         //Create and set Animator
         EntryListAnimator entryListAnimator=new EntryListAnimator();
-        entryRecyclerView.setItemAnimator(entryListAnimator);
+        mainBinding.myRecyclerView.setItemAnimator(entryListAnimator);
 
-        //Create notifcationchannel for reminders
-        createNotificationChannel();
+        //Create notificationChannel for reminders
+        notificationHelper=new CustomNotificationHelper();
+        notificationHelper.createNotificationChannel();
 
+        keyboardHelper=new KeyboardHelper(this);
 
         //Setting swipe gestures
         itemTouchHelper=new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT)
@@ -163,16 +88,33 @@ public class Main extends AppCompatActivity
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)
             {
-                //Sometimes getContextMenu() returns null. To avoid a crash we use try-catch.
                 try
                 {
-                    ((EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder)viewHolder).getContextMenu().close();
+                    ((EntryViewHolder)viewHolder).getContextMenu().close();
                 }
-                catch(Exception e){}
+                catch(Exception exception){ exception.printStackTrace(); }
 
-                entryRecyclerViewAdapter.moveEntry(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                int fromIndex=viewHolder.getBindingAdapterPosition();
+                int toIndex=target.getBindingAdapterPosition();
 
-                return viewHolder.getAdapterPosition()!=target.getAdapterPosition();
+                if(fromIndex<toIndex)
+                {
+                    for (int i=fromIndex; i<toIndex; i++)
+                    {
+                        dataAccessor.swapEntries(i, i+1);
+                    }
+                }
+                else
+                {
+                    for(int i=fromIndex; i>toIndex; i--)
+                    {
+                        dataAccessor.swapEntries(i, i-1);
+                    }
+                }
+                entryAdapter.notifyItemMoved(fromIndex, toIndex);
+
+
+                return viewHolder.getBindingAdapterPosition()!=target.getBindingAdapterPosition();
             }
 
             //distance contains how many cards were passed after dropping the card after dragging the card
@@ -180,55 +122,58 @@ public class Main extends AppCompatActivity
 
             //onMoved() is called when a card is in drag mode and swapped the position with another card
             @Override
-            public void onMoved(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, int fromPos, RecyclerView.ViewHolder target, int toPos, int x, int y)
+            public void onMoved(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, int fromIndex, RecyclerView.ViewHolder target, int toIndex, int x, int y)
             {
-                distance+=(fromPos-toPos);
+                distance+=(fromIndex-toIndex);
 
-                super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
+                super.onMoved(recyclerView, viewHolder, fromIndex, target, toIndex, x, y);
             }
 
             //onSwiped() is called when a card is swiped successfully to the left or to the right
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir)
             {
-                Entry entry=getEntry(viewHolder.getAdapterPosition());
-                int adapterPosition=viewHolder.getAdapterPosition();
+                Entry entry= dataAccessor.getEntry(viewHolder.getBindingAdapterPosition());
+                int adapterPosition=viewHolder.getBindingAdapterPosition();
 
-                entryRecyclerViewAdapter.deleteEntry(adapterPosition);
+                dataAccessor.removeEntry(adapterPosition);
+                entryAdapter.notifyItemRemoved(adapterPosition);
+
                 if(entry.getDate()!=null)
                 {
-                    cancelNotification(entry);
+                    notificationHelper.cancelNotification(entry);
                 }
 
                 Snackbar snackbar=Snackbar.make(findViewById(R.id.root),SimpleDo.getAppContext().getResources().getString(R.string.entry_deleted),BaseTransientBottomBar.LENGTH_SHORT);
                 snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
 
-                if(addCardMaterialCardView.getVisibility()== View.VISIBLE)
+                if(mainBinding.addCard.getVisibility()==View.VISIBLE)
                 {
-                    snackbar.setAnchorView(addCardMaterialCardView);
+                    snackbar.setAnchorView(mainBinding.addCard);
                 }
                 else
                 {
-                    snackbar.setAnchorView(startFloatingActionButton);
+                    snackbar.setAnchorView(mainBinding.start);
                 }
 
                 snackbar.setAction(SimpleDo.getAppContext().getResources().getString(R.string.undo), (view) ->
                 {
-                    entryRecyclerViewAdapter.insertEntry(entry, adapterPosition);
+                    dataAccessor.addEntry(adapterPosition, entry);
+
+                    entryAdapter.notifyItemInserted(adapterPosition);
+
                     if(entry.getDate()!=null)
                     {
-                        planAndSendNotification(entry);
+                        notificationHelper.planAndSendNotification(entry);
                     }
                 });
 
-
                 snackbar.show();
-
-                setupLayoutClickability();
+                toggleSortability();
             }
 
             //This contains the current dragged card
-            EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder entryRecyclerViewViewHolder;
+            EntryViewHolder entryViewHolder;
 
             //onSelectedChanged() is called when the state of the current dragged card changes
             @Override
@@ -236,257 +181,49 @@ public class Main extends AppCompatActivity
             {
                 if(actionState == ItemTouchHelper.ACTION_STATE_DRAG)
                 {
-                    ((EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder) viewHolder).getCardMaterialCardView().setDragged(true);
-                    entryRecyclerViewViewHolder=(EntryRecyclerViewAdapter.EntryRecyclerViewViewHolder) viewHolder;
+                    ((EntryViewHolder) viewHolder).getMaterialCardView().setDragged(true);
+                    entryViewHolder =(EntryViewHolder) viewHolder;
                 }
 
                 if(actionState==ItemTouchHelper.ACTION_STATE_IDLE)
                 {
                     try
                     {
-                        entryRecyclerViewViewHolder.getCardMaterialCardView().setDragged(false);
+                        entryViewHolder.getMaterialCardView().setDragged(false);
                     }
-                    catch(Exception exception){}
+                    catch(Exception exception)
+                    {
+                        exception.printStackTrace();
+                    }
 
                     if(distance!=0)
                     {
                         Drawable temp = getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme());
                         temp.setAlpha(128);
-                        changeDirectionMaterialButton.setIcon(temp);
-                        changeDirectionMaterialButton.setEnabled(false);
-                        setSortDirection(Direction.NONE);
+                        mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(temp);
+                        mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(false);
+                        dataAccessor.setSortDirection(Direction.NONE);
 
-                        changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
-                        setSortCriterion(Criterion.NONE);
+                        mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
+                        dataAccessor.setSortCriterion(Criterion.NONE);
 
                         distance=0;
                     }
                 }
             }
         });
-        itemTouchHelper.attachToRecyclerView(entryRecyclerView);
+        itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
 
-        //Setting up date-, time- and color picker and remind button
-        addCardDatePickerMaterialButton.setOnClickListener((view) ->
-        {
-            UIUtil.hideKeyboard(Main.this);
-
-            MaterialDatePicker<Long> materialDatePicker=MaterialDatePicker.Builder
-                    .datePicker()
-                    .setTheme(R.style.MaterialCalendarTheme)
-                    .setSelection(chosenDate==null?Calendar.getInstance().getTimeInMillis():fromDateInMilis(chosenDate))
-                    .build();
-
-
-
-            materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
-                @Override
-                public void onPositiveButtonClick(Long selection) {
-
-                    chosenDate=fromMilisInDate(selection);
-
-                    addCardTimePickerMaterialButton.setVisibility(View.VISIBLE);
-                    addCardDeadlineLinearLayout.setVisibility(View.VISIBLE);
-                    addCardDateTextView.setText(chosenDate.toString());
-                    addCardDivider.setVisibility(View.VISIBLE);
-                    addCardRemindMaterialButton.setVisibility(View.VISIBLE);
-                    addCardRemindMaterialButton.setEnabled(true);
-
-                    openKeyboardIfClosed();
-                }
-            });
-
-            materialDatePicker.addOnNegativeButtonClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v)
-                {
-                    chosenDate=null;
-                    chosenTime=null;
-
-                    addCardTimePickerMaterialButton.setVisibility(View.GONE);
-                    addCardDeadlineLinearLayout.setVisibility(View.GONE);
-                    addCardDivider.setVisibility(View.GONE);
-                    addCardRemindMaterialButton.setVisibility(View.GONE);
-                    addCardRemindMaterialButton.setEnabled(false);
-
-                    openKeyboardIfClosed();
-                }
-            });
-
-            materialDatePicker.addOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog)
-                {
-                    openKeyboardIfClosed();
-                }
-            });
-            //materialDatePicker.getView().<Button>findViewById(com.google.android.material.R.id.confirm_button).setText("Test");
-            materialDatePicker.show(getSupportFragmentManager(), "null");
-
-
-        });
-
-        addCardTimePickerMaterialButton.setOnClickListener((view)->
-        {
-            MaterialTimePicker materialTimePicker=new MaterialTimePicker.Builder()
-                    .setTimeFormat(TimeFormat.CLOCK_24H)
-                    .setHour(chosenTime==null?Calendar.getInstance().get(Calendar.HOUR_OF_DAY):chosenTime.getHour())
-                    .setMinute(chosenTime==null?Calendar.getInstance().get(Calendar.MINUTE):chosenTime.getHour())
-                    .build();
-
-            /*geht nicht:
-            Button b=materialTimePicker.getView().findViewById(R.id.material_timepicker_ok_button);
-            b.setText("Steven");*/
-
-            materialTimePicker.addOnPositiveButtonClickListener(v ->
-            {
-                chosenTime=new Time(materialTimePicker.getHour(), materialTimePicker.getMinute());
-
-                addCardTimeTextView.setVisibility(View.VISIBLE);
-                addCardTimeTextView.setText(chosenTime.toString());
-
-                openKeyboardIfClosed();
-            });
-
-
-            materialTimePicker.addOnCancelListener(dialog ->
-            {
-                openKeyboardIfClosed();
-            });
-
-            materialTimePicker.addOnNegativeButtonClickListener(dialog ->
-            {
-                addCardTimeTextView.setVisibility(View.GONE);
-                chosenTime=null;
-
-                openKeyboardIfClosed();
-            });
-
-            materialTimePicker.show(getSupportFragmentManager(), null);
-            materialTimePicker.getFragmentManager().executePendingTransactions();
-            materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_ok_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
-            materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_cancel_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
-        });
-
-        addCardColorMenuMaterialButton.setOnClickListener((view) ->
-        {
-            PopupMenu popupMenu=new PopupMenu(getApplicationContext(), view);
-
-            popupMenu.getMenuInflater().inflate(R.menu.color_change_menu,popupMenu.getMenu());
-
-            try
-            {
-                //Complex reflection stuff to achieve that in lower android versions the color images in the popup menu are shown
-                Field fieldMPopup=popupMenu.getClass().getDeclaredField("mPopup");
-                fieldMPopup.setAccessible(true);
-                Object mPopup=fieldMPopup.get(popupMenu);
-                mPopup.getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(mPopup, true);
-            }catch(Exception exception){}
-
-            popupMenu.setOnMenuItemClickListener((menuItem)->
-            {
-                chosenColor=colorChangeMenuMenuItemToColor(menuItem);
-                addCardMaterialCardView.setCardBackgroundColor(chosenColor);
-
-                return true;
-            });
-
-            popupMenu.show();
-        });
-
-        addCardRemindMaterialButton.setOnClickListener((view)->
-        {
-            reminding=!reminding;
-
-            Drawable drawable;
-
-            if(reminding)
-            {
-                drawable=getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme());
-            }
-            else
-            {
-                drawable=getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme());
-            }
-
-            addCardRemindMaterialButton.setIcon(drawable);
-        });
-
-        //Setting up sort buttons
-        changeDirectionMaterialButton.setOnMenuItemClickListener((menuItem) ->
-        {
-            switch(getSortDirection())
-            {
-                case UP:
-                {
-                    changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
-                    setSortDirection(Direction.DOWN);
-                }break;
-                case DOWN:
-                case NONE:
-                {
-                    changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, Main.this.getTheme()));
-                    setSortDirection(Direction.UP);
-                }break;
-            }
-
-            entryRecyclerViewAdapter.sortEntries();
-
-            return true;
-        });
-
-        changeCriterionMaterialButton.setOnMenuItemClickListener((menuItem)->
-        {
-            switch(getSortCriterion())
-            {
-                case TEXT:
-                {
-                    changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_clock, Main.this.getTheme()));
-
-                    setSortCriterion(Criterion.DEADLINE);
-                }break;
-                case DEADLINE:
-                {
-                    changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_palette, Main.this.getTheme()));
-
-                    setSortCriterion(Criterion.COLOR);
-
-                }break;
-                case COLOR:
-                case NONE:
-                {
-                    changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_alpha, Main.this.getTheme()));
-                    setSortCriterion(Criterion.TEXT);
-
-                    Drawable temp=getResources().getDrawable(R.drawable.ic_arrow_downward);
-                    temp.setAlpha(255);
-                    changeDirectionMaterialButton.setIcon(temp);
-                    changeDirectionMaterialButton.setEnabled(true);
-
-                    setSortDirection(Direction.DOWN);
-                }break;
-            }
-
-            if(getSortDirection()==Direction.NONE)
-            {
-                changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
-
-                setSortDirection(Direction.DOWN);
-            }
-
-            entryRecyclerViewAdapter.sortEntries();
-
-            return true;
-        });
-
-        bottomAppBar.setNavigationOnClickListener((view)->
+        mainBinding.bottomAppBar.setNavigationOnClickListener((view)->
         {
             Intent intent=new Intent(this, SettingsActivity.class);
             startActivity(intent);
         });
 
         setupLayout();
+        keyboardHelper.setKeyboardEnabled(false);
     }
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -495,62 +232,54 @@ public class Main extends AppCompatActivity
         int duration=400;
         int interpolatorFactor=2;
 
-        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleY", 1F).setDuration(duration);
-        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleX", 1F).setDuration(duration);
-        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(startFloatingActionButton, "alpha", 1F).setDuration(duration);
-        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(startFloatingActionButton,"visibility", View.VISIBLE).setDuration(duration);
+        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(mainBinding.start, "scaleY", 1F).setDuration(duration);
+        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(mainBinding.start, "scaleX", 1F).setDuration(duration);
+        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(mainBinding.start, "alpha", 1F).setDuration(duration);
+        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(mainBinding.start,"visibility", View.VISIBLE).setDuration(duration);
 
         AnimatorSet floatingActionButtonAnimatorSet=new AnimatorSet();
         floatingActionButtonAnimatorSet.play(floatingActionButtonScaleX).with(floatingActionButtonScaleY).with(floatingActionButtonAlpha).with(floatingActionButtonVisibility);
         floatingActionButtonAnimatorSet.setStartDelay((long) (duration/1.2));
         floatingActionButtonAnimatorSet.setInterpolator(new DecelerateInterpolator(interpolatorFactor));
 
-        ObjectAnimator addCardVisibility=ObjectAnimator.ofInt(addCardMaterialCardView,"visibility", View.GONE).setDuration(10);
-        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleY", 1F, 0.2F).setDuration(duration);
-        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleX", 1F, 0.2F).setDuration(duration);
-        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(addCardMaterialCardView, "alpha", 1F, 0F).setDuration(duration);
-        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(addCardMaterialCardView, "radius", 4, 100).setDuration(duration);
+        ObjectAnimator addCardVisibility=ObjectAnimator.ofInt(mainBinding.addCard,"visibility", View.GONE).setDuration(10);
+        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(mainBinding.addCard, "scaleY", 1F, 0.2F).setDuration(duration);
+        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(mainBinding.addCard, "scaleX", 1F, 0.2F).setDuration(duration);
+        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(mainBinding.addCard, "alpha", 1F, 0F).setDuration(duration);
+        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(mainBinding.addCard, "radius", 4, 100).setDuration(duration);
 
         AnimatorSet addCardAnimatorSet=new AnimatorSet();
         addCardAnimatorSet.play(addCardScaleY).with(addCardScaleX).with(addCardAlpha).with(addCardRadius).before(addCardVisibility);
         addCardAnimatorSet.setInterpolator(new AccelerateInterpolator(interpolatorFactor));
 
 
-        addCardAnimatorSet.addListener(new Animator.AnimatorListener() {
+        addCardAnimatorSet.addListener(new Animator.AnimatorListener()
+        {
             @Override
             public void onAnimationStart(Animator animation)
             {
-                addCardContentEditText.setEnabled(false);
+                mainBinding.contentEditText.setEnabled(false);
             }
 
-            @Override
-            public void onAnimationEnd(Animator animation){}
-
-            @Override
-            public void onAnimationCancel(Animator animation){}
-
-            @Override
-            public void onAnimationRepeat(Animator animation){}
+            @Override public void onAnimationEnd(Animator animation){}
+            @Override public void onAnimationCancel(Animator animation){}
+            @Override public void onAnimationRepeat(Animator animation){}
         });
 
-        floatingActionButtonAnimatorSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {}
+        floatingActionButtonAnimatorSet.addListener(new Animator.AnimatorListener()
+        {
+            @Override public void onAnimationStart(Animator animation) {}
 
             @Override
             public void onAnimationEnd(Animator animation)
             {
-                addCardContentEditText.setEnabled(true);
-
-                bottomAppBar.performShow();
-                bottomAppBar.setVisibility(View.VISIBLE);
+                mainBinding.contentEditText.setEnabled(true);
+                mainBinding.bottomAppBar.performShow();
+                mainBinding.bottomAppBar.setVisibility(View.VISIBLE);
             }
 
-            @Override
-            public void onAnimationCancel(Animator animation){}
-
-            @Override
-            public void onAnimationRepeat(Animator animation){}
+            @Override public void onAnimationCancel(Animator animation){}
+            @Override public void onAnimationRepeat(Animator animation){}
         });
 
         addCardAnimatorSet.start();
@@ -559,114 +288,254 @@ public class Main extends AppCompatActivity
 
     private void setupLayout()
     {
-        switch(getSortDirection())
+        switch(dataAccessor.getSortDirection())
         {
-            case UP:
-            {
-                changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, this.getTheme()));
-            }
-            break;
-            case DOWN:
-            {
-                changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, this.getTheme()));
-            }
-            break;
+            case UP: mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, this.getTheme())); break;
+            case DOWN: mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, this.getTheme())); break;
             case NONE:
             {
                 Drawable drawable = getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
                 drawable.setAlpha(128);
-                changeDirectionMaterialButton.setIcon(drawable);
-                changeDirectionMaterialButton.setEnabled(false);
-            }
-            break;
+                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(drawable);
+                mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(false);
+            } break;
         }
 
-        switch(getSortCriterion())
+        switch(dataAccessor.getSortCriterion())
         {
-            case TEXT:
-            {
-                changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_alpha, this.getTheme()));
-            }
-            break;
-            case DEADLINE:
-            {
-                changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_clock, this.getTheme()));
-            }
-            break;
-            case COLOR:
-            {
-                changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_palette, this.getTheme()));
-            }
-            break;
-            case NONE:
-            {
-                changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, this.getTheme()));
-            }
-            break;
+            case TEXT: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_alpha, this.getTheme())); break;
+            case DEADLINE: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_clock, this.getTheme())); break;
+            case COLOR: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_palette, this.getTheme())); break;
+            case NONE: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_sort, this.getTheme())); break;
         }
-
-        setupLayoutClickability();
+        toggleSortability();
     }
 
-    private void setupLayoutClickability()
+    //Disables sortability if there is only one or no entry, enables it if there are two or more entries
+    private void toggleSortability()
     {
-        if(getEntriesSize()<=1)
-        {
-            Drawable drawable=getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
-            drawable.setAlpha(128);
-            changeDirectionMaterialButton.setIcon(drawable);
-            changeDirectionMaterialButton.setEnabled(false);
+        Drawable directionDrawable = getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
+        Drawable criterionDrawable = getResources().getDrawable(R.drawable.ic_sort, this.getTheme());
 
-            drawable=getResources().getDrawable(R.drawable.ic_sort, this.getTheme());
-            drawable.setAlpha(128);
-            changeCriterionMaterialButton.setIcon(drawable);
-            changeCriterionMaterialButton.setEnabled(false);
+        if (dataAccessor.getEntriesSize() <= 1)
+        {
+            directionDrawable.setAlpha(128);
+            mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(false);
+
+            criterionDrawable.setAlpha(128);
+            mainBinding.bottomAppBar.getMenu().getItem(1).setEnabled(false);
         }
         else
         {
-            Drawable drawable=getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
-            drawable.setAlpha(255);
-            changeDirectionMaterialButton.setIcon(drawable);
-            changeDirectionMaterialButton.setEnabled(true);
+            directionDrawable.setAlpha(255);
+            mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(true);
 
-            drawable=getResources().getDrawable(R.drawable.ic_sort, this.getTheme());
-            drawable.setAlpha(255);
-            changeCriterionMaterialButton.setIcon(drawable);
-            changeCriterionMaterialButton.setEnabled(true);
+            criterionDrawable.setAlpha(255);
+            mainBinding.bottomAppBar.getMenu().getItem(1).setEnabled(true);
         }
+        mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(directionDrawable);
+        mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(criterionDrawable);
     }
 
-    private void createNotificationChannel()
+
+    public void selectDate(View dateButton)
     {
-        if(Build.VERSION.SDK_INT >= 26)
-        {
-            NotificationChannel notificationChannel=new NotificationChannel("main", "Erinnerungen", NotificationManager.IMPORTANCE_HIGH);
-            notificationChannel.setDescription(SimpleDo.getAppContext().getResources().getString(R.string.reminders_description));
+        keyboardHelper.setKeyboardEnabled(false);
+        DateTimeConverter dateTimeConverter =new DateTimeConverter();
 
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
+        MaterialDatePicker<Long> materialDatePicker=MaterialDatePicker.Builder
+                .datePicker()
+                .setTheme(R.style.MaterialCalendarTheme)
+                .setSelection(chosenDate==null?Calendar.getInstance().getTimeInMillis(): dateTimeConverter.fromDateInMillis(chosenDate))
+                .build();
+
+        materialDatePicker.addOnPositiveButtonClickListener(selection ->
+        {
+            chosenDate= dateTimeConverter.fromMillisInDate(selection);
+
+            mainBinding.timeButton.setVisibility(View.VISIBLE);
+            mainBinding.addCardDeadline.setVisibility(View.VISIBLE);
+            mainBinding.addCardDate.setText(chosenDate.toString());
+            mainBinding.divider1.setVisibility(View.VISIBLE);
+            mainBinding.remindButton.setVisibility(View.VISIBLE);
+            mainBinding.remindButton.setEnabled(true);
+
+            keyboardHelper.setKeyboardEnabled(true);
+        });
+
+        materialDatePicker.addOnNegativeButtonClickListener(view ->
+        {
+            chosenDate=null;
+            chosenTime=null;
+
+            mainBinding.timeButton.setVisibility(View.GONE);
+            mainBinding.addCardDeadline.setVisibility(View.GONE);
+            mainBinding.divider1.setVisibility(View.GONE);
+            mainBinding.remindButton.setVisibility(View.GONE);
+            mainBinding.remindButton.setEnabled(false);
+
+            keyboardHelper.setKeyboardEnabled(true);
+        });
+
+        materialDatePicker.addOnCancelListener(dialog->keyboardHelper.setKeyboardEnabled(true));
+
+        materialDatePicker.show(getSupportFragmentManager(), "null");
     }
 
-    public void start(View view)
+    public void selectTime(View timeButton)
+    {
+        MaterialTimePicker materialTimePicker=new MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_24H)
+                .setHour(chosenTime==null?Calendar.getInstance().get(Calendar.HOUR_OF_DAY):chosenTime.getHour())
+                .setMinute(chosenTime==null?Calendar.getInstance().get(Calendar.MINUTE):chosenTime.getMinute())
+                .build();
+
+        materialTimePicker.addOnPositiveButtonClickListener(view ->
+        {
+            chosenTime=new Time(materialTimePicker.getHour(), materialTimePicker.getMinute());
+            mainBinding.addCardTime.setVisibility(View.VISIBLE);
+            mainBinding.addCardTime.setText(chosenTime.toString());
+
+            keyboardHelper.setKeyboardEnabled(true);
+        });
+
+        materialTimePicker.addOnNegativeButtonClickListener(dialog ->
+        {
+            mainBinding.addCardTime.setVisibility(View.GONE);
+            chosenTime=null;
+
+            keyboardHelper.setKeyboardEnabled(true);
+        });
+
+        materialTimePicker.addOnCancelListener(dialog->keyboardHelper.setKeyboardEnabled(true));
+
+        materialTimePicker.show(getSupportFragmentManager(), null);
+        materialTimePicker.getFragmentManager().executePendingTransactions();
+        materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_ok_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
+        materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_cancel_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
+    }
+
+    public void selectColor(View colorButton)
+    {
+        PopupMenu popupMenu=new PopupMenu(getApplicationContext(), colorButton);
+        popupMenu.getMenuInflater().inflate(R.menu.color_change_menu, popupMenu.getMenu());
+
+        try
+        {
+            //Complex reflection stuff to achieve that in lower android versions the color images in the popup menu are shown
+            Field fieldPopup=popupMenu.getClass().getDeclaredField("mPopup");
+            fieldPopup.setAccessible(true);
+            Object popup=fieldPopup.get(popupMenu);
+            popup.getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(popup, true);
+        }
+        catch(Exception exception)
+        {
+            exception.printStackTrace();
+        }
+
+        popupMenu.setOnMenuItemClickListener((menuItem)->
+        {
+            switch(menuItem.getItemId())
+            {
+                case R.id.white: chosenColor=Color.WHITE; break;
+                case R.id.yellow: chosenColor=Color.parseColor("#FFF9C4"); break;
+                case R.id.orange: chosenColor=Color.parseColor("#FFE0B2"); break;
+                case R.id.red: chosenColor=Color.parseColor("#FFCDD2"); break;
+                case R.id.green: chosenColor=Color.parseColor("#DCEDC8"); break;
+                case R.id.blue: chosenColor=Color.parseColor("#BBDEFB"); break;
+                case R.id.purple: chosenColor=Color.parseColor("#E1BEE7"); break;
+            }
+            mainBinding.addCard.setCardBackgroundColor(chosenColor);
+            return true;
+        });
+        popupMenu.show();
+    }
+
+    public void toggleReminding(View remindButton)
+    {
+        reminding=!reminding;
+        Drawable drawable=reminding?getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme()):getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme());
+        mainBinding.remindButton.setIcon(drawable);
+    }
+
+    public void changeSortDirection(MenuItem sortDirectionItem)
+    {
+        switch (dataAccessor.getSortDirection())
+        {
+            case UP:
+            {
+                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
+                dataAccessor.setSortDirection(Direction.DOWN);
+            }
+            break;
+            case DOWN:
+            case NONE:
+            {
+                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, Main.this.getTheme()));
+                dataAccessor.setSortDirection(Direction.UP);
+            }
+            break;
+        }
+
+        dataAccessor.sortEntries();
+        entryAdapter.notifyItemRangeChanged(0, dataAccessor.getEntriesSize());
+    }
+
+    public void changeSortCriterion(MenuItem sortCriterionItem)
+    {
+        switch (dataAccessor.getSortCriterion()) {
+            case TEXT: {
+                mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_clock, Main.this.getTheme()));
+                dataAccessor.setSortCriterion(Criterion.DEADLINE);
+            }
+            break;
+            case DEADLINE: {
+                mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_palette, Main.this.getTheme()));
+                dataAccessor.setSortCriterion(Criterion.COLOR);
+            }
+            break;
+            case COLOR:
+            case NONE: {
+                mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_alpha, Main.this.getTheme()));
+                dataAccessor.setSortCriterion(Criterion.TEXT);
+
+                Drawable drawable = getResources().getDrawable(R.drawable.ic_arrow_downward);
+                drawable.setAlpha(255);
+                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(drawable);
+                mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(true);
+                dataAccessor.setSortDirection(Direction.DOWN);
+            }
+            break;
+        }
+
+        if (dataAccessor.getSortDirection() == Direction.NONE) {
+            mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
+            dataAccessor.setSortDirection(Direction.DOWN);
+        }
+
+        dataAccessor.sortEntries();
+        entryAdapter.notifyItemRangeChanged(0, dataAccessor.getEntriesSize());
+    }
+
+    public void start(View floatingActionButton)
     {
         int duration=400;
         int interpolatorFactor=2;
 
-        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleY", 1.5F).setDuration(duration);
-        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(startFloatingActionButton, "scaleX", 5F).setDuration(duration);
-        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(startFloatingActionButton, "alpha", 0F).setDuration(duration);
-        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(startFloatingActionButton,"visibility", View.GONE).setDuration(duration);
+        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(floatingActionButton, "scaleY", 1.5F).setDuration(duration);
+        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(floatingActionButton, "scaleX", 5F).setDuration(duration);
+        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(floatingActionButton, "alpha", 0F).setDuration(duration);
+        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(floatingActionButton,"visibility", View.GONE).setDuration(duration);
 
         AnimatorSet floatingActionButtonAnimatorSet=new AnimatorSet();
         floatingActionButtonAnimatorSet.play(floatingActionButtonScaleX).with(floatingActionButtonScaleY).with(floatingActionButtonAlpha).with(floatingActionButtonVisibility);
         floatingActionButtonAnimatorSet.setInterpolator(new AccelerateInterpolator(interpolatorFactor));
 
-        ObjectAnimator addCardVisibility=ObjectAnimator.ofInt(addCardMaterialCardView,"visibility", View.VISIBLE).setDuration(10);
-        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleY", 0.2F, 1F).setDuration(duration);
-        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(addCardMaterialCardView, "scaleX", 0.2F, 1F).setDuration(duration);
-        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(addCardMaterialCardView, "alpha", 0F, 1F).setDuration(duration);
-        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(addCardMaterialCardView, "radius", 100, 4).setDuration(duration);
+        ObjectAnimator addCardVisibility=ObjectAnimator.ofInt(mainBinding.addCard,"visibility", View.VISIBLE).setDuration(10);
+        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(mainBinding.addCard, "scaleY", 0.2F, 1F).setDuration(duration);
+        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(mainBinding.addCard, "scaleX", 0.2F, 1F).setDuration(duration);
+        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(mainBinding.addCard, "alpha", 0F, 1F).setDuration(duration);
+        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(mainBinding.addCard, "radius", 100, 4).setDuration(duration);
 
         AnimatorSet addCardAnimatorSet=new AnimatorSet();
         addCardAnimatorSet.play(addCardVisibility).with(addCardScaleY).with(addCardScaleX).with(addCardAlpha).with(addCardRadius);
@@ -678,173 +547,86 @@ public class Main extends AppCompatActivity
             @Override
             public void onAnimationStart(Animator animation)
             {
-                addCardContentEditText.setEnabled(false);
+                mainBinding.contentEditText.setEnabled(false);
             }
 
             @Override
             public void onAnimationEnd(Animator animation)
             {
-                addCardContentEditText.setEnabled(true);
+                mainBinding.contentEditText.setEnabled(true);
 
-                bottomAppBar.performHide();
-                bottomAppBar.setVisibility(View.GONE);
+                mainBinding.bottomAppBar.performHide();
+                mainBinding.bottomAppBar.setVisibility(View.GONE);
 
                 InputMethodManager inputMethodManager = (InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-                addCardContentEditText.requestFocus();
+                mainBinding.contentEditText.requestFocus();
             }
 
-            @Override
-            public void onAnimationCancel(Animator animation) {}
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {}
+            @Override public void onAnimationCancel(Animator animation){}
+            @Override public void onAnimationRepeat(Animator animation){}
         });
 
         floatingActionButtonAnimatorSet.start();
         addCardAnimatorSet.start();
     }
 
-    public void addCard(View view)
+    public void addCard(View addButton)
     {
-        Entry entry;
+        Entry entry = new Entry();
+        System.out.println(entry.getId());
+        entry.setContent(mainBinding.contentEditText.getText().toString());
+        entry.setNotifying(reminding);
+        if (chosenColor != -1) entry.setColor(chosenColor);
 
-        if(chosenColor!=-1)
-        {
-            if(chosenDate!=null)
-            {
-                if(chosenTime!=null)
-                {
-                    entry=new Entry(addCardContentEditText.getText().toString(), chosenDate, chosenTime, chosenColor, reminding);
-                }
-                else
-                {
-                    entry=new Entry(addCardContentEditText.getText().toString(), chosenDate, chosenColor, reminding);
-                }
-            }
-            else
-            {
-                entry=new Entry(addCardContentEditText.getText().toString(), chosenColor, reminding);
-            }
-        }
-        else
-        {
-            if(chosenDate!=null)
-            {
-                if(chosenTime!=null)
-                {
-                    entry=new Entry(addCardContentEditText.getText().toString(), chosenDate, chosenTime, reminding);
-                }
-                else
-                {
-                    entry=new Entry(addCardContentEditText.getText().toString(), chosenDate, reminding);
-                }
-            }
-            else
-            {
-                entry=new Entry(addCardContentEditText.getText().toString(), reminding);
-            }
+        if (chosenDate != null) {
+            entry.setDate(chosenDate);
+            if (chosenTime != null) entry.setTime(chosenTime);
         }
 
-        if(reminding)
-        {
-            if(isInPast(entry))
+        if (reminding) {
+            if (entry.isInPast(dataAccessor.getAlldayTime()))
             {
-                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),this.getResources().getString(R.string.past_notification), BaseTransientBottomBar.LENGTH_SHORT);
+                Snackbar snackbar = Snackbar.make(findViewById(R.id.root), this.getResources().getString(R.string.past_notification), BaseTransientBottomBar.LENGTH_SHORT);
                 snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
                 snackbar.setAnchorView(R.id.addCard);
                 snackbar.show();
-
                 return;
             }
-
-            planAndSendNotification(entry);
-
+            notificationHelper.planAndSendNotification(entry);
         }
 
-        changeDirectionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme()));
-        changeCriterionMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
-        setSortDirection(Direction.NONE);
-        setSortCriterion(Criterion.NONE);
+        mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme()));
+        mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
+        dataAccessor.setSortDirection(Direction.NONE);
+        dataAccessor.setSortCriterion(Criterion.NONE);
 
-        entryRecyclerViewAdapter.insertEntry(entry);
+        dataAccessor.addEntry(entry);
+        entryAdapter.notifyItemInserted(dataAccessor.getEntriesSize());
 
-        setupLayoutClickability();
+        toggleSortability();
+        mainBinding.contentEditText.getText().clear();
+        mainBinding.addCardDeadline.setVisibility(View.GONE);
+        mainBinding.timeButton.setVisibility(View.GONE);
+        mainBinding.divider1.setVisibility(View.GONE);
+        mainBinding.remindButton.setVisibility(View.GONE);
+        mainBinding.remindButton.setIcon(getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme()));
+        reminding = false;
+        chosenDate = null;
+        chosenTime = null;
 
-        addCardContentEditText.getText().clear();
-        addCardDeadlineLinearLayout.setVisibility(View.GONE);
-        addCardTimePickerMaterialButton.setVisibility(View.GONE);
-        addCardDivider.setVisibility(View.GONE);
-        addCardRemindMaterialButton.setVisibility(View.GONE);
-        addCardRemindMaterialButton.setIcon(getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme()));
-        reminding=false;
-
-        chosenDate=null;
-        chosenTime=null;
-
-        entryRecyclerView.scrollToPosition(SaveHelper.getEntriesSize()-1);
-    }
-
-    private boolean isInPast(Entry entry)
-    {
-        Calendar calendar=Calendar.getInstance();
-
-        Date currentDate=new Date(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
-        Time currentTime=new Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
-
-        Time allDayEventTime=getAlldayTime();
-
-        if (entry.getDate()!=null && entry.getDate().compareTo(currentDate)==0)
-        {
-            if(entry.getTime()!=null)
-            {
-                return (entry.getTime().compareTo(currentTime))<0;
-            }
-            else
-            {
-                return allDayEventTime.compareTo(currentTime)<0;
-            }
-
-        }
-
-        return (entry.getDate().compareTo(currentDate))<0;
+        mainBinding.myRecyclerView.scrollToPosition(dataAccessor.getEntriesSize());
     }
 
     public void itemTouchHelperEnabled(boolean mode)
     {
         if(mode)
         {
-            itemTouchHelper.attachToRecyclerView(entryRecyclerView);
+            itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
         }
         else
         {
             itemTouchHelper.attachToRecyclerView(null);
-        }
-    }
-
-    public static Date fromMilisInDate(long milis)
-    {
-        java.util.Date jDate=new java.util.Date(milis);
-        Calendar calendar=Calendar.getInstance();
-        calendar.setTime(jDate);
-
-        return new Date(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
-    }
-
-    public static long fromDateInMilis(Date date)
-    {
-        Calendar calendar=Calendar.getInstance();
-        calendar.set(date.getYear(), date.getMonth()-1, date.getDay());
-
-        return calendar.getTimeInMillis();
-    }
-
-    private void openKeyboardIfClosed()
-    {
-        if(!keyboardOpen)
-        {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(0,0);
         }
     }
 }

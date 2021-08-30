@@ -1,39 +1,40 @@
 package de.stevensolleder.simpledo.controller;
 
-import android.app.AlertDialog;
-import android.app.TimePickerDialog;
-import android.content.DialogInterface;
+
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Html;
+import android.widget.Button;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
-import com.judemanutd.autostarter.AutoStartPermissionHelper;
-
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 
 import de.stevensolleder.simpledo.R;
+import de.stevensolleder.simpledo.model.CustomDataAccessor;
+import de.stevensolleder.simpledo.model.DataAccessor;
 import de.stevensolleder.simpledo.model.SimpleDo;
 import de.stevensolleder.simpledo.model.Time;
 
-import static de.stevensolleder.simpledo.model.NotificationHelper.planAndSendNotification;
-import static de.stevensolleder.simpledo.model.SaveHelper.getAlldayTime;
-import static de.stevensolleder.simpledo.model.SaveHelper.getEntriesSize;
-import static de.stevensolleder.simpledo.model.SaveHelper.getEntry;
-import static de.stevensolleder.simpledo.model.SaveHelper.setAlldayTime;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements PreferenceManager.OnPreferenceTreeClickListener
 {
+    private DataAccessor dataAccessor;
+
+    public SettingsFragment()
+    {
+        dataAccessor=new CustomDataAccessor(SimpleDo.getAppContext().getSharedPreferences("settings", Context.MODE_PRIVATE));
+    }
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey)
     {
         addPreferencesFromResource(R.xml.settings_preference);
-
-        findPreference("allday_reminder_time_key").setSummary(getAlldayTime().toString());
+        findPreference("allday_reminder_time_key").setSummary(dataAccessor.getAlldayTime().toString());
     }
 
     @Override
@@ -44,45 +45,22 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
         switch(preferenceKey)
         {
             case "allday_reminder_time_key":
-                //bitte im TimePicker setzen
-                preference.setSummary(getAlldayTime().toString());
-                
-                /*TimePickerDialog timePickerDialog=new TimePickerDialog(SimpleDo.getAppContext(), (timePicker, hour, minute)->
-                {
-                    setAlldayTime(new Time(hour, minute));
+                MaterialTimePicker materialTimePicker=new MaterialTimePicker.Builder()
+                        .setTimeFormat(TimeFormat.CLOCK_24H)
+                        .setHour(dataAccessor.getAlldayTime().getHour())
+                        .setMinute(dataAccessor.getAlldayTime().getMinute())
+                        .build();
 
-                    for(int i=0; i<getEntriesSize(); i++)
-                    {
-                        if(getEntry(i).getTime()!=null)
-                        {
-                            planAndSendNotification(getEntry(i));
-                        }
-                    }
-                }, getAlldayTime().getHour(), getAlldayTime().getMinute(), true)
+                materialTimePicker.addOnPositiveButtonClickListener(view ->
                 {
-                    @Override
-                    public void onBackPressed()
-                    {
-                        this.dismiss();
-                    }
-                };
-
-                timePickerDialog.setOnCancelListener((dialogInterface)->
-                {
-                    timePickerDialog.dismiss();
+                    dataAccessor.setAlldayTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
+                    preference.setSummary(dataAccessor.getAlldayTime().toString());
                 });
 
-                timePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, SimpleDo.getAppContext().getResources().getString(R.string.cancel), (dialogInterface, which)->
-                {
-                    timePickerDialog.dismiss();
-                });
-
-                //UIUtil.hideKeyboard(Main);
-
-                timePickerDialog.show();
-
-                timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.ok));
-                timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(SimpleDo.getAppContext().getResources().getString(R.string.cancel));*/
+                materialTimePicker.show(getParentFragmentManager(), null);
+                materialTimePicker.getParentFragmentManager().executePendingTransactions();
+                materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_ok_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
+                materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_cancel_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.cancel));
 
                 return true;
 
