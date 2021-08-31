@@ -7,8 +7,8 @@ public class Time implements Comparable<Time>
 
     public Time(int hour, int minute)
     {
-        this.hour=hour;
-        this.minute=minute;
+        setHour(hour);
+        setMinute(minute);
     }
 
     @Override
@@ -34,14 +34,25 @@ public class Time implements Comparable<Time>
         return (hour - comparingTime.hour);
     }
 
-
     public int getHour()
     {
         return hour;
     }
 
+    public void setHour(int hour)
+    {
+       if(hour<0 || hour>23) throw new IllegalArgumentException();
+       this.hour=hour;
+    }
+
     public int getMinute()
     {
         return minute;
+    }
+
+    public void setMinute(int minute)
+    {
+        if(minute<0 || minute>59) throw new IllegalArgumentException();
+        this.minute=minute;
     }
 }

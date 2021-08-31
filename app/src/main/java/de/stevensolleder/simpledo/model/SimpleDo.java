@@ -10,7 +10,7 @@ public class SimpleDo extends Application
     public void onCreate()
     {
         super.onCreate();
-        SimpleDo.applicationContext = getApplicationContext();
+        SimpleDo.applicationContext=getApplicationContext();
     }
 
     public static Context getAppContext()

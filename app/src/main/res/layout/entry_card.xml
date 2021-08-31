@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <de.stevensolleder.simpledo.controller.AddCardContentEditText
+        <de.stevensolleder.simpledo.controller.ContentEditText
             android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -37,10 +37,10 @@
             <ImageView
                 android:layout_width="14sp"
                 android:layout_gravity="center"
-                android:tint="#757575"
                 android:layout_height="14sp"
                 android:id="@+id/bell"
-                app:srcCompat="@drawable/ic_notifications"/>
+                app:srcCompat="@drawable/ic_notifications"
+                app:tint="#757575" />
 
             <TextView
                 android:id="@+id/date"
