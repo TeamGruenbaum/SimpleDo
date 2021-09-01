@@ -41,7 +41,7 @@
     <string name="ok">Ok</string>
     <string name="information">Information</string>
     <string name="open_settings">Einstellungen öffnen</string>
-    <string name="battery_optimization_hint">Die richtige Einstellung konnte nicht gefunden werden. Bitte wende Dich an deinen Hersteller, um diese Funktion zu deaktivieren.</string>
+    <string name="battery_optimization_hint">Die richtige Einstellung konnte nicht gefunden werden. Bitte deaktiviere sie manuell in den Einstellungen oder wende Dich an deinen Hersteller, um diese Funktion zu deaktivieren.</string>
     <string name="battery_optimization_button_hint">"Der folgende Button führt Dich gleich zu den entsprechenden Einstellungen Deines Gerätes."</string>
     <string name="battery_optimization_summary">Stelle sicher, dass Du keine Erinnerungen verpasst, indem Du SimpleDo erlaubst stets im Hintergrund zu laufen.</string>
     <string name="about_summary">Ein paar Informationen zur aktuellen App Version und den Entwicklern.</string>

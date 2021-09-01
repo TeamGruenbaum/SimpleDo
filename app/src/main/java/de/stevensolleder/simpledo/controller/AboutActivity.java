@@ -3,10 +3,11 @@ package de.stevensolleder.simpledo.controller;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import de.stevensolleder.simpledo.databinding.AboutActivityBinding;
+import de.stevensolleder.simpledo.R;
 
 public class AboutActivity extends AppCompatActivity
 {
@@ -14,21 +15,17 @@ public class AboutActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.about_activity);
+    }
 
-        AboutActivityBinding layout=AboutActivityBinding.inflate(getLayoutInflater());
-
-        setContentView(layout.rootDeveloperActivity);
-
-        layout.stevenSolleder.setOnClickListener(view ->
+    public void openDeveloperPage(View view)
+    {
+        String uri="";
+        switch(view.getId())
         {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://stevensolleder.de"));
-            startActivity(intent);
-        });
-
-        layout.isabellwaas.setOnClickListener(view ->
-        {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/isabellwaas"));
-                startActivity(intent);
-        });
+            case R.id.stevensolleder: uri="https://stevensolleder.de"; break;
+            case R.id.isabellwaas: uri="https://github.com/isabellwaas"; break;
+        }
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(uri)));
     }
 }

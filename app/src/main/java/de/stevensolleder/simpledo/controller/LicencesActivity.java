@@ -13,7 +13,6 @@ public class LicencesActivity extends AppCompatActivity
     protected void onCreate( Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.licenses_activity);
 
         WebView webView=findViewById(R.id.webview);

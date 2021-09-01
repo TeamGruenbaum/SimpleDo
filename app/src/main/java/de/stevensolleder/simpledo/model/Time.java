@@ -15,12 +15,7 @@ public class Time implements Comparable<Time>
     public String toString()
     {
         String minute=Integer.toString(this.minute);
-
-        if(this.minute<10)
-        {
-            minute="0"+minute;
-        }
-
+        if(this.minute<10) minute="0"+minute;
         return hour+":"+minute;
     }
 
@@ -28,10 +23,10 @@ public class Time implements Comparable<Time>
     @Override
     public int compareTo(Time comparingTime)
     {
-        if ((hour - comparingTime.hour) == 0) {
-            return (minute - comparingTime.minute);
+        if ((hour-comparingTime.hour)==0) {
+            return (minute-comparingTime.minute);
         }
-        return (hour - comparingTime.hour);
+        return (hour-comparingTime.hour);
     }
 
     public int getHour()

@@ -16,11 +16,6 @@
             android:enabled="true"
             android:exported="true" />
 
-        <!--<service
-            android:name=".model.ReminderService"
-            android:enabled="true"
-            android:exported="true"/>-->
-
         <activity
             android:name=".controller.Main"
             android:launchMode="singleTop">

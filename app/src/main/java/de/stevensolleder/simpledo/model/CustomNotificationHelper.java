@@ -11,6 +11,7 @@ import android.os.Build;
 import java.util.Calendar;
 
 import de.stevensolleder.simpledo.R;
+import de.stevensolleder.simpledo.controller.Main;
 
 public class CustomNotificationHelper implements NotificationHelper<Entry>
 {
@@ -24,7 +25,7 @@ public class CustomNotificationHelper implements NotificationHelper<Entry>
     @Override
     public void createNotificationChannel()
     {
-        if(Build.VERSION.SDK_INT >= 26)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             NotificationChannel notificationChannel=new NotificationChannel("main", "Erinnerungen", NotificationManager.IMPORTANCE_HIGH);
             notificationChannel.setDescription(SimpleDo.getAppContext().getResources().getString(R.string.reminders_description));
@@ -38,19 +39,11 @@ public class CustomNotificationHelper implements NotificationHelper<Entry>
     public void planAndSendNotification(Entry entry)
     {
         Calendar calendar=Calendar.getInstance();
-
-        //Determine the exact point in time for the notification
-        if(entry.getTime()!=null)
-        {
-            calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay(), entry.getTime().getHour(), entry.getTime().getMinute(), 0);
-        }
-        else
-        {
-            calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay(), dataAccessor.getAlldayTime().getHour(), dataAccessor.getAlldayTime().getMinute(), 0);
-        }
+        if(entry.getTime()!=null) calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay(), entry.getTime().getHour(), entry.getTime().getMinute(), 0);
+        else calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay(), dataAccessor.getAlldayTime().getHour(), dataAccessor.getAlldayTime().getMinute(), 0);
 
         Intent intent=new Intent(SimpleDo.getAppContext(), ReminderBroadcastReceiver.class);
-        intent.putExtra("CONTENT", entry.getContent());
+        intent.putExtra("content", entry.getContent());
         PendingIntent pendingIntent=PendingIntent.getBroadcast(SimpleDo.getAppContext(), entry.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) SimpleDo.getAppContext().getSystemService(Context.ALARM_SERVICE);

@@ -5,8 +5,9 @@ import java.util.Locale;
 
 public class IdentificationHelper
 {
-    //Method for creating a unique ID
-    public static int createUniqueID()
+    public IdentificationHelper() {}
+
+    public int createUniqueId()
     {
         return new SimpleDateFormat("ddHHmmssSS",  Locale.US).format(new java.util.Date()).hashCode();
     }

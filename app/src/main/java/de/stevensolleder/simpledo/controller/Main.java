@@ -79,9 +79,8 @@ public class Main extends AppCompatActivity
         notificationHelper=new CustomNotificationHelper();
         notificationHelper.createNotificationChannel();
 
-        keyboardHelper=new KeyboardHelper(this);
-
         //Setting swipe gestures
+        //itemTouchHelper=new ItemTouchHelper(new CustomItemTouchHelperCallback(this, mainBinding, entryAdapter, dataAccessor, notificationHelper));
         itemTouchHelper=new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT)
         {
             //onMove() is called when a dragged card is dropped
@@ -94,27 +93,20 @@ public class Main extends AppCompatActivity
                 }
                 catch(Exception exception){ exception.printStackTrace(); }
 
-                int fromIndex=viewHolder.getBindingAdapterPosition();
-                int toIndex=target.getBindingAdapterPosition();
+                int fromIndex=viewHolder.getPosition();
+                int toIndex=target.getPosition();
 
                 if(fromIndex<toIndex)
                 {
-                    for (int i=fromIndex; i<toIndex; i++)
-                    {
-                        dataAccessor.swapEntries(i, i+1);
-                    }
+                    for (int i=fromIndex; i<toIndex; i++) dataAccessor.swapEntries(i, i+1);
                 }
                 else
                 {
-                    for(int i=fromIndex; i>toIndex; i--)
-                    {
-                        dataAccessor.swapEntries(i, i-1);
-                    }
+                    for(int i=fromIndex; i>toIndex; i--) dataAccessor.swapEntries(i, i-1);
                 }
                 entryAdapter.notifyItemMoved(fromIndex, toIndex);
 
-
-                return viewHolder.getBindingAdapterPosition()!=target.getBindingAdapterPosition();
+                return viewHolder.getPosition()!=target.getPosition();
             }
 
             //distance contains how many cards were passed after dropping the card after dragging the card
@@ -125,7 +117,6 @@ public class Main extends AppCompatActivity
             public void onMoved(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, int fromIndex, RecyclerView.ViewHolder target, int toIndex, int x, int y)
             {
                 distance+=(fromIndex-toIndex);
-
                 super.onMoved(recyclerView, viewHolder, fromIndex, target, toIndex, x, y);
             }
 
@@ -133,39 +124,24 @@ public class Main extends AppCompatActivity
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir)
             {
-                Entry entry= dataAccessor.getEntry(viewHolder.getBindingAdapterPosition());
-                int adapterPosition=viewHolder.getBindingAdapterPosition();
+                Entry entry=dataAccessor.getEntry(viewHolder.getPosition());
+                int adapterPosition=viewHolder.getPosition();
 
                 dataAccessor.removeEntry(adapterPosition);
                 entryAdapter.notifyItemRemoved(adapterPosition);
-
-                if(entry.getDate()!=null)
-                {
-                    notificationHelper.cancelNotification(entry);
-                }
+                if(entry.getDate()!=null) notificationHelper.cancelNotification(entry);
 
                 Snackbar snackbar=Snackbar.make(findViewById(R.id.root),SimpleDo.getAppContext().getResources().getString(R.string.entry_deleted),BaseTransientBottomBar.LENGTH_SHORT);
                 snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
 
-                if(mainBinding.addCard.getVisibility()==View.VISIBLE)
-                {
-                    snackbar.setAnchorView(mainBinding.addCard);
-                }
-                else
-                {
-                    snackbar.setAnchorView(mainBinding.start);
-                }
+                if(mainBinding.addCard.getVisibility()==View.VISIBLE) snackbar.setAnchorView(mainBinding.addCard);
+                else snackbar.setAnchorView(mainBinding.start);
 
                 snackbar.setAction(SimpleDo.getAppContext().getResources().getString(R.string.undo), (view) ->
                 {
                     dataAccessor.addEntry(adapterPosition, entry);
-
                     entryAdapter.notifyItemInserted(adapterPosition);
-
-                    if(entry.getDate()!=null)
-                    {
-                        notificationHelper.planAndSendNotification(entry);
-                    }
+                    if(entry.getDate()!=null) notificationHelper.planAndSendNotification(entry);
                 });
 
                 snackbar.show();
@@ -212,16 +188,14 @@ public class Main extends AppCompatActivity
                 }
             }
         });
+
         itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
 
-        mainBinding.bottomAppBar.setNavigationOnClickListener((view)->
-        {
-            Intent intent=new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-        });
-
+        //Setting up UI
         setupLayout();
+        keyboardHelper=new KeyboardHelper(this);
         keyboardHelper.setKeyboardEnabled(false);
+        mainBinding.bottomAppBar.setNavigationOnClickListener((view)->startActivity(new Intent(this, SettingsActivity.class)));
     }
 
 
@@ -312,7 +286,7 @@ public class Main extends AppCompatActivity
     }
 
     //Disables sortability if there is only one or no entry, enables it if there are two or more entries
-    private void toggleSortability()
+    void toggleSortability()
     {
         Drawable directionDrawable = getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
         Drawable criterionDrawable = getResources().getDrawable(R.drawable.ic_sort, this.getTheme());
@@ -351,7 +325,7 @@ public class Main extends AppCompatActivity
 
         materialDatePicker.addOnPositiveButtonClickListener(selection ->
         {
-            chosenDate= dateTimeConverter.fromMillisInDate(selection);
+            chosenDate=dateTimeConverter.fromMillisInDate(selection);
 
             mainBinding.timeButton.setVisibility(View.VISIBLE);
             mainBinding.addCardDeadline.setVisibility(View.VISIBLE);
@@ -410,7 +384,7 @@ public class Main extends AppCompatActivity
         materialTimePicker.addOnCancelListener(dialog->keyboardHelper.setKeyboardEnabled(true));
 
         materialTimePicker.show(getSupportFragmentManager(), null);
-        materialTimePicker.getFragmentManager().executePendingTransactions();
+        materialTimePicker.getParentFragmentManager().executePendingTransactions();
         materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_ok_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
         materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_cancel_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
     }
@@ -425,8 +399,7 @@ public class Main extends AppCompatActivity
             //Complex reflection stuff to achieve that in lower android versions the color images in the popup menu are shown
             Field fieldPopup=popupMenu.getClass().getDeclaredField("mPopup");
             fieldPopup.setAccessible(true);
-            Object popup=fieldPopup.get(popupMenu);
-            popup.getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(popup, true);
+            fieldPopup.get(popupMenu).getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(fieldPopup.get(popupMenu), true);
         }
         catch(Exception exception)
         {
@@ -478,7 +451,7 @@ public class Main extends AppCompatActivity
         }
 
         dataAccessor.sortEntries();
-        entryAdapter.notifyItemRangeChanged(0, dataAccessor.getEntriesSize());
+        entryAdapter.notifyDataSetChanged();
     }
 
     public void changeSortCriterion(MenuItem sortCriterionItem)
@@ -514,7 +487,7 @@ public class Main extends AppCompatActivity
         }
 
         dataAccessor.sortEntries();
-        entryAdapter.notifyItemRangeChanged(0, dataAccessor.getEntriesSize());
+        entryAdapter.notifyDataSetChanged();
     }
 
     public void start(View floatingActionButton)
@@ -608,6 +581,7 @@ public class Main extends AppCompatActivity
         mainBinding.contentEditText.getText().clear();
         mainBinding.addCardDeadline.setVisibility(View.GONE);
         mainBinding.timeButton.setVisibility(View.GONE);
+        mainBinding.addCardTime.setText("");
         mainBinding.divider1.setVisibility(View.GONE);
         mainBinding.remindButton.setVisibility(View.GONE);
         mainBinding.remindButton.setIcon(getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme()));
@@ -618,7 +592,7 @@ public class Main extends AppCompatActivity
         mainBinding.myRecyclerView.scrollToPosition(dataAccessor.getEntriesSize());
     }
 
-    public void itemTouchHelperEnabled(boolean mode)
+    /*public void itemTouchHelperEnabled(boolean mode)
     {
         if(mode)
         {
@@ -628,5 +602,5 @@ public class Main extends AppCompatActivity
         {
             itemTouchHelper.attachToRecyclerView(null);
         }
-    }
+    }*/
 }

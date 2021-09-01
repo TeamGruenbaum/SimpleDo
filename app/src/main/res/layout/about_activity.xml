@@ -45,23 +45,25 @@
             android:text="@string/version" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/steven_solleder"
+            android:id="@+id/stevensolleder"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_gravity="center"
             android:layout_marginBottom="-4dp"
+            android:onClick="openDeveloperPage"
             android:text="@string/steven_solleder"/>
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/isabellwaas"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_gravity="center"
             android:layout_marginTop="-4dp"
             android:layout_marginBottom="5dp"
-            android:text="@string/isabell_waas"
-            android:id="@+id/isabellwaas"/>
+            android:onClick="openDeveloperPage"
+            android:text="@string/isabell_waas"/>
 
     </LinearLayout>
 

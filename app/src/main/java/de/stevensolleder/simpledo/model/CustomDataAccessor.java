@@ -99,10 +99,7 @@ public class CustomDataAccessor implements DataAccessor
                         if (getSortDirection() == Direction.DOWN) return (entry1.getDate().compareTo(entry2.getDate()) == 0 && entry1.getTime() != null && entry2.getTime() != null)?(entry1.getTime().compareTo(entry2.getTime())):(entry1.getDate().compareTo(entry2.getDate()));
                         else return (entry2.getDate().compareTo(entry1.getDate()) == 0 && entry2.getTime() != null && entry1.getTime() != null)?(entry2.getTime().compareTo(entry1.getTime())):(entry2.getDate().compareTo(entry1.getDate()));
                     }
-                    else
-                    {
-                        return (entry1.getDate()==null)?(Integer.MAX_VALUE):Integer.MIN_VALUE;
-                    }
+                    else return (entry1.getDate()==null)?(Integer.MAX_VALUE):Integer.MIN_VALUE;
                 });
             } break;
             case COLOR: entries.sort((entry1, entry2) -> (getSortDirection()==Direction.DOWN)?(entry2.getColor() - entry1.getColor()):(entry1.getColor() - entry2.getColor())); break;
