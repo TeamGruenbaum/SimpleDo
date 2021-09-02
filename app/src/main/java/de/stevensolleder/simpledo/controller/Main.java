@@ -76,119 +76,11 @@ public class Main extends AppCompatActivity
         mainBinding.myRecyclerView.setItemAnimator(entryListAnimator);
 
         //Create notificationChannel for reminders
-        notificationHelper=new CustomNotificationHelper();
+        notificationHelper=new CustomNotificationHelper(dataAccessor);
         notificationHelper.createNotificationChannel();
 
         //Setting swipe gestures
-        //itemTouchHelper=new ItemTouchHelper(new CustomItemTouchHelperCallback(this, mainBinding, entryAdapter, dataAccessor, notificationHelper));
-        itemTouchHelper=new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT)
-        {
-            //onMove() is called when a dragged card is dropped
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)
-            {
-                try
-                {
-                    ((EntryViewHolder)viewHolder).getContextMenu().close();
-                }
-                catch(Exception exception){ exception.printStackTrace(); }
-
-                int fromIndex=viewHolder.getPosition();
-                int toIndex=target.getPosition();
-
-                if(fromIndex<toIndex)
-                {
-                    for (int i=fromIndex; i<toIndex; i++) dataAccessor.swapEntries(i, i+1);
-                }
-                else
-                {
-                    for(int i=fromIndex; i>toIndex; i--) dataAccessor.swapEntries(i, i-1);
-                }
-                entryAdapter.notifyItemMoved(fromIndex, toIndex);
-
-                return viewHolder.getPosition()!=target.getPosition();
-            }
-
-            //distance contains how many cards were passed after dropping the card after dragging the card
-            int distance=0;
-
-            //onMoved() is called when a card is in drag mode and swapped the position with another card
-            @Override
-            public void onMoved(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, int fromIndex, RecyclerView.ViewHolder target, int toIndex, int x, int y)
-            {
-                distance+=(fromIndex-toIndex);
-                super.onMoved(recyclerView, viewHolder, fromIndex, target, toIndex, x, y);
-            }
-
-            //onSwiped() is called when a card is swiped successfully to the left or to the right
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir)
-            {
-                Entry entry=dataAccessor.getEntry(viewHolder.getPosition());
-                int adapterPosition=viewHolder.getPosition();
-
-                dataAccessor.removeEntry(adapterPosition);
-                entryAdapter.notifyItemRemoved(adapterPosition);
-                if(entry.getDate()!=null) notificationHelper.cancelNotification(entry);
-
-                Snackbar snackbar=Snackbar.make(findViewById(R.id.root),SimpleDo.getAppContext().getResources().getString(R.string.entry_deleted),BaseTransientBottomBar.LENGTH_SHORT);
-                snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
-
-                if(mainBinding.addCard.getVisibility()==View.VISIBLE) snackbar.setAnchorView(mainBinding.addCard);
-                else snackbar.setAnchorView(mainBinding.start);
-
-                snackbar.setAction(SimpleDo.getAppContext().getResources().getString(R.string.undo), (view) ->
-                {
-                    dataAccessor.addEntry(adapterPosition, entry);
-                    entryAdapter.notifyItemInserted(adapterPosition);
-                    if(entry.getDate()!=null) notificationHelper.planAndSendNotification(entry);
-                });
-
-                snackbar.show();
-                toggleSortability();
-            }
-
-            //This contains the current dragged card
-            EntryViewHolder entryViewHolder;
-
-            //onSelectedChanged() is called when the state of the current dragged card changes
-            @Override
-            public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState)
-            {
-                if(actionState == ItemTouchHelper.ACTION_STATE_DRAG)
-                {
-                    ((EntryViewHolder) viewHolder).getMaterialCardView().setDragged(true);
-                    entryViewHolder =(EntryViewHolder) viewHolder;
-                }
-
-                if(actionState==ItemTouchHelper.ACTION_STATE_IDLE)
-                {
-                    try
-                    {
-                        entryViewHolder.getMaterialCardView().setDragged(false);
-                    }
-                    catch(Exception exception)
-                    {
-                        exception.printStackTrace();
-                    }
-
-                    if(distance!=0)
-                    {
-                        Drawable temp = getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme());
-                        temp.setAlpha(128);
-                        mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(temp);
-                        mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(false);
-                        dataAccessor.setSortDirection(Direction.NONE);
-
-                        mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
-                        dataAccessor.setSortCriterion(Criterion.NONE);
-
-                        distance=0;
-                    }
-                }
-            }
-        });
-
+        itemTouchHelper=new ItemTouchHelper(new CustomItemTouchHelperCallback(this, mainBinding, entryAdapter, dataAccessor, notificationHelper));
         itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
 
         //Setting up UI
@@ -225,7 +117,6 @@ public class Main extends AppCompatActivity
         AnimatorSet addCardAnimatorSet=new AnimatorSet();
         addCardAnimatorSet.play(addCardScaleY).with(addCardScaleX).with(addCardAlpha).with(addCardRadius).before(addCardVisibility);
         addCardAnimatorSet.setInterpolator(new AccelerateInterpolator(interpolatorFactor));
-
 
         addCardAnimatorSet.addListener(new Animator.AnimatorListener()
         {
@@ -457,31 +348,28 @@ public class Main extends AppCompatActivity
     public void changeSortCriterion(MenuItem sortCriterionItem)
     {
         switch (dataAccessor.getSortCriterion()) {
-            case TEXT: {
+            case TEXT:
                 mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_clock, Main.this.getTheme()));
                 dataAccessor.setSortCriterion(Criterion.DEADLINE);
-            }
-            break;
-            case DEADLINE: {
+                break;
+            case DEADLINE:
                 mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_palette, Main.this.getTheme()));
                 dataAccessor.setSortCriterion(Criterion.COLOR);
-            }
-            break;
+                break;
             case COLOR:
-            case NONE: {
+            case NONE:
                 mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_alpha, Main.this.getTheme()));
                 dataAccessor.setSortCriterion(Criterion.TEXT);
-
                 Drawable drawable = getResources().getDrawable(R.drawable.ic_arrow_downward);
                 drawable.setAlpha(255);
                 mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(drawable);
                 mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(true);
                 dataAccessor.setSortDirection(Direction.DOWN);
-            }
-            break;
+                break;
         }
 
-        if (dataAccessor.getSortDirection() == Direction.NONE) {
+        if (dataAccessor.getSortDirection() == Direction.NONE)
+        {
             mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
             dataAccessor.setSortDirection(Direction.DOWN);
         }
@@ -546,8 +434,7 @@ public class Main extends AppCompatActivity
 
     public void addCard(View addButton)
     {
-        Entry entry = new Entry();
-        System.out.println(entry.getId());
+        Entry entry = new Entry(new IdentificationHelper().createUniqueId());
         entry.setContent(mainBinding.contentEditText.getText().toString());
         entry.setNotifying(reminding);
         if (chosenColor != -1) entry.setColor(chosenColor);
@@ -594,13 +481,7 @@ public class Main extends AppCompatActivity
 
     /*public void itemTouchHelperEnabled(boolean mode)
     {
-        if(mode)
-        {
-            itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
-        }
-        else
-        {
-            itemTouchHelper.attachToRecyclerView(null);
-        }
+        if(mode) itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
+        else itemTouchHelper.attachToRecyclerView(null);
     }*/
 }

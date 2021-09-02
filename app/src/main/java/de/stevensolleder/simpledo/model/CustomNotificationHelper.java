@@ -8,18 +8,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import de.stevensolleder.simpledo.R;
-import de.stevensolleder.simpledo.controller.Main;
 
 public class CustomNotificationHelper implements NotificationHelper<Entry>
 {
     private final DataAccessor dataAccessor;
 
-    public CustomNotificationHelper()
+    public CustomNotificationHelper(DataAccessor dataAccessor)
     {
-        dataAccessor=new CustomDataAccessor(SimpleDo.getAppContext().getSharedPreferences("settings", Context.MODE_PRIVATE));
+        this.dataAccessor=dataAccessor;
     }
 
     @Override
@@ -58,5 +59,18 @@ public class CustomNotificationHelper implements NotificationHelper<Entry>
 
         AlarmManager alarmManager = (AlarmManager) SimpleDo.getAppContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
+    }
+
+    @Override
+    public void updateAlldayNotifications()
+    {
+        for(Entry entry: dataAccessor.getEntries())
+        {
+            if(entry.getTime()==null&entry.isNotifying())
+            {
+                cancelNotification(entry);
+                planAndSendNotification(entry);
+            }
+        }
     }
 }

@@ -57,8 +57,8 @@
                     style="@style/deadlineText" />
 
                 <TextView
-                    style="@style/deadlineText"
-                    android:text="" />
+                    android:text=" "
+                    style="@style/deadlineText" />
 
                 <TextView
                     android:id="@+id/addCardTime"

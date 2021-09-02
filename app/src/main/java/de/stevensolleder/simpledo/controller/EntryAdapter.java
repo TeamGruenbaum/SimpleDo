@@ -24,7 +24,7 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryViewHolder>
     @Override
     public EntryViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        return new EntryViewHolder(EntryCardBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mainActivity, this);
+        return new EntryViewHolder(mainActivity, EntryCardBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), this, dataAccessor);
     }
 
     @Override

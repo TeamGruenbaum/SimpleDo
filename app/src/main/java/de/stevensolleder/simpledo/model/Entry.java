@@ -8,7 +8,7 @@ import java.util.Calendar;
 
 public class Entry
 {
-    private final int id=new IdentificationHelper().createUniqueId();
+    private final int id;
     private String content;
     private Date date=null;
     private Time time=null;
@@ -17,7 +17,10 @@ public class Entry
 
 
 
-    public Entry() {}
+    public Entry(int id)
+    {
+        this.id=id;
+    }
 
 
     public int getId() {

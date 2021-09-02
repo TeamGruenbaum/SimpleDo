@@ -16,7 +16,10 @@ import com.google.android.material.timepicker.TimeFormat;
 
 import de.stevensolleder.simpledo.R;
 import de.stevensolleder.simpledo.model.CustomDataAccessor;
+import de.stevensolleder.simpledo.model.CustomNotificationHelper;
 import de.stevensolleder.simpledo.model.DataAccessor;
+import de.stevensolleder.simpledo.model.Entry;
+import de.stevensolleder.simpledo.model.NotificationHelper;
 import de.stevensolleder.simpledo.model.SimpleDo;
 import de.stevensolleder.simpledo.model.Time;
 
@@ -24,10 +27,12 @@ import de.stevensolleder.simpledo.model.Time;
 public class SettingsFragment extends PreferenceFragmentCompat implements PreferenceManager.OnPreferenceTreeClickListener
 {
     private DataAccessor dataAccessor;
+    private NotificationHelper<Entry> notificationHelper;
 
     public SettingsFragment()
     {
         dataAccessor=new CustomDataAccessor(SimpleDo.getAppContext().getSharedPreferences("settings", Context.MODE_PRIVATE));
+        notificationHelper=new CustomNotificationHelper(dataAccessor);
     }
 
     @Override
@@ -55,33 +60,27 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 {
                     dataAccessor.setAlldayTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
                     preference.setSummary(dataAccessor.getAlldayTime().toString());
+                    System.out.println("1");
+                    notificationHelper.updateAlldayNotifications();
+                    System.out.println("2");
                 });
 
                 materialTimePicker.show(getParentFragmentManager(), null);
                 materialTimePicker.getParentFragmentManager().executePendingTransactions();
                 materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_ok_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
                 materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_cancel_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.cancel));
-
                 return true;
-
             case "battery_optimization_key":
-                Intent batteryOptimizationIntent=new Intent(SimpleDo.getAppContext(), BatteryOptimizationActivity.class);
-                startActivity(batteryOptimizationIntent);
+                startActivity(new Intent(SimpleDo.getAppContext(), BatteryOptimizationActivity.class));
                 return true;
-
             case "about_key":
-                Intent aboutIntent=new Intent(SimpleDo.getAppContext(), AboutActivity.class);
-                startActivity(aboutIntent);
+                startActivity(new Intent(SimpleDo.getAppContext(), AboutActivity.class));
                 return true;
-
             case "imprint_key":
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://imprint.stevensolleder.de/"));
-                startActivity(intent);
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://imprint.stevensolleder.de/")));
                 return true;
-
             case "open_source_licences_key":
-                Intent licencesIntent=new Intent(SimpleDo.getAppContext(), LicencesActivity.class);
-                startActivity(licencesIntent);
+                startActivity(new Intent(SimpleDo.getAppContext(), LicencesActivity.class));
                 return true;
         }
 

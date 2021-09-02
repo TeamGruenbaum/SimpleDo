@@ -1,6 +1,5 @@
 package de.stevensolleder.simpledo.controller;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 import android.view.ContextMenu;
@@ -8,7 +7,6 @@ import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,26 +34,22 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
     private NotificationHelper<Entry> notificationHelper;
     private KeyboardHelper keyboardHelper;
 
-    private MaterialCardView materialCardView;
-
     private ContextMenu contextMenu;
     boolean contextMenuEnabled =true;
 
 
 
-    public EntryViewHolder(EntryCardBinding entryCardBinding, Main mainActivity, EntryAdapter entryAdapter)
+    public EntryViewHolder(Main mainActivity, EntryCardBinding entryCardBinding, EntryAdapter entryAdapter, DataAccessor dataAccessor)
     {
         super(entryCardBinding.getRoot());
 
         this.mainActivity=mainActivity;
         this.entryCardBinding=entryCardBinding;
         this.entryAdapter=entryAdapter;
-        this.dataAccessor=new CustomDataAccessor(SimpleDo.getAppContext().getSharedPreferences("settings", Context.MODE_PRIVATE));
+        this.dataAccessor=dataAccessor;
 
-        this.notificationHelper=new CustomNotificationHelper();
+        this.notificationHelper=new CustomNotificationHelper(dataAccessor);
         this.keyboardHelper=new KeyboardHelper(mainActivity);
-
-        this.materialCardView=entryCardBinding.card;
 
         entryCardBinding.content.setKeyPreImeAction((keyCode, keyEvent) ->
         {
@@ -81,8 +75,9 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 entryCardBinding.card.setLongClickable(false);
                 setContextMenuEnabled(false);
 
-                InputMethodManager inputMethodManager=(InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+                keyboardHelper.setKeyboardEnabled(true);
+                //InputMethodManager inputMethodManager=(InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                //inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
             }
             else
             {
@@ -95,7 +90,6 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 setContextMenuEnabled(true);
             }
         });
-
         setUpContextMenu();
     }
 
@@ -164,6 +158,8 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
                 materialDatePicker.addOnPositiveButtonClickListener(selection -> {
                     Entry entry=dataAccessor.getEntry(getPosition());
+                    if(entry.isNotifying()) notificationHelper.cancelNotification(entry);
+
                     entry.setDate(dateTimeConverter.fromMillisInDate(selection));
                     dataAccessor.changeEntry(entry, getPosition());
                     entryAdapter.notifyItemChanged(getPosition());
@@ -198,20 +194,22 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 materialTimePicker.addOnPositiveButtonClickListener(view1 ->
                 {
                     Entry entry=dataAccessor.getEntry(getPosition());
+                    if(entry.isNotifying()) notificationHelper.cancelNotification(entry);
+
                     entry.setTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
                     dataAccessor.changeEntry(entry, getPosition());
                     entryAdapter.notifyItemChanged(getPosition());
-
                     if(entry.isNotifying()) notificationHelper.planAndSendNotification(entry);
                 });
 
                 materialTimePicker.addOnNegativeButtonClickListener(view1 ->
                 {
                     Entry entry=dataAccessor.getEntry(getPosition());
+                    if(entry.isNotifying()) notificationHelper.cancelNotification(entry);
+
                     entry.setTime(null);
                     dataAccessor.changeEntry(entry, getPosition());
                     entryAdapter.notifyItemChanged(getPosition());
-
                     if(entry.isNotifying()) notificationHelper.planAndSendNotification(entry);
                 });
 
@@ -274,8 +272,8 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
         return contextMenu;
     }
 
-    public MaterialCardView getMaterialCardView()
+    public void setEntryDragged(boolean dragged)
     {
-        return materialCardView;
+        entryCardBinding.card.setDragged(dragged);
     }
 }

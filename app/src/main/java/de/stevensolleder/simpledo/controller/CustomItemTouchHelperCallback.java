@@ -3,6 +3,7 @@ package de.stevensolleder.simpledo.controller;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,20 +16,18 @@ import de.stevensolleder.simpledo.model.*;
 
 
 
-public class CustomItemTouchHelperCallback extends ItemTouchHelper.SimpleCallback
+public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
 {
     private Main mainActivity;
     private MainActivityBinding mainBinding;
     private RecyclerView.Adapter adapter;
     private DataAccessor dataAccessor;
     private NotificationHelper<Entry> notificationHelper;
-
+    private EntryViewHolder currentDraggedViewHolder;
     private int distance;
 
     public CustomItemTouchHelperCallback(Main mainActivity, MainActivityBinding mainBinding, RecyclerView.Adapter adapter, DataAccessor dataAccessor, NotificationHelper<Entry> notificationHelper)
     {
-        super(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
-
         this.mainActivity=mainActivity;
         this.mainBinding=mainBinding;
         this.adapter=adapter;
@@ -37,6 +36,12 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.SimpleCallbac
 
         //distance contains how many cards were passed after dropping the card after dragging the card
         this.distance=0;
+    }
+
+    @Override
+    public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder)
+    {
+        return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
     }
 
     //onMove() is called when a dragged card is dropped
@@ -54,7 +59,6 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.SimpleCallbac
 
         int fromIndex=viewHolder.getPosition();
         int toIndex=target.getPosition();
-
         if(fromIndex<toIndex) for (int i=fromIndex; i<toIndex; i++) dataAccessor.swapEntries(i, i+1);
         else for(int i=fromIndex; i>toIndex; i--) dataAccessor.swapEntries(i, i-1);
         adapter.notifyItemMoved(fromIndex, toIndex);
@@ -102,17 +106,17 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.SimpleCallbac
     @Override
     public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState)
     {
-        EntryViewHolder currentDraggedViewHolder=(EntryViewHolder) viewHolder;
         if(actionState == ItemTouchHelper.ACTION_STATE_DRAG)
         {
-            currentDraggedViewHolder.getMaterialCardView().setDragged(true);
+            currentDraggedViewHolder=(EntryViewHolder) viewHolder;
+            currentDraggedViewHolder.setEntryDragged(true);
         }
 
         if(actionState==ItemTouchHelper.ACTION_STATE_IDLE)
         {
             try
             {
-                currentDraggedViewHolder.getMaterialCardView().setDragged(false);
+                currentDraggedViewHolder.setEntryDragged(false);
             }
             catch(Exception exception)
             {
@@ -121,12 +125,12 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.SimpleCallbac
 
             if(distance!=0)
             {
-                Drawable sortIcon=mainActivity.getResources().getDrawable(R.drawable.ic_swap_vert, mainActivity.getTheme());
-                sortIcon.setAlpha(128);
-                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(sortIcon);
+                Drawable temp = mainActivity.getResources().getDrawable(R.drawable.ic_swap_vert, mainActivity.getTheme());
+                temp.setAlpha(128);
+                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(temp);
                 mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(false);
                 dataAccessor.setSortDirection(Direction.NONE);
-                
+
                 mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(mainActivity.getResources().getDrawable(R.drawable.ic_sort, mainActivity.getTheme()));
                 dataAccessor.setSortCriterion(Criterion.NONE);
 
