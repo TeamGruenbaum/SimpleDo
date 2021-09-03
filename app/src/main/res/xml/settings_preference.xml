@@ -24,6 +24,7 @@
             android:key="about_key"
             android:title="@string/about"
             android:icon="@drawable/ic_person"
+
             android:summary="@string/about_summary"/>
 
         <Preference

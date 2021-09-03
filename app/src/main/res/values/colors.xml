@@ -1,15 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primaryColor">#212121</color>
-    <color name="primaryLightColor">#484848</color>
-    <color name="primaryDarkColor">#000000</color>
+    <!--The color displayed most frequently across your app’s screens and components.-->
+    <color name="colorPrimary">#ffffff</color>
+    <!--A tonal variation of the primary color.-->
+    <color name="colorPrimaryVariant">#848484</color>
 
-    <color name="secondaryColor">#558b2f</color>
-    <color name="secondaryLightColor">#85bb5c</color>
-    <color name="secondaryDarkColor">#255d00</color>
+    <!--The secondary branding color for the app, usually an accented complement to the primary branding color.-->
+    <color name="colorSecondary">#558b2f</color>
+    <!--A color that passes accessibility guidelines for text/iconography when drawn on top of the secondary color.-->
+    <color name="colorOnSecondary">#000000</color>
 
-    <color name="colorSurface">#FFFFFF</color>
+    <!--Surface colors affect surfaces of components, such as cards, sheets, and menus.-->
+    <color name="colorSurface">#ffffff</color>
 
-    <color name="primaryTextColor">#ffffff</color>
-    <color name="secondaryTextColor">#000000</color>
+    <color name="primaryTextColor">#000000</color>
+    <color name="secondaryTextColor">#848484</color>
+
+    <color name="colorCardDefault">#ffffff</color>
+    <color name="colorCardYellow">#FFF9C4</color>
+    <color name="colorCardOrange">#FFE0B2</color>
+    <color name="colorCardRed">#FFCDD2</color>
+    <color name="colorCardGreen">#DCEDC8</color>
+    <color name="colorCardBlue">#BBDEFB</color>
+    <color name="colorCardPurple">#E1BEE7</color>
 </resources>

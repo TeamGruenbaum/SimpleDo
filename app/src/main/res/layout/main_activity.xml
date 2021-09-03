@@ -17,6 +17,7 @@
         android:scrollbars="vertical"/>
 
     <com.google.android.material.card.MaterialCardView
+        style="@style/cardView"
         android:id="@+id/addCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -54,15 +55,15 @@
 
                 <TextView
                     android:id="@+id/addCardDate"
-                    style="@style/deadlineText" />
+                    style="@style/informationText" />
 
                 <TextView
                     android:text=" "
-                    style="@style/deadlineText" />
+                    style="@style/informationText" />
 
                 <TextView
                     android:id="@+id/addCardTime"
-                    style="@style/deadlineText"
+                    style="@style/informationText"
                     android:visibility="gone" />
 
             </LinearLayout>
@@ -116,8 +117,8 @@
                     android:background="?android:attr/listDivider" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/remindButton"
                     style="@style/cardButton"
+                    android:id="@+id/remindButton"
                     android:onClick="toggleReminding"
                     android:visibility="gone"
                     android:tooltipText="@string/set_notification"
@@ -146,18 +147,18 @@
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.bottomappbar.BottomAppBar
+        style="@style/Widget.MaterialComponents.BottomAppBar.PrimarySurface"
         android:id="@+id/bottomAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:backgroundTint="#FFFFFF"
         app:hideOnScroll="true"
         app:menu="@menu/app_bar_menu"
         app:navigationIcon="@drawable/ic_more_vert" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/start"
         style="@style/floatingActionButton"
+        android:id="@+id/start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_anchor="@id/bottomAppBar"

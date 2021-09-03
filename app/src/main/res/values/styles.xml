@@ -1,0 +1,84 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryVariant</item>
+        <item name="colorAccent">@color/colorSecondary</item>
+        <item name="colorSurface">@color/colorSurface</item>
+
+        <item name="popupTheme">@style/popupMenu</item>
+        <item name="preferenceTheme">@style/preference</item>
+        <item name="materialTimePickerTheme">@style/TimePicker</item>
+    </style>
+
+    <style name="cardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/colorSurface</item>
+    </style>
+
+    <style name="cardButton" parent="@style/Widget.MaterialComponents.Button.TextButton">
+        <item name="android:layout_width">45dp</item>
+        <item name="android:layout_height">45dp</item>
+        <item name="android:gravity">center</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconTint">@color/primaryTextColor</item>
+    </style>
+
+    <style name="cardContentText">
+        <item name="android:textColor">@color/primaryTextColor</item>
+        <item name="android:layout_margin">10dp</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:inputType">textMultiLine</item>
+    </style>
+
+    <style name="cardDeadlineText">
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+    </style>
+
+    <style name="informationText" parent="@style/TextAppearance.MaterialComponents.Body2">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/secondaryTextColor</item>
+    </style>
+
+    <style name="popupMenu" parent="@style/Widget.AppCompat.Light.PopupMenu">
+        <item name="android:dropDownVerticalOffset">-70dp</item>
+        <item name="backgroundTint">@color/colorSurface</item>
+        <item name="android:textColor">@color/primaryTextColor</item>
+    </style>
+
+    <style name="floatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="backgroundTint">@color/colorSecondary</item>
+    </style>
+
+    <style name="MaterialCalendarTheme" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="colorPrimary">@color/colorSecondary</item>
+        <item name="colorPrimaryDark">@color/colorSecondary</item>
+        <item name="colorAccent">@color/colorSecondary</item>
+    </style>
+
+    <style name="TimePicker" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <item name="colorPrimary">@color/colorSecondary</item>
+        <item name="colorPrimaryDark">@color/colorSecondary</item>
+        <item name="colorAccent">@color/colorSecondary</item>
+    </style>
+
+    <style name="linkedButton" parent="@style/Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/primaryTextColor</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="preference" parent="@style/PreferenceThemeOverlay.v14.Material">
+        <item name="android:tint">@color/primaryTextColor</item>
+    </style>
+
+    <style name="relativeLayout">
+        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="android:textColor">@color/primaryTextColor</item>
+    </style>
+
+</resources>

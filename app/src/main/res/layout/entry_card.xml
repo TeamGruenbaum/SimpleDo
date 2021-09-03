@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView
+    style="@style/cardView"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card"
@@ -44,15 +45,15 @@
 
             <TextView
                 android:id="@+id/date"
-                style="@style/deadlineText"/>
+                style="@style/informationText"/>
 
             <TextView
                 android:text=" "
-                style="@style/deadlineText"/>
+                style="@style/informationText"/>
 
             <TextView
                 android:id="@+id/time"
-                style="@style/deadlineText"/>
+                style="@style/informationText"/>
 
         </LinearLayout>
 

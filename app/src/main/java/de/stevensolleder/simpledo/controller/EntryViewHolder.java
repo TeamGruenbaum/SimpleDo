@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
@@ -126,7 +127,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
             new MenuInflater(SimpleDo.getAppContext()).inflate(R.menu.entry_change_menu, contextMenu);
 
             keyboardHelper.setKeyboardEnabled(false);
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) mainActivity.onBackPressed();
+            mainActivity.onBackPressed();
 
             if(dataAccessor.getEntry(getPosition()).getDate()!=null)
             {
@@ -245,19 +246,20 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 Entry entry=dataAccessor.getEntry(getPosition());
                 switch(subitem.getItemId())
                 {
-                    case R.id.white: entry.setColor(Color.WHITE); break;
-                    case R.id.yellow: entry.setColor(Color.parseColor("#FFF9C4")); break;
-                    case R.id.orange:entry.setColor(Color.parseColor("#FFE0B2")); break;
-                    case R.id.red: entry.setColor(Color.parseColor("#FFCDD2")); break;
-                    case R.id.green: entry.setColor(Color.parseColor("#DCEDC8")); break;
-                    case R.id.blue: entry.setColor(Color.parseColor("#BBDEFB")); break;
-                    case R.id.purple: entry.setColor(Color.parseColor("#E1BEE7")); break;
+                    case R.id.white: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardDefault)); break;
+                    case R.id.yellow: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardYellow)); break;
+                    case R.id.orange:entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardOrange)); break;
+                    case R.id.red: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardRed)); break;
+                    case R.id.green: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardGreen)); break;
+                    case R.id.blue: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardBlue)); break;
+                    case R.id.purple: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardPurple)); break;
                 }
                 dataAccessor.changeEntry(entry, getPosition());
                 entryAdapter.notifyItemChanged(getPosition());
                 return true;
             };
 
+            new MenuInflater(SimpleDo.getAppContext()).inflate(R.menu.color_change_menu, contextMenu.getItem(4).getSubMenu());
             for(int i=0; i<7; i++) contextMenu.getItem(4).getSubMenu().getItem(i).setOnMenuItemClickListener(colorChanger);
         });
     }

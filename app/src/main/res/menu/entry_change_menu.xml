@@ -13,35 +13,6 @@
         android:visible="false"/>
     <item android:id="@+id/editColor"
         android:title="@string/edit_color">
-        <menu>
-            <item android:id="@+id/white"
-                android:icon="@drawable/ic_white"
-                android:title="@string/white"
-                app:showAsAction="always" />
-            <item android:id="@+id/yellow"
-                android:icon="@drawable/ic_yellow"
-                android:title="@string/yellow"
-                app:showAsAction="always" />
-            <item android:id="@+id/orange"
-                android:icon="@drawable/ic_orange"
-                android:title="@string/orange"
-                app:showAsAction="always" />
-            <item android:id="@+id/red"
-                android:icon="@drawable/ic_red"
-                android:title="@string/red"
-                app:showAsAction="always" />
-            <item android:id="@+id/green"
-                android:icon="@drawable/ic_green"
-                android:title="@string/green"
-                app:showAsAction="always" />
-            <item android:id="@+id/blue"
-                android:icon="@drawable/ic_blue"
-                android:title="@string/blue"
-                app:showAsAction="always" />
-            <item android:id="@+id/purple"
-                android:icon="@drawable/ic_purple"
-                android:title="@string/purple"
-                app:showAsAction="always"/>
-        </menu>
+        <menu></menu> <!-- placeholder for color_change_menu.xml -->
     </item>
 </menu>

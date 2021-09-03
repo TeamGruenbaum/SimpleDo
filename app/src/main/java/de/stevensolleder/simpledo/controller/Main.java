@@ -5,9 +5,8 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,14 +15,12 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 
 import android.widget.Button;
-import android.widget.PopupMenu;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -71,6 +68,32 @@ public class Main extends AppCompatActivity
         mainBinding.myRecyclerView.setVerticalScrollBarEnabled(false);
         mainBinding.myRecyclerView.setAdapter(entryAdapter);
 
+        //React to theme changes
+        switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) {
+            case Configuration.UI_MODE_NIGHT_YES:
+                break;
+            case Configuration.UI_MODE_NIGHT_NO:
+                break;
+        }
+
+        Entry currentEntry;
+        for(int index=0; index<dataAccessor.getEntries().size(); index++)
+        {
+           currentEntry=dataAccessor.getEntries().get(index);
+            switch(currentEntry.getColor())
+            {
+                case  -14606047: case -1: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardDefault)); break;
+                case -3422573: case -1596: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardYellow)); break;
+                case -3428734: case -8014: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardOrange)); break;
+                case -3433311: case -12846: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardRed)); break;
+                case -5588073: case -2298424: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardGreen)); break;
+                case -7689016: case -4464901: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardBlue)); break;
+                case -5271883: case -1982745: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardPurple)); break;
+            }
+            dataAccessor.changeEntry(currentEntry, index);
+        }
+        entryAdapter.notifyDataSetChanged();
+
         //Create and set Animator
         EntryListAnimator entryListAnimator=new EntryListAnimator();
         mainBinding.myRecyclerView.setItemAnimator(entryListAnimator);
@@ -91,7 +114,6 @@ public class Main extends AppCompatActivity
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBackPressed()
     {
@@ -282,9 +304,8 @@ public class Main extends AppCompatActivity
 
     public void selectColor(View colorButton)
     {
-        PopupMenu popupMenu=new PopupMenu(getApplicationContext(), colorButton);
+        PopupMenu popupMenu=new PopupMenu(this, colorButton);
         popupMenu.getMenuInflater().inflate(R.menu.color_change_menu, popupMenu.getMenu());
-
         try
         {
             //Complex reflection stuff to achieve that in lower android versions the color images in the popup menu are shown
@@ -301,13 +322,13 @@ public class Main extends AppCompatActivity
         {
             switch(menuItem.getItemId())
             {
-                case R.id.white: chosenColor=Color.WHITE; break;
-                case R.id.yellow: chosenColor=Color.parseColor("#FFF9C4"); break;
-                case R.id.orange: chosenColor=Color.parseColor("#FFE0B2"); break;
-                case R.id.red: chosenColor=Color.parseColor("#FFCDD2"); break;
-                case R.id.green: chosenColor=Color.parseColor("#DCEDC8"); break;
-                case R.id.blue: chosenColor=Color.parseColor("#BBDEFB"); break;
-                case R.id.purple: chosenColor=Color.parseColor("#E1BEE7"); break;
+                case R.id.white: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardDefault); break;
+                case R.id.yellow: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardYellow); break;
+                case R.id.orange: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardOrange); break;
+                case R.id.red: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardRed); break;
+                case R.id.green: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardGreen); break;
+                case R.id.blue: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardBlue); break;
+                case R.id.purple: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardPurple); break;
             }
             mainBinding.addCard.setCardBackgroundColor(chosenColor);
             return true;

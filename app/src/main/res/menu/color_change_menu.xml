@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/white"
         android:icon="@drawable/ic_white"
-        android:title="@string/white"
+        android:title="@string/defaultColor"
         app:showAsAction="always" />
     <item android:id="@+id/yellow"
         android:icon="@drawable/ic_yellow"

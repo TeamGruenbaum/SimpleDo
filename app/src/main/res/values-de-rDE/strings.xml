@@ -13,7 +13,7 @@
     <string name="set_color">Farbe wählen</string>
     <string name="set_notification">Benachrichtigung setzen</string>
     <string name="allday_reminder_time">Erinnerungen für ganztägige Ereignisse</string>
-    <string name="white">Weiß</string>
+    <string name="defaultColor">Standard</string>
     <string name="yellow">Gelb</string>
     <string name="orange">Orange</string>
     <string name="green">Grün</string>

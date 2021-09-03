@@ -60,9 +60,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 {
                     dataAccessor.setAlldayTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
                     preference.setSummary(dataAccessor.getAlldayTime().toString());
-                    System.out.println("1");
                     notificationHelper.updateAlldayNotifications();
-                    System.out.println("2");
                 });
 
                 materialTimePicker.show(getParentFragmentManager(), null);

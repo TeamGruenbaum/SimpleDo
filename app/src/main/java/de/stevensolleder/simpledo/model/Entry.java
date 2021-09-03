@@ -2,8 +2,11 @@ package de.stevensolleder.simpledo.model;
 
 import android.graphics.Color;
 
+import androidx.core.content.ContextCompat;
+
 import java.util.Calendar;
 
+import de.stevensolleder.simpledo.R;
 
 
 public class Entry
@@ -12,7 +15,7 @@ public class Entry
     private String content;
     private Date date=null;
     private Time time=null;
-    private int color=Color.WHITE;
+    private int color=ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardDefault);
     private boolean notifying;
 
 

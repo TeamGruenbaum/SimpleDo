@@ -14,5 +14,4 @@
         android:tooltipText="@string/change_sort_criterion"
         app:showAsAction="ifRoom"
         android:title="" />
-
 </menu>

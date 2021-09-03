@@ -15,7 +15,7 @@
     <string name="set_time">Set time</string>
     <string name="set_color">Set color</string>
     <string name="set_notification">Toggle notification</string>
-    <string name="white">White</string>
+    <string name="defaultColor">Default</string>
     <string name="yellow">Yellow</string>
     <string name="orange">Orange</string>
     <string name="green">Green</string>

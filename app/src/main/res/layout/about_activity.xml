@@ -38,7 +38,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/deadlineText"
+            style="@style/informationText"
             android:textSize="12dp"
             android:layout_marginBottom="20dp"
             android:layout_gravity="center"
@@ -46,20 +46,14 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/stevensolleder"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
+            style="@style/linkedButton"
             android:layout_marginBottom="-4dp"
             android:onClick="openDeveloperPage"
             android:text="@string/steven_solleder"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/isabellwaas"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
+            style="@style/linkedButton"
             android:layout_marginTop="-4dp"
             android:layout_marginBottom="5dp"
             android:onClick="openDeveloperPage"
