@@ -1,7 +1,5 @@
 package de.stevensolleder.simpledo.controller;
 
-import android.graphics.Color;
-import android.os.Build;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.MenuInflater;
@@ -12,7 +10,6 @@ import android.widget.Button;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
@@ -34,6 +31,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
     private NotificationHelper<Entry> notificationHelper;
     private KeyboardHelper keyboardHelper;
+    private ColorHelper colorHelper;
 
     private ContextMenu contextMenu;
     boolean contextMenuEnabled =true;
@@ -51,6 +49,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
         this.notificationHelper=new CustomNotificationHelper(dataAccessor);
         this.keyboardHelper=new KeyboardHelper(mainActivity);
+        this.colorHelper=new ColorHelper();
 
         entryCardBinding.content.setKeyPreImeAction((keyCode, keyEvent) ->
         {
@@ -72,13 +71,11 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 entryCardBinding.content.setFocusable(true);
                 entryCardBinding.content.setFocusableInTouchMode(true);
                 entryCardBinding.content.setSelection(entryCardBinding.content.length());
-                //mainActivity.itemTouchHelperEnabled(false);
+                mainActivity.itemTouchHelperEnabled(false);
                 entryCardBinding.card.setLongClickable(false);
                 setContextMenuEnabled(false);
-
+                mainActivity.softInputAdjustmentEnabled(false);
                 keyboardHelper.setKeyboardEnabled(true);
-                //InputMethodManager inputMethodManager=(InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                //inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
             }
             else
             {
@@ -86,9 +83,20 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 entryCardBinding.content.setCursorVisible(false);
                 entryCardBinding.content.setFocusable(false);
                 entryCardBinding.content.setFocusableInTouchMode(false);
-                //mainActivity.itemTouchHelperEnabled(true);
+                mainActivity.itemTouchHelperEnabled(true);
                 entryCardBinding.card.setLongClickable(true);
                 setContextMenuEnabled(true);
+                mainActivity.softInputAdjustmentEnabled(true);
+
+                Entry entry=dataAccessor.getEntry(getPosition());
+                entry.setContent(entryCardBinding.content.getText().toString());
+                dataAccessor.changeEntry(entry, getPosition());
+                if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime()))
+                {
+                    notificationHelper.cancelNotification(entry);
+                    notificationHelper.planAndSendNotification(entry);
+                }
+
             }
         });
         setUpContextMenu();
@@ -159,13 +167,13 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
                 materialDatePicker.addOnPositiveButtonClickListener(selection -> {
                     Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()) notificationHelper.cancelNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry);
 
                     entry.setDate(dateTimeConverter.fromMillisInDate(selection));
                     dataAccessor.changeEntry(entry, getPosition());
                     entryAdapter.notifyItemChanged(getPosition());
 
-                    if (entry.isNotifying()) notificationHelper.planAndSendNotification(entry);
+                    if (entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry);
                 });
 
                 materialDatePicker.addOnNegativeButtonClickListener(view1 -> {
@@ -175,7 +183,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                     dataAccessor.changeEntry(entry, getPosition());
                     entryAdapter.notifyItemChanged(getPosition());
 
-                    if(entry.isNotifying()) notificationHelper.cancelNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry);
                 });
 
                 materialDatePicker.show(mainActivity.getSupportFragmentManager(), "null");
@@ -195,23 +203,23 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 materialTimePicker.addOnPositiveButtonClickListener(view1 ->
                 {
                     Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()) notificationHelper.cancelNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry);
 
                     entry.setTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
                     dataAccessor.changeEntry(entry, getPosition());
                     entryAdapter.notifyItemChanged(getPosition());
-                    if(entry.isNotifying()) notificationHelper.planAndSendNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry);
                 });
 
                 materialTimePicker.addOnNegativeButtonClickListener(view1 ->
                 {
                     Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()) notificationHelper.cancelNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry);
 
                     entry.setTime(null);
                     dataAccessor.changeEntry(entry, getPosition());
                     entryAdapter.notifyItemChanged(getPosition());
-                    if(entry.isNotifying()) notificationHelper.planAndSendNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry);
                 });
 
                 materialTimePicker.show(mainActivity.getSupportFragmentManager(), "null");
@@ -234,7 +242,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 {
                     entry.setNotifying(true);
                     dataAccessor.changeEntry(entry, getPosition());
-                    notificationHelper.planAndSendNotification(entry);
+                    if(!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry);
                 }
                 dataAccessor.changeEntry(entry, getPosition());
                 entryAdapter.notifyItemChanged(getPosition());
@@ -244,22 +252,14 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
             MenuItem.OnMenuItemClickListener colorChanger=(subitem) ->
             {
                 Entry entry=dataAccessor.getEntry(getPosition());
-                switch(subitem.getItemId())
-                {
-                    case R.id.white: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardDefault)); break;
-                    case R.id.yellow: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardYellow)); break;
-                    case R.id.orange:entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardOrange)); break;
-                    case R.id.red: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardRed)); break;
-                    case R.id.green: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardGreen)); break;
-                    case R.id.blue: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardBlue)); break;
-                    case R.id.purple: entry.setColor(ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardPurple)); break;
-                }
+                entry.setColor(colorHelper.getMenuItemColor(subitem));
                 dataAccessor.changeEntry(entry, getPosition());
                 entryAdapter.notifyItemChanged(getPosition());
                 return true;
             };
 
             new MenuInflater(SimpleDo.getAppContext()).inflate(R.menu.color_change_menu, contextMenu.getItem(4).getSubMenu());
+            colorHelper.setupThemeSpecificColorMenuIcons(contextMenu.getItem(4).getSubMenu());
             for(int i=0; i<7; i++) contextMenu.getItem(4).getSubMenu().getItem(i).setOnMenuItemClickListener(colorChanger);
         });
     }

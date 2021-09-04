@@ -8,8 +8,11 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
@@ -46,6 +49,7 @@ public class Main extends AppCompatActivity
     private ItemTouchHelper itemTouchHelper;
     private NotificationHelper<Entry> notificationHelper;
     private KeyboardHelper keyboardHelper;
+    private ColorHelper colorHelper;
 
     private Date chosenDate=null;
     private Time chosenTime=null;
@@ -60,6 +64,7 @@ public class Main extends AppCompatActivity
         mainBinding=MainActivityBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
         dataAccessor=new CustomDataAccessor(SimpleDo.getAppContext().getSharedPreferences("settings", Context.MODE_PRIVATE));
+        colorHelper=new ColorHelper();
 
         //Set attributes from entryRecyclerView and set Adapter
         entryAdapter=new EntryAdapter(this, dataAccessor);
@@ -69,13 +74,6 @@ public class Main extends AppCompatActivity
         mainBinding.myRecyclerView.setAdapter(entryAdapter);
 
         //React to theme changes
-        switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) {
-            case Configuration.UI_MODE_NIGHT_YES:
-                break;
-            case Configuration.UI_MODE_NIGHT_NO:
-                break;
-        }
-
         Entry currentEntry;
         for(int index=0; index<dataAccessor.getEntries().size(); index++)
         {
@@ -304,36 +302,29 @@ public class Main extends AppCompatActivity
 
     public void selectColor(View colorButton)
     {
-        PopupMenu popupMenu=new PopupMenu(this, colorButton);
-        popupMenu.getMenuInflater().inflate(R.menu.color_change_menu, popupMenu.getMenu());
+        PopupMenu colorMenu=new PopupMenu(this, colorButton);
+        colorMenu.getMenuInflater().inflate(R.menu.color_change_menu, colorMenu.getMenu());
         try
         {
             //Complex reflection stuff to achieve that in lower android versions the color images in the popup menu are shown
-            Field fieldPopup=popupMenu.getClass().getDeclaredField("mPopup");
+            Field fieldPopup=colorMenu.getClass().getDeclaredField("mPopup");
             fieldPopup.setAccessible(true);
-            fieldPopup.get(popupMenu).getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(fieldPopup.get(popupMenu), true);
+            fieldPopup.get(colorMenu).getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(fieldPopup.get(colorMenu), true);
         }
         catch(Exception exception)
         {
             exception.printStackTrace();
         }
 
-        popupMenu.setOnMenuItemClickListener((menuItem)->
+        colorHelper.setupThemeSpecificColorMenuIcons(colorMenu.getMenu());
+
+        colorMenu.setOnMenuItemClickListener((menuItem)->
         {
-            switch(menuItem.getItemId())
-            {
-                case R.id.white: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardDefault); break;
-                case R.id.yellow: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardYellow); break;
-                case R.id.orange: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardOrange); break;
-                case R.id.red: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardRed); break;
-                case R.id.green: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardGreen); break;
-                case R.id.blue: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardBlue); break;
-                case R.id.purple: chosenColor=ContextCompat.getColor(getApplicationContext(), R.color.colorCardPurple); break;
-            }
+            chosenColor=colorHelper.getMenuItemColor(menuItem);
             mainBinding.addCard.setCardBackgroundColor(chosenColor);
             return true;
         });
-        popupMenu.show();
+        colorMenu.show();
     }
 
     public void toggleReminding(View remindButton)
@@ -348,18 +339,13 @@ public class Main extends AppCompatActivity
         switch (dataAccessor.getSortDirection())
         {
             case UP:
-            {
                 mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
                 dataAccessor.setSortDirection(Direction.DOWN);
-            }
-            break;
-            case DOWN:
-            case NONE:
-            {
+                break;
+            case DOWN: case NONE:
                 mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, Main.this.getTheme()));
                 dataAccessor.setSortDirection(Direction.UP);
-            }
-            break;
+                break;
         }
 
         dataAccessor.sortEntries();
@@ -460,12 +446,14 @@ public class Main extends AppCompatActivity
         entry.setNotifying(reminding);
         if (chosenColor != -1) entry.setColor(chosenColor);
 
-        if (chosenDate != null) {
+        if (chosenDate != null)
+        {
             entry.setDate(chosenDate);
             if (chosenTime != null) entry.setTime(chosenTime);
         }
 
-        if (reminding) {
+        if (reminding)
+        {
             if (entry.isInPast(dataAccessor.getAlldayTime()))
             {
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.root), this.getResources().getString(R.string.past_notification), BaseTransientBottomBar.LENGTH_SHORT);
@@ -500,9 +488,15 @@ public class Main extends AppCompatActivity
         mainBinding.myRecyclerView.scrollToPosition(dataAccessor.getEntriesSize());
     }
 
-    /*public void itemTouchHelperEnabled(boolean mode)
+    public void itemTouchHelperEnabled(boolean enabled)
     {
-        if(mode) itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
+        if(enabled) itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
         else itemTouchHelper.attachToRecyclerView(null);
-    }*/
+    }
+
+    public void softInputAdjustmentEnabled(boolean enabled)
+    {
+        if (enabled) getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        else getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+    }
 }
