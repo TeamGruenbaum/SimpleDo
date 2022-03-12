@@ -1,8 +1,7 @@
-package de.stevensolleder.simpledo.controller;
+package de.stevensolleder.simpledo.presenter;
 
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
-import 	androidx.recyclerview.widget.SimpleItemAnimator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 

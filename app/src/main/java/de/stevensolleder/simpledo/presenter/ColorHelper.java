@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.model;
+package de.stevensolleder.simpledo.presenter;
 
 import android.content.res.Configuration;
 import android.view.Menu;
@@ -9,8 +9,7 @@ import androidx.core.content.ContextCompat;
 import de.stevensolleder.simpledo.R;
 
 
-
-public class ColorHelper 
+public class ColorHelper
 {
     public ColorHelper(){}
 

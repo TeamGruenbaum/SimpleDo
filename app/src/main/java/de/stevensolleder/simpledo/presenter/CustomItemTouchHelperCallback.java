@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.controller;
+package de.stevensolleder.simpledo.presenter;
 
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -20,17 +20,19 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
     private Main mainActivity;
     private MainActivityBinding mainBinding;
     private RecyclerView.Adapter adapter;
-    private DataAccessor dataAccessor;
-    private NotificationHelper<Entry> notificationHelper;
+    private ISettingsAccessor settingsAccessor;
+    private IDataAccessor dataAccessor;
+    private INotificationHelper notificationHelper;
     private EntryViewHolder currentDraggedViewHolder;
     private int distance;
 
-    public CustomItemTouchHelperCallback(Main mainActivity, MainActivityBinding mainBinding, RecyclerView.Adapter adapter, DataAccessor dataAccessor, NotificationHelper<Entry> notificationHelper)
+    public CustomItemTouchHelperCallback(Main mainActivity, MainActivityBinding mainBinding, RecyclerView.Adapter adapter, IDataAccessor dataAccessor, ISettingsAccessor settingsAccessor, INotificationHelper notificationHelper)
     {
         this.mainActivity=mainActivity;
         this.mainBinding=mainBinding;
         this.adapter=adapter;
         this.dataAccessor=dataAccessor;
+        this.settingsAccessor=settingsAccessor;
         this.notificationHelper=notificationHelper;
 
         //distance contains how many cards were passed after dropping the card after dragging the card
@@ -82,19 +84,19 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
 
         dataAccessor.removeEntry(position);
         adapter.notifyItemRemoved(position);
-        if(entry.getDate()!=null) notificationHelper.cancelNotification(entry);
+        if(entry.getDate()!=null) notificationHelper.cancelNotification(entry.getId());
 
         Snackbar snackbar=Snackbar.make(mainActivity.findViewById(R.id.root), SimpleDo.getAppContext().getResources().getString(R.string.entry_deleted), BaseTransientBottomBar.LENGTH_SHORT);
         snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
 
         if(mainBinding.addCard.getVisibility()== View.VISIBLE) snackbar.setAnchorView(mainBinding.addCard);
-        else snackbar.setAnchorView(mainBinding.start);
+        else snackbar.setAnchorView(mainBinding.floatingActionButton);
 
         snackbar.setAction(SimpleDo.getAppContext().getResources().getString(R.string.undo), (view) ->
         {
             dataAccessor.addEntry(position, entry);
             adapter.notifyItemInserted(position);
-            if(entry.getDate()!=null) notificationHelper.planAndSendNotification(entry);
+            if(entry.getDate()!=null) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
         });
 
         snackbar.show();
@@ -128,10 +130,10 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
                 temp.setAlpha(128);
                 mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(temp);
                 mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(false);
-                dataAccessor.setSortDirection(Direction.NONE);
+                settingsAccessor.setSortDirection(Direction.NONE);
 
                 mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(mainActivity.getResources().getDrawable(R.drawable.ic_sort, mainActivity.getTheme()));
-                dataAccessor.setSortCriterion(Criterion.NONE);
+                settingsAccessor.setSortCriterion(Criterion.NONE);
 
                 distance=0;
             }

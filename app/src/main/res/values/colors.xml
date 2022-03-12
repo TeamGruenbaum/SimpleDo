@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--The color displayed most frequently across your app’s screens and components.-->
     <color name="colorPrimary">#ffffff</color>
-    <!--A tonal variation of the primary color.-->
     <color name="colorPrimaryVariant">#848484</color>
 
-    <!--The secondary branding color for the app, usually an accented complement to the primary branding color.-->
     <color name="colorSecondary">#558b2f</color>
-    <!--A color that passes accessibility guidelines for text/iconography when drawn on top of the secondary color.-->
     <color name="colorOnSecondary">#000000</color>
 
-    <!--Surface colors affect surfaces of components, such as cards, sheets, and menus.-->
     <color name="colorSurface">#ffffff</color>
 
     <color name="primaryTextColor">#000000</color>

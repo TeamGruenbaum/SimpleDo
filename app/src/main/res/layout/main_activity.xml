@@ -38,8 +38,8 @@
             android:layout_alignParentBottom="true">
 
             <EditText
-                android:id="@+id/contentEditText"
                 style="@style/cardContentText"
+                android:id="@+id/contentEditText"
                 android:layout_width="match_parent"
                 android:maxLength="500"
                 android:layout_height="0dp"
@@ -85,25 +85,22 @@
                 android:padding="0dp">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dateButton"
                     style="@style/cardButton"
-                    android:onClick="selectDate"
+                    android:id="@+id/dateButton"
                     android:tooltipText="@string/set_date"
                     android:visibility="visible"
                     app:icon="@drawable/ic_calendar"/>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/timeButton"
                     style="@style/cardButton"
-                    android:onClick="selectTime"
+                    android:id="@+id/timeButton"
                     android:visibility="gone"
                     android:tooltipText="@string/set_time"
                     app:icon="@drawable/ic_alarm"/>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/colorButton"
                     style="@style/cardButton"
-                    android:onClick="selectColor"
+                    android:id="@+id/colorButton"
                     android:visibility="visible"
                     android:tooltipText="@string/set_color"
                     app:icon="@drawable/ic_brush"/>
@@ -119,7 +116,6 @@
                 <com.google.android.material.button.MaterialButton
                     style="@style/cardButton"
                     android:id="@+id/remindButton"
-                    android:onClick="toggleReminding"
                     android:visibility="gone"
                     android:tooltipText="@string/set_notification"
                     android:enabled="false"
@@ -134,8 +130,8 @@
 
                 <com.google.android.material.button.MaterialButton
                     style="@style/cardButton"
+                    android:id="@+id/addButton"
                     android:layout_marginEnd="10dp"
-                    android:onClick="addCard"
                     android:tooltipText="@string/add_entry"
                     android:visibility="visible"
                     app:icon="@drawable/ic_send"/>
@@ -152,18 +148,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+
         app:hideOnScroll="true"
         app:menu="@menu/app_bar_menu"
         app:navigationIcon="@drawable/ic_more_vert" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         style="@style/floatingActionButton"
-        android:id="@+id/start"
+        android:id="@+id/floatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_anchor="@id/bottomAppBar"
-        android:onClick="start"
         android:tooltipText="@string/start"
+        app:layout_anchor="@id/bottomAppBar"
         app:srcCompat="@drawable/ic_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

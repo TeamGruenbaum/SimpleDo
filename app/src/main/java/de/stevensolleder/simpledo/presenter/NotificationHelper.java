@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.model;
+package de.stevensolleder.simpledo.presenter;
 
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
@@ -8,18 +8,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import de.stevensolleder.simpledo.R;
+import de.stevensolleder.simpledo.model.IDataAccessor;
+import de.stevensolleder.simpledo.model.Date;
+import de.stevensolleder.simpledo.model.Entry;
+import de.stevensolleder.simpledo.model.ISettingsAccessor;
+import de.stevensolleder.simpledo.model.Time;
 
-public class CustomNotificationHelper implements NotificationHelper<Entry>
+public class NotificationHelper implements INotificationHelper
 {
-    private final DataAccessor dataAccessor;
+    private final ISettingsAccessor settingsAccessor;
+    private final IDataAccessor dataAccessor;
 
-    public CustomNotificationHelper(DataAccessor dataAccessor)
+    public NotificationHelper(ISettingsAccessor settingsAccessor, IDataAccessor dataAccessor)
     {
+        this.settingsAccessor=settingsAccessor;
         this.dataAccessor=dataAccessor;
     }
 
@@ -37,25 +42,25 @@ public class CustomNotificationHelper implements NotificationHelper<Entry>
     }
 
     @Override
-    public void planAndSendNotification(Entry entry)
+    public void planAndSendNotification(Time time, Date date, String content, int id)
     {
         Calendar calendar=Calendar.getInstance();
-        if(entry.getTime()!=null) calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay(), entry.getTime().getHour(), entry.getTime().getMinute(), 0);
-        else calendar.set(entry.getDate().getYear(), entry.getDate().getMonth()-1, entry.getDate().getDay(), dataAccessor.getAlldayTime().getHour(), dataAccessor.getAlldayTime().getMinute(), 0);
+        if(time!=null) calendar.set(date.getYear(), date.getMonth()-1, date.getDay(), time.getHour(), time.getMinute(), 0);
+        else calendar.set(date.getYear(), date.getMonth()-1, date.getDay(), settingsAccessor.getAlldayTime().getHour(), settingsAccessor.getAlldayTime().getMinute(), 0);
 
         Intent intent=new Intent(SimpleDo.getAppContext(), ReminderBroadcastReceiver.class);
-        intent.putExtra("content", entry.getContent());
-        PendingIntent pendingIntent=PendingIntent.getBroadcast(SimpleDo.getAppContext(), entry.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        intent.putExtra("content", content);
+        PendingIntent pendingIntent=PendingIntent.getBroadcast(SimpleDo.getAppContext(), id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) SimpleDo.getAppContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
     }
 
     @Override
-    public void cancelNotification(Entry entry)
+    public void cancelNotification(int id)
     {
         Intent intent=new Intent(SimpleDo.getAppContext(), ReminderBroadcastReceiver.class);
-        PendingIntent pendingIntent=PendingIntent.getBroadcast(SimpleDo.getAppContext(), entry.getId(), intent, 0);
+        PendingIntent pendingIntent=PendingIntent.getBroadcast(SimpleDo.getAppContext(), id, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager) SimpleDo.getAppContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
@@ -68,8 +73,8 @@ public class CustomNotificationHelper implements NotificationHelper<Entry>
         {
             if(entry.getTime()==null&entry.isNotifying())
             {
-                cancelNotification(entry);
-                planAndSendNotification(entry);
+                cancelNotification(entry.getId());
+                planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
             }
         }
     }

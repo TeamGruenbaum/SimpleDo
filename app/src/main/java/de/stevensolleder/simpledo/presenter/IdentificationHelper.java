@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.model;
+package de.stevensolleder.simpledo.presenter;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;

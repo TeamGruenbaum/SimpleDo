@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.controller;
+package de.stevensolleder.simpledo.presenter;
 
 import android.content.Context;
 import android.view.inputmethod.InputMethodManager;

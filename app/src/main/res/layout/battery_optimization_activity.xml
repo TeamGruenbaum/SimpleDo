@@ -33,7 +33,6 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/autostartManagerButton"
             style="@style/linkedButton"
-            android:onClick="openBatteryOptimizationSettings"
             android:text="@string/open_settings"/>
 
     </LinearLayout>

@@ -1,17 +1,15 @@
-package de.stevensolleder.simpledo.model;
+package de.stevensolleder.simpledo.presenter;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import de.stevensolleder.simpledo.R;
-import de.stevensolleder.simpledo.controller.Main;
 
 public class ReminderBroadcastReceiver extends BroadcastReceiver
 {

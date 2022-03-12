@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.controller;
+package de.stevensolleder.simpledo.presenter;
 
 import android.view.ContextMenu;
 import android.view.KeyEvent;
@@ -7,7 +7,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -26,19 +25,20 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 {
     private Main mainActivity;
     private EntryCardBinding entryCardBinding;
-    private DataAccessor dataAccessor;
     private EntryAdapter entryAdapter;
+    private IDataAccessor dataAccessor;
+    private ISettingsAccessor settingsAccessor;
 
-    private NotificationHelper<Entry> notificationHelper;
+    private INotificationHelper notificationHelper;
     private KeyboardHelper keyboardHelper;
     private ColorHelper colorHelper;
 
     private ContextMenu contextMenu;
-    boolean contextMenuEnabled =true;
+    private boolean contextMenuEnabled =true;
 
 
 
-    public EntryViewHolder(Main mainActivity, EntryCardBinding entryCardBinding, EntryAdapter entryAdapter, DataAccessor dataAccessor)
+    public EntryViewHolder(Main mainActivity, EntryCardBinding entryCardBinding, EntryAdapter entryAdapter, IDataAccessor dataAccessor, ISettingsAccessor settingsAccessor)
     {
         super(entryCardBinding.getRoot());
 
@@ -46,8 +46,9 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
         this.entryCardBinding=entryCardBinding;
         this.entryAdapter=entryAdapter;
         this.dataAccessor=dataAccessor;
+        this.settingsAccessor=settingsAccessor;
 
-        this.notificationHelper=new CustomNotificationHelper(dataAccessor);
+        this.notificationHelper=new NotificationHelper(settingsAccessor, dataAccessor);
         this.keyboardHelper=new KeyboardHelper(mainActivity);
         this.colorHelper=new ColorHelper();
 
@@ -58,7 +59,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 entryCardBinding.content.clearFocus();
                 Entry entry=dataAccessor.getEntry(getPosition());
                 entry.setContent(entryCardBinding.content.getText().toString());
-                dataAccessor.changeEntry(entry, getPosition());
+                dataAccessor.changeEntry(getPosition(), entry);
                 entryAdapter.notifyItemChanged(getPosition());
             }
         });
@@ -90,11 +91,11 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
                 Entry entry=dataAccessor.getEntry(getPosition());
                 entry.setContent(entryCardBinding.content.getText().toString());
-                dataAccessor.changeEntry(entry, getPosition());
-                if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime()))
+                dataAccessor.changeEntry(getPosition(), entry);
+                if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime()))
                 {
-                    notificationHelper.cancelNotification(entry);
-                    notificationHelper.planAndSendNotification(entry);
+                    notificationHelper.cancelNotification(entry.getId());
+                    notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
                 }
 
             }
@@ -123,6 +124,21 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
             else entryCardBinding.time.setVisibility(View.GONE);
         }
         else entryCardBinding.deadline.setVisibility(View.GONE);
+    }
+
+    public void setContextMenuEnabled(boolean enabled)
+    {
+        contextMenuEnabled=enabled;
+    }
+
+    public ContextMenu getContextMenu()
+    {
+        return contextMenu;
+    }
+
+    public void setEntryDragged(boolean dragged)
+    {
+        entryCardBinding.card.setDragged(dragged);
     }
 
     private void setUpContextMenu()
@@ -167,23 +183,23 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
                 materialDatePicker.addOnPositiveButtonClickListener(selection -> {
                     Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
 
                     entry.setDate(dateTimeConverter.fromMillisInDate(selection));
-                    dataAccessor.changeEntry(entry, getPosition());
+                    dataAccessor.changeEntry(getPosition(), entry);
                     entryAdapter.notifyItemChanged(getPosition());
 
-                    if (entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry);
+                    if (entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
                 });
 
                 materialDatePicker.addOnNegativeButtonClickListener(view1 -> {
                     Entry entry=dataAccessor.getEntry(getPosition());
                     entry.setDate(null);
                     entry.setTime(null);
-                    dataAccessor.changeEntry(entry, getPosition());
+                    dataAccessor.changeEntry(getPosition(), entry);
                     entryAdapter.notifyItemChanged(getPosition());
 
-                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
                 });
 
                 materialDatePicker.show(mainActivity.getSupportFragmentManager(), "null");
@@ -203,23 +219,23 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 materialTimePicker.addOnPositiveButtonClickListener(view1 ->
                 {
                     Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
 
                     entry.setTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
-                    dataAccessor.changeEntry(entry, getPosition());
+                    dataAccessor.changeEntry(getPosition(), entry);
                     entryAdapter.notifyItemChanged(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
                 });
 
                 materialTimePicker.addOnNegativeButtonClickListener(view1 ->
                 {
                     Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
 
                     entry.setTime(null);
-                    dataAccessor.changeEntry(entry, getPosition());
+                    dataAccessor.changeEntry(getPosition(), entry);
                     entryAdapter.notifyItemChanged(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry);
+                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
                 });
 
                 materialTimePicker.show(mainActivity.getSupportFragmentManager(), "null");
@@ -235,16 +251,16 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 if(dataAccessor.getEntry(getPosition()).isNotifying())
                 {
                     entry.setNotifying(false);
-                    dataAccessor.changeEntry(entry, getPosition());
-                    notificationHelper.cancelNotification(entry);
+                    dataAccessor.changeEntry(getPosition(), entry);
+                    notificationHelper.cancelNotification(entry.getId());
                 }
                 else
                 {
                     entry.setNotifying(true);
-                    dataAccessor.changeEntry(entry, getPosition());
-                    if(!entry.isInPast(dataAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry);
+                    dataAccessor.changeEntry(getPosition(), entry);
+                    if(!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
                 }
-                dataAccessor.changeEntry(entry, getPosition());
+                dataAccessor.changeEntry(getPosition(), entry);
                 entryAdapter.notifyItemChanged(getPosition());
                 return true;
             });
@@ -253,7 +269,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
             {
                 Entry entry=dataAccessor.getEntry(getPosition());
                 entry.setColor(colorHelper.getMenuItemColor(subitem));
-                dataAccessor.changeEntry(entry, getPosition());
+                dataAccessor.changeEntry(getPosition(), entry);
                 entryAdapter.notifyItemChanged(getPosition());
                 return true;
             };
@@ -262,20 +278,5 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
             colorHelper.setupThemeSpecificColorMenuIcons(contextMenu.getItem(4).getSubMenu());
             for(int i=0; i<7; i++) contextMenu.getItem(4).getSubMenu().getItem(i).setOnMenuItemClickListener(colorChanger);
         });
-    }
-
-    public void setContextMenuEnabled(boolean enabled)
-    {
-        contextMenuEnabled=enabled;
-    }
-
-    public ContextMenu getContextMenu()
-    {
-        return contextMenu;
-    }
-
-    public void setEntryDragged(boolean dragged)
-    {
-        entryCardBinding.card.setDragged(dragged);
     }
 }

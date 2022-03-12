@@ -1,7 +1,9 @@
-package de.stevensolleder.simpledo.model;
+package de.stevensolleder.simpledo.presenter;
 
 import java.util.Calendar;
 
+import de.stevensolleder.simpledo.model.Date;
+import de.stevensolleder.simpledo.model.Time;
 
 
 public class DateTimeConverter

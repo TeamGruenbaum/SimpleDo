@@ -1,21 +1,24 @@
-package de.stevensolleder.simpledo.controller;
+package de.stevensolleder.simpledo.presenter;
 
 import android.os.Bundle;
 import android.webkit.WebView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import de.stevensolleder.simpledo.R;
+import de.stevensolleder.simpledo.databinding.LicensesActivityBinding;
 
 public class LicencesActivity extends AppCompatActivity
 {
+    private LicensesActivityBinding licencesBinding;
+
     @Override
     protected void onCreate( Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.licenses_activity);
+        licencesBinding= LicensesActivityBinding.inflate(getLayoutInflater());
+        setContentView(licencesBinding.getRoot());
 
-        WebView webView=findViewById(R.id.webview);
+        WebView webView=licencesBinding.webview;
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.loadUrl("file:///android_asset/licenses.html");

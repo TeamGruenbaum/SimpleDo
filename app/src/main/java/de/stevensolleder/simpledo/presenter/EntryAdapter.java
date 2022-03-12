@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.controller;
+package de.stevensolleder.simpledo.presenter;
 
 
 import android.view.LayoutInflater;
@@ -7,24 +7,27 @@ import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
 
 import de.stevensolleder.simpledo.databinding.EntryCardBinding;
-import de.stevensolleder.simpledo.model.DataAccessor;
+import de.stevensolleder.simpledo.model.IDataAccessor;
+import de.stevensolleder.simpledo.model.ISettingsAccessor;
 
 
 public class EntryAdapter extends RecyclerView.Adapter<EntryViewHolder>
 {
     private Main mainActivity;
-    private DataAccessor dataAccessor;
+    private IDataAccessor dataAccessor;
+    private ISettingsAccessor settingsAccessor;
 
-    public EntryAdapter(Main activity, DataAccessor dataAccessor)
+    public EntryAdapter(Main activity, IDataAccessor dataAccessor, ISettingsAccessor settingsAccessor)
     {
         mainActivity=activity;
         this.dataAccessor=dataAccessor;
+        this.settingsAccessor=settingsAccessor;
     }
 
     @Override
     public EntryViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        return new EntryViewHolder(mainActivity, EntryCardBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), this, dataAccessor);
+        return new EntryViewHolder(mainActivity, EntryCardBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), this, dataAccessor, settingsAccessor);
     }
 
     @Override

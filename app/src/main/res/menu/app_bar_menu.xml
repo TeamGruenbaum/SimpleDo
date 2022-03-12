@@ -2,16 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/sortDirectionButton"
         android:icon="@drawable/ic_arrow_downward"
-        android:onClick="changeSortDirection"
         android:tooltipText="@string/change_sort_direction"
-        app:showAsAction="ifRoom"
-        android:title="" />
+        android:title=""
+        app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/sortCriterionButton"
         android:icon="@drawable/ic_sort"
-        android:onClick="changeSortCriterion"
         android:tooltipText="@string/change_sort_criterion"
-        app:showAsAction="ifRoom"
-        android:title="" />
+        android:title=""
+        app:showAsAction="ifRoom" />
 </menu>
