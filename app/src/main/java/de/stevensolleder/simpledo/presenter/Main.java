@@ -40,13 +40,13 @@ public class Main extends AppCompatActivity
 {
     private MainActivityBinding mainBinding;
     private IDataAccessor dataAccessor;
-    private ISettingsAccessor settingsAccessor;
+    private ISortSettingsAccessor sortSettingsAccessor;
+    private IReminderSettingsAccessor reminderSettingsAccessor;
 
     private EntryAdapter entryAdapter;
     private ItemTouchHelper itemTouchHelper;
     private INotificationHelper notificationHelper;
     private KeyboardHelper keyboardHelper;
-    private ColorHelper colorHelper;
 
     private Date chosenDate=null;
     private Time chosenTime=null;
@@ -61,11 +61,11 @@ public class Main extends AppCompatActivity
         mainBinding=MainActivityBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
         dataAccessor=new DataAccessor(SimpleDo.getAppContext());
-        settingsAccessor=new SettingsAccessor(SimpleDo.getAppContext());
-        colorHelper=new ColorHelper();
+        sortSettingsAccessor=new SortSettingsAccessor(SimpleDo.getAppContext());
+        reminderSettingsAccessor=new ReminderSettingsAccessor(SimpleDo.getAppContext());
 
         //Set attributes from entryRecyclerView and set Adapter
-        entryAdapter=new EntryAdapter(this, dataAccessor, settingsAccessor);
+        entryAdapter=new EntryAdapter(this, dataAccessor, reminderSettingsAccessor);
         mainBinding.myRecyclerView.setHasFixedSize(true);
         mainBinding.myRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mainBinding.myRecyclerView.setVerticalScrollBarEnabled(false);
@@ -91,15 +91,14 @@ public class Main extends AppCompatActivity
         entryAdapter.notifyDataSetChanged();
 
         //Create and set Animator
-        EntryListAnimator entryListAnimator=new EntryListAnimator();
-        mainBinding.myRecyclerView.setItemAnimator(entryListAnimator);
+        mainBinding.myRecyclerView.setItemAnimator(new EntryListAnimator());
 
         //Create notificationChannel for reminders
-        notificationHelper=new NotificationHelper(settingsAccessor, dataAccessor);
+        notificationHelper=new NotificationHelper(dataAccessor::getEntries, reminderSettingsAccessor);
         notificationHelper.createNotificationChannel();
 
         //Setting swipe gestures
-        itemTouchHelper=new ItemTouchHelper(new CustomItemTouchHelperCallback(this, mainBinding, entryAdapter, dataAccessor, settingsAccessor, notificationHelper));
+        itemTouchHelper=new ItemTouchHelper(new CustomItemTouchHelperCallback(this, mainBinding, entryAdapter, dataAccessor, sortSettingsAccessor, notificationHelper));
         itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
 
         //Setting up UI
@@ -310,6 +309,7 @@ public class Main extends AppCompatActivity
 
     public void selectColor(View colorButton)
     {
+        ColorHelper colorHelper=new ColorHelper();
         PopupMenu colorMenu=new PopupMenu(this, colorButton);
         colorMenu.getMenuInflater().inflate(R.menu.color_change_menu, colorMenu.getMenu());
         try
@@ -370,52 +370,52 @@ public class Main extends AppCompatActivity
 
     public void changeSortDirection(View sortDirectionItem)
     {
-        switch (settingsAccessor.getSortDirection())
+        switch (sortSettingsAccessor.getSortDirection())
         {
             case UP:
                 mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
-                settingsAccessor.setSortDirection(Direction.DOWN);
+                sortSettingsAccessor.setSortDirection(Direction.DOWN);
                 break;
             case DOWN: case NONE:
                 mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, Main.this.getTheme()));
-            settingsAccessor.setSortDirection(Direction.UP);
+            sortSettingsAccessor.setSortDirection(Direction.UP);
                 break;
         }
 
-        dataAccessor.sortEntries(settingsAccessor.getSortCriterion(), settingsAccessor.getSortDirection());
+        dataAccessor.sortEntries(sortSettingsAccessor.getSortCriterion(), sortSettingsAccessor.getSortDirection());
         entryAdapter.notifyDataSetChanged();
     }
 
     public void changeSortCriterion(View sortCriterionItem)
     {
-        switch (settingsAccessor.getSortCriterion()) {
+        switch (sortSettingsAccessor.getSortCriterion()) {
             case TEXT:
                 mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_clock, Main.this.getTheme()));
-                settingsAccessor.setSortCriterion(Criterion.DEADLINE);
+                sortSettingsAccessor.setSortCriterion(Criterion.DEADLINE);
                 break;
             case DEADLINE:
                 mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_palette, Main.this.getTheme()));
-                settingsAccessor.setSortCriterion(Criterion.COLOR);
+                sortSettingsAccessor.setSortCriterion(Criterion.COLOR);
                 break;
             case COLOR:
             case NONE:
                 mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_alpha, Main.this.getTheme()));
-                settingsAccessor.setSortCriterion(Criterion.TEXT);
+                sortSettingsAccessor.setSortCriterion(Criterion.TEXT);
                 Drawable drawable = getResources().getDrawable(R.drawable.ic_arrow_downward);
                 drawable.setAlpha(255);
                 mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(drawable);
                 mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(true);
-                settingsAccessor.setSortDirection(Direction.DOWN);
+                sortSettingsAccessor.setSortDirection(Direction.DOWN);
                 break;
         }
 
-        if (settingsAccessor.getSortDirection() == Direction.NONE)
+        if (sortSettingsAccessor.getSortDirection() == Direction.NONE)
         {
             mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
-            settingsAccessor.setSortDirection(Direction.DOWN);
+            sortSettingsAccessor.setSortDirection(Direction.DOWN);
         }
 
-        dataAccessor.sortEntries(settingsAccessor.getSortCriterion(), settingsAccessor.getSortDirection());
+        dataAccessor.sortEntries(sortSettingsAccessor.getSortCriterion(), sortSettingsAccessor.getSortDirection());
         entryAdapter.notifyDataSetChanged();
     }
 
@@ -436,7 +436,7 @@ public class Main extends AppCompatActivity
 
         if (reminding)
         {
-            if (entry.isInPast(settingsAccessor.getAlldayTime()))
+            if (entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
             {
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.root), this.getResources().getString(R.string.past_notification), BaseTransientBottomBar.LENGTH_SHORT);
                 snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
@@ -449,8 +449,8 @@ public class Main extends AppCompatActivity
 
         mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme()));
         mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
-        settingsAccessor.setSortDirection(Direction.NONE);
-        settingsAccessor.setSortCriterion(Criterion.NONE);
+        sortSettingsAccessor.setSortDirection(Direction.NONE);
+        sortSettingsAccessor.setSortCriterion(Criterion.NONE);
 
         dataAccessor.addEntry(entry);
         entryAdapter.notifyItemInserted(dataAccessor.getEntriesSize());
@@ -484,7 +484,7 @@ public class Main extends AppCompatActivity
 
     private void setupLayout()
     {
-        switch(settingsAccessor.getSortDirection())
+        switch(sortSettingsAccessor.getSortDirection())
         {
             case UP: mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, this.getTheme())); break;
             case DOWN: mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, this.getTheme())); break;
@@ -497,7 +497,7 @@ public class Main extends AppCompatActivity
             } break;
         }
 
-        switch(settingsAccessor.getSortCriterion())
+        switch(sortSettingsAccessor.getSortCriterion())
         {
             case TEXT: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_alpha, this.getTheme())); break;
             case DEADLINE: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_clock, this.getTheme())); break;

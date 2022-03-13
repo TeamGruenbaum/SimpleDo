@@ -15,27 +15,27 @@ import com.google.android.material.timepicker.TimeFormat;
 
 import de.stevensolleder.simpledo.R;
 import de.stevensolleder.simpledo.model.DataAccessor;
-import de.stevensolleder.simpledo.model.SettingsAccessor;
-import de.stevensolleder.simpledo.model.ISettingsAccessor;
+import de.stevensolleder.simpledo.model.IReminderSettingsAccessor;
+import de.stevensolleder.simpledo.model.ReminderSettingsAccessor;
 import de.stevensolleder.simpledo.model.Time;
 
 
 public class SettingsFragment extends PreferenceFragmentCompat implements PreferenceManager.OnPreferenceTreeClickListener
 {
-    private ISettingsAccessor settingsAccessor;
+    private IReminderSettingsAccessor reminderSettingsAccessor;
     private INotificationHelper notificationHelper;
 
     public SettingsFragment()
     {
-        settingsAccessor=new SettingsAccessor(SimpleDo.getAppContext());
-        notificationHelper=new NotificationHelper(settingsAccessor, new DataAccessor(SimpleDo.getAppContext()));
+        reminderSettingsAccessor=new ReminderSettingsAccessor(SimpleDo.getAppContext());
+        notificationHelper=new NotificationHelper(new DataAccessor(SimpleDo.getAppContext())::getEntries, reminderSettingsAccessor);
     }
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey)
     {
         addPreferencesFromResource(R.xml.settings_preference);
-        findPreference("allday_reminder_time_key").setSummary(settingsAccessor.getAlldayTime().toString());
+        findPreference("allday_reminder_time_key").setSummary(reminderSettingsAccessor.getAlldayTime().toString());
     }
 
     @Override
@@ -48,14 +48,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
             case "allday_reminder_time_key":
                 MaterialTimePicker materialTimePicker=new MaterialTimePicker.Builder()
                         .setTimeFormat(TimeFormat.CLOCK_24H)
-                        .setHour(settingsAccessor.getAlldayTime().getHour())
-                        .setMinute(settingsAccessor.getAlldayTime().getMinute())
+                        .setHour(reminderSettingsAccessor.getAlldayTime().getHour())
+                        .setMinute(reminderSettingsAccessor.getAlldayTime().getMinute())
                         .build();
 
                 materialTimePicker.addOnPositiveButtonClickListener(view ->
                 {
-                    settingsAccessor.setAlldayTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
-                    preference.setSummary(settingsAccessor.getAlldayTime().toString());
+                    reminderSettingsAccessor.setAlldayTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
+                    preference.setSummary(reminderSettingsAccessor.getAlldayTime().toString());
                     notificationHelper.updateAlldayNotifications();
                 });
 

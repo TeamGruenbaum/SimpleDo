@@ -21,7 +21,6 @@
         android:id="@+id/addCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:windowSoftInputMode="adjustPan"
         app:layout_anchor="@id/bottomAppBar"
 
         android:layout_marginStart="10dp"
@@ -145,10 +144,10 @@
     <com.google.android.material.bottomappbar.BottomAppBar
         style="@style/Widget.MaterialComponents.BottomAppBar.PrimarySurface"
         android:id="@+id/bottomAppBar"
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-
         app:hideOnScroll="true"
         app:menu="@menu/app_bar_menu"
         app:navigationIcon="@drawable/ic_more_vert" />

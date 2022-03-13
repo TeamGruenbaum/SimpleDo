@@ -9,23 +9,24 @@ import android.content.Intent;
 import android.os.Build;
 
 import java.util.Calendar;
+import java.util.List;
+import java.util.function.Supplier;
 
 import de.stevensolleder.simpledo.R;
-import de.stevensolleder.simpledo.model.IDataAccessor;
 import de.stevensolleder.simpledo.model.Date;
 import de.stevensolleder.simpledo.model.Entry;
-import de.stevensolleder.simpledo.model.ISettingsAccessor;
+import de.stevensolleder.simpledo.model.IReminderSettingsAccessor;
 import de.stevensolleder.simpledo.model.Time;
 
 public class NotificationHelper implements INotificationHelper
 {
-    private final ISettingsAccessor settingsAccessor;
-    private final IDataAccessor dataAccessor;
+    private final Supplier<List<Entry>> entries;
+    private final IReminderSettingsAccessor reminderSettingsAccessor;
 
-    public NotificationHelper(ISettingsAccessor settingsAccessor, IDataAccessor dataAccessor)
+    public NotificationHelper(Supplier<List<Entry>> entries, IReminderSettingsAccessor reminderSettingsAccessor)
     {
-        this.settingsAccessor=settingsAccessor;
-        this.dataAccessor=dataAccessor;
+        this.entries=entries;
+        this.reminderSettingsAccessor=reminderSettingsAccessor;
     }
 
     @Override
@@ -46,7 +47,7 @@ public class NotificationHelper implements INotificationHelper
     {
         Calendar calendar=Calendar.getInstance();
         if(time!=null) calendar.set(date.getYear(), date.getMonth()-1, date.getDay(), time.getHour(), time.getMinute(), 0);
-        else calendar.set(date.getYear(), date.getMonth()-1, date.getDay(), settingsAccessor.getAlldayTime().getHour(), settingsAccessor.getAlldayTime().getMinute(), 0);
+        else calendar.set(date.getYear(), date.getMonth()-1, date.getDay(), reminderSettingsAccessor.getAlldayTime().getHour(), reminderSettingsAccessor.getAlldayTime().getMinute(), 0);
 
         Intent intent=new Intent(SimpleDo.getAppContext(), ReminderBroadcastReceiver.class);
         intent.putExtra("content", content);
@@ -69,7 +70,7 @@ public class NotificationHelper implements INotificationHelper
     @Override
     public void updateAlldayNotifications()
     {
-        for(Entry entry: dataAccessor.getEntries())
+        for(Entry entry: entries.get())
         {
             if(entry.getTime()==null&entry.isNotifying())
             {

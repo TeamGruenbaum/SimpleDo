@@ -14,6 +14,7 @@ import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
 import java.util.Calendar;
+import java.util.function.Consumer;
 
 import de.stevensolleder.simpledo.R;
 import de.stevensolleder.simpledo.databinding.EntryCardBinding;
@@ -23,34 +24,26 @@ import de.stevensolleder.simpledo.model.*;
 
 public class EntryViewHolder extends RecyclerView.ViewHolder
 {
-    private Main mainActivity;
     private EntryCardBinding entryCardBinding;
-    private EntryAdapter entryAdapter;
     private IDataAccessor dataAccessor;
-    private ISettingsAccessor settingsAccessor;
-
-    private INotificationHelper notificationHelper;
-    private KeyboardHelper keyboardHelper;
-    private ColorHelper colorHelper;
+    private IReminderSettingsAccessor reminderSettingsAccessor;
 
     private ContextMenu contextMenu;
     private boolean contextMenuEnabled =true;
 
 
 
-    public EntryViewHolder(Main mainActivity, EntryCardBinding entryCardBinding, EntryAdapter entryAdapter, IDataAccessor dataAccessor, ISettingsAccessor settingsAccessor)
+    public EntryViewHolder(Main mainActivity, EntryCardBinding entryCardBinding, IDataAccessor dataAccessor, IReminderSettingsAccessor reminderSettingsAccessor, Consumer<Integer> notifyAdapter)
     {
         super(entryCardBinding.getRoot());
 
-        this.mainActivity=mainActivity;
         this.entryCardBinding=entryCardBinding;
-        this.entryAdapter=entryAdapter;
         this.dataAccessor=dataAccessor;
-        this.settingsAccessor=settingsAccessor;
+        this.reminderSettingsAccessor=reminderSettingsAccessor;
 
-        this.notificationHelper=new NotificationHelper(settingsAccessor, dataAccessor);
-        this.keyboardHelper=new KeyboardHelper(mainActivity);
-        this.colorHelper=new ColorHelper();
+        ColorHelper colorHelper=new ColorHelper();
+        KeyboardHelper keyboardHelper=new KeyboardHelper(mainActivity);
+        NotificationHelper notificationHelper=new NotificationHelper(dataAccessor::getEntries, reminderSettingsAccessor);
 
         entryCardBinding.content.setKeyPreImeAction((keyCode, keyEvent) ->
         {
@@ -60,7 +53,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 Entry entry=dataAccessor.getEntry(getPosition());
                 entry.setContent(entryCardBinding.content.getText().toString());
                 dataAccessor.changeEntry(getPosition(), entry);
-                entryAdapter.notifyItemChanged(getPosition());
+                notifyAdapter.accept(getPosition());
             }
         });
 
@@ -92,7 +85,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 Entry entry=dataAccessor.getEntry(getPosition());
                 entry.setContent(entryCardBinding.content.getText().toString());
                 dataAccessor.changeEntry(getPosition(), entry);
-                if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime()))
+                if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
                 {
                     notificationHelper.cancelNotification(entry.getId());
                     notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
@@ -100,49 +93,8 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
             }
         });
-        setUpContextMenu();
-    }
 
-    public void bindData(Entry entry)
-    {
-        entryCardBinding.content.setText(entry.getContent());
-        entryCardBinding.card.setCardBackgroundColor(entry.getColor());
-
-        if(entry.isNotifying()) entryCardBinding.bell.setVisibility(View.VISIBLE);
-        else entryCardBinding.bell.setVisibility(View.GONE);
-
-        if(entry.getDate()!=null)
-        {
-            entryCardBinding.date.setText(entry.getDate().toString());
-            entryCardBinding.deadline.setVisibility(View.VISIBLE);
-
-            if(entry.getTime()!=null)
-            {
-                entryCardBinding.time.setText(entry.getTime().toString());
-                entryCardBinding.time.setVisibility(View.VISIBLE);
-            }
-            else entryCardBinding.time.setVisibility(View.GONE);
-        }
-        else entryCardBinding.deadline.setVisibility(View.GONE);
-    }
-
-    public void setContextMenuEnabled(boolean enabled)
-    {
-        contextMenuEnabled=enabled;
-    }
-
-    public ContextMenu getContextMenu()
-    {
-        return contextMenu;
-    }
-
-    public void setEntryDragged(boolean dragged)
-    {
-        entryCardBinding.card.setDragged(dragged);
-    }
-
-    private void setUpContextMenu()
-    {
+        //Set up context menu
         entryCardBinding.card.setOnCreateContextMenuListener((contextMenu, view, menuInfo) ->
         {
             if(!contextMenuEnabled) return;
@@ -181,25 +133,27 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                         .setSelection(date==null? Calendar.getInstance().getTimeInMillis(): dateTimeConverter.fromDateInMillis(date))
                         .build();
 
-                materialDatePicker.addOnPositiveButtonClickListener(selection -> {
+                materialDatePicker.addOnPositiveButtonClickListener(selection ->
+                {
                     Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
+                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
 
                     entry.setDate(dateTimeConverter.fromMillisInDate(selection));
                     dataAccessor.changeEntry(getPosition(), entry);
-                    entryAdapter.notifyItemChanged(getPosition());
+                    notifyAdapter.accept(getPosition());
 
-                    if (entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
+                    if (entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
                 });
 
-                materialDatePicker.addOnNegativeButtonClickListener(view1 -> {
+                materialDatePicker.addOnNegativeButtonClickListener(view1 ->
+                {
                     Entry entry=dataAccessor.getEntry(getPosition());
                     entry.setDate(null);
                     entry.setTime(null);
                     dataAccessor.changeEntry(getPosition(), entry);
-                    entryAdapter.notifyItemChanged(getPosition());
+                    notifyAdapter.accept(getPosition());
 
-                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
+                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
                 });
 
                 materialDatePicker.show(mainActivity.getSupportFragmentManager(), "null");
@@ -219,23 +173,23 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 materialTimePicker.addOnPositiveButtonClickListener(view1 ->
                 {
                     Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
+                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
 
                     entry.setTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
                     dataAccessor.changeEntry(getPosition(), entry);
-                    entryAdapter.notifyItemChanged(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
+                    notifyAdapter.accept(getPosition());
+                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
                 });
 
                 materialTimePicker.addOnNegativeButtonClickListener(view1 ->
                 {
                     Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
+                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
 
                     entry.setTime(null);
                     dataAccessor.changeEntry(getPosition(), entry);
-                    entryAdapter.notifyItemChanged(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
+                    notifyAdapter.accept(getPosition());
+                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
                 });
 
                 materialTimePicker.show(mainActivity.getSupportFragmentManager(), "null");
@@ -258,10 +212,10 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 {
                     entry.setNotifying(true);
                     dataAccessor.changeEntry(getPosition(), entry);
-                    if(!entry.isInPast(settingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
+                    if(!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
                 }
                 dataAccessor.changeEntry(getPosition(), entry);
-                entryAdapter.notifyItemChanged(getPosition());
+                notifyAdapter.accept(getPosition());
                 return true;
             });
 
@@ -270,7 +224,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 Entry entry=dataAccessor.getEntry(getPosition());
                 entry.setColor(colorHelper.getMenuItemColor(subitem));
                 dataAccessor.changeEntry(getPosition(), entry);
-                entryAdapter.notifyItemChanged(getPosition());
+                notifyAdapter.accept(getPosition());
                 return true;
             };
 
@@ -278,5 +232,43 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
             colorHelper.setupThemeSpecificColorMenuIcons(contextMenu.getItem(4).getSubMenu());
             for(int i=0; i<7; i++) contextMenu.getItem(4).getSubMenu().getItem(i).setOnMenuItemClickListener(colorChanger);
         });
+    }
+
+    public void bindData(Entry entry)
+    {
+        entryCardBinding.content.setText(entry.getContent());
+        entryCardBinding.card.setCardBackgroundColor(entry.getColor());
+
+        if(entry.isNotifying()) entryCardBinding.bell.setVisibility(View.VISIBLE);
+        else entryCardBinding.bell.setVisibility(View.GONE);
+
+        if(entry.getDate()!=null)
+        {
+            entryCardBinding.date.setText(entry.getDate().toString());
+            entryCardBinding.deadline.setVisibility(View.VISIBLE);
+
+            if(entry.getTime()!=null)
+            {
+                entryCardBinding.time.setText(entry.getTime().toString());
+                entryCardBinding.time.setVisibility(View.VISIBLE);
+            }
+            else entryCardBinding.time.setVisibility(View.GONE);
+        }
+        else entryCardBinding.deadline.setVisibility(View.GONE);
+    }
+
+    public void setContextMenuEnabled(boolean enabled)
+    {
+        contextMenuEnabled=enabled;
+    }
+
+    public ContextMenu getContextMenu()
+    {
+        return contextMenu;
+    }
+
+    public void setEntryDragged(boolean dragged)
+    {
+        entryCardBinding.card.setDragged(dragged);
     }
 }

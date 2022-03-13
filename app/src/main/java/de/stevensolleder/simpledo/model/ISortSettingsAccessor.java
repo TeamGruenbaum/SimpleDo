@@ -1,11 +1,9 @@
 package de.stevensolleder.simpledo.model;
 
-public interface ISettingsAccessor
+public interface ISortSettingsAccessor
 {
     Direction getSortDirection();
     void setSortDirection(Direction newValue);
     Criterion getSortCriterion();
     void setSortCriterion(Criterion newValue);
-    Time getAlldayTime();
-    void setAlldayTime(Time newValue);
 }

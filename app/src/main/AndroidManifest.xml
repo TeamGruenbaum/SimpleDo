@@ -17,6 +17,7 @@
             android:exported="true" />
 
         <activity
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
             android:name=".presenter.Main"
             android:launchMode="singleTop">
             <intent-filter>
