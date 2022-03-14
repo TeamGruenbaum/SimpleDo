@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.presenter;
+package de.stevensolleder.simpledo.presenter.recyclerview;
 
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;

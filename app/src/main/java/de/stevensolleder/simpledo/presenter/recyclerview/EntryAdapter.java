@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.presenter;
+package de.stevensolleder.simpledo.presenter.recyclerview;
 
 
 import android.view.LayoutInflater;
@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import de.stevensolleder.simpledo.databinding.EntryCardBinding;
 import de.stevensolleder.simpledo.model.IDataAccessor;
 import de.stevensolleder.simpledo.model.IReminderSettingsAccessor;
+import de.stevensolleder.simpledo.presenter.Main;
 
 
 public class EntryAdapter extends RecyclerView.Adapter<EntryViewHolder>
@@ -27,7 +28,7 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryViewHolder>
     @Override
     public EntryViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        return new EntryViewHolder(mainActivity, EntryCardBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), dataAccessor, reminderSettingsAccessor, this::notifyItemChanged);
+        return new EntryViewHolder(mainActivity, EntryCardBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), dataAccessor, reminderSettingsAccessor);
     }
 
     @Override

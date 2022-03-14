@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.presenter;
+package de.stevensolleder.simpledo.presenter.notifications;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,6 +10,9 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import de.stevensolleder.simpledo.R;
+import de.stevensolleder.simpledo.presenter.IdentificationHelper;
+import de.stevensolleder.simpledo.presenter.Main;
+import de.stevensolleder.simpledo.presenter.SimpleDo;
 
 public class ReminderBroadcastReceiver extends BroadcastReceiver
 {

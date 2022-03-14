@@ -13,11 +13,16 @@ import androidx.preference.PreferenceManager;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
+import java.util.List;
+
 import de.stevensolleder.simpledo.R;
 import de.stevensolleder.simpledo.model.DataAccessor;
+import de.stevensolleder.simpledo.model.Entry;
 import de.stevensolleder.simpledo.model.IReminderSettingsAccessor;
 import de.stevensolleder.simpledo.model.ReminderSettingsAccessor;
 import de.stevensolleder.simpledo.model.Time;
+import de.stevensolleder.simpledo.presenter.notifications.INotificationHelper;
+import de.stevensolleder.simpledo.presenter.notifications.NotificationHelper;
 
 
 public class SettingsFragment extends PreferenceFragmentCompat implements PreferenceManager.OnPreferenceTreeClickListener
@@ -28,7 +33,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
     public SettingsFragment()
     {
         reminderSettingsAccessor=new ReminderSettingsAccessor(SimpleDo.getAppContext());
-        notificationHelper=new NotificationHelper(new DataAccessor(SimpleDo.getAppContext())::getEntries, reminderSettingsAccessor);
+        notificationHelper=new NotificationHelper();
     }
 
     @Override
@@ -56,7 +61,16 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                 {
                     reminderSettingsAccessor.setAlldayTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
                     preference.setSummary(reminderSettingsAccessor.getAlldayTime().toString());
-                    notificationHelper.updateAlldayNotifications();
+
+                    List<Entry> allEntries=new DataAccessor(SimpleDo.getAppContext()).getEntries();
+                    for(Entry entry: allEntries)
+                    {
+                        if(entry.getTime()==null&entry.isNotifying())
+                        {
+                            notificationHelper.cancelNotification(entry.getId());
+                            notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
+                        }
+                    }
                 });
 
                 materialTimePicker.show(getParentFragmentManager(), null);

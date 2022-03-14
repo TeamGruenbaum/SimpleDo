@@ -12,12 +12,12 @@
         android:theme="@style/AppTheme">
 
         <receiver
-            android:name=".presenter.ReminderBroadcastReceiver"
+            android:name=".presenter.notifications.ReminderBroadcastReceiver"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
+            android:windowSoftInputMode="adjustNothing"
             android:name=".presenter.Main"
             android:launchMode="singleTop">
             <intent-filter>

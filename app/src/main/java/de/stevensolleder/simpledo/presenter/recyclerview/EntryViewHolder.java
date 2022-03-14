@@ -1,4 +1,4 @@
-package de.stevensolleder.simpledo.presenter;
+package de.stevensolleder.simpledo.presenter.recyclerview;
 
 import android.view.ContextMenu;
 import android.view.KeyEvent;
@@ -7,6 +7,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -14,36 +16,38 @@ import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
 import java.util.Calendar;
-import java.util.function.Consumer;
 
 import de.stevensolleder.simpledo.R;
 import de.stevensolleder.simpledo.databinding.EntryCardBinding;
 import de.stevensolleder.simpledo.model.*;
-
+import de.stevensolleder.simpledo.presenter.ColorHelper;
+import de.stevensolleder.simpledo.presenter.DateTimeConverter;
+import de.stevensolleder.simpledo.presenter.KeyboardHelper;
+import de.stevensolleder.simpledo.presenter.Main;
+import de.stevensolleder.simpledo.presenter.notifications.NotificationHelper;
+import de.stevensolleder.simpledo.presenter.SimpleDo;
 
 
 public class EntryViewHolder extends RecyclerView.ViewHolder
 {
-    private EntryCardBinding entryCardBinding;
-    private IDataAccessor dataAccessor;
-    private IReminderSettingsAccessor reminderSettingsAccessor;
+    @NonNull private final EntryCardBinding entryCardBinding;
 
-    private ContextMenu contextMenu;
-    private boolean contextMenuEnabled =true;
+    @Nullable private ContextMenu contextMenu;
+    private boolean contextMenuEnabled;
 
 
 
-    public EntryViewHolder(Main mainActivity, EntryCardBinding entryCardBinding, IDataAccessor dataAccessor, IReminderSettingsAccessor reminderSettingsAccessor, Consumer<Integer> notifyAdapter)
+    public EntryViewHolder(@NonNull Main mainActivity, @NonNull EntryCardBinding entryCardBinding, @NonNull IDataAccessor dataAccessor, @NonNull IReminderSettingsAccessor reminderSettingsAccessor)
     {
         super(entryCardBinding.getRoot());
 
         this.entryCardBinding=entryCardBinding;
-        this.dataAccessor=dataAccessor;
-        this.reminderSettingsAccessor=reminderSettingsAccessor;
+        this.contextMenu=null;
+        this.contextMenuEnabled=true;
 
         ColorHelper colorHelper=new ColorHelper();
         KeyboardHelper keyboardHelper=new KeyboardHelper(mainActivity);
-        NotificationHelper notificationHelper=new NotificationHelper(dataAccessor::getEntries, reminderSettingsAccessor);
+        NotificationHelper notificationHelper=new NotificationHelper();
 
         entryCardBinding.content.setKeyPreImeAction((keyCode, keyEvent) ->
         {
@@ -53,34 +57,47 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 Entry entry=dataAccessor.getEntry(getPosition());
                 entry.setContent(entryCardBinding.content.getText().toString());
                 dataAccessor.changeEntry(getPosition(), entry);
-                notifyAdapter.accept(getPosition());
+                getBindingAdapter().notifyItemChanged(getPosition());
             }
         });
 
-        entryCardBinding.content.setOnFocusChangeListener((view, hasFocus) -> {
+        entryCardBinding.content.setOnFocusChangeListener((view, hasFocus) ->
+        {
             if(hasFocus)
             {
                 entryCardBinding.content.setClickable(true);
                 entryCardBinding.content.setCursorVisible(true);
+
                 entryCardBinding.content.setFocusable(true);
                 entryCardBinding.content.setFocusableInTouchMode(true);
+
                 entryCardBinding.content.setSelection(entryCardBinding.content.length());
+
                 mainActivity.itemTouchHelperEnabled(false);
+
                 entryCardBinding.card.setLongClickable(false);
-                setContextMenuEnabled(false);
-                mainActivity.softInputAdjustmentEnabled(false);
+
+                contextMenuEnabled=false;
+
+
                 keyboardHelper.setKeyboardEnabled(true);
             }
             else
             {
                 entryCardBinding.content.setClickable(false);
                 entryCardBinding.content.setCursorVisible(false);
+
                 entryCardBinding.content.setFocusable(false);
                 entryCardBinding.content.setFocusableInTouchMode(false);
+
                 mainActivity.itemTouchHelperEnabled(true);
+
                 entryCardBinding.card.setLongClickable(true);
-                setContextMenuEnabled(true);
-                mainActivity.softInputAdjustmentEnabled(true);
+
+                contextMenuEnabled=true;
+
+
+                keyboardHelper.setKeyboardEnabled(false);
 
                 Entry entry=dataAccessor.getEntry(getPosition());
                 entry.setContent(entryCardBinding.content.getText().toString());
@@ -88,7 +105,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
                 {
                     notificationHelper.cancelNotification(entry.getId());
-                    notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
+                    notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
                 }
 
             }
@@ -118,7 +135,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
             {
                 entryCardBinding.content.setFocusableInTouchMode(true);
                 entryCardBinding.content.setFocusable(true);
-                entryCardBinding.content.requestFocus();
+                System.out.println(entryCardBinding.content.requestFocus());
                 return true;
             });
 
@@ -140,9 +157,9 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
                     entry.setDate(dateTimeConverter.fromMillisInDate(selection));
                     dataAccessor.changeEntry(getPosition(), entry);
-                    notifyAdapter.accept(getPosition());
+                    getBindingAdapter().notifyItemChanged(getPosition());
 
-                    if (entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
+                    if (entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
                 });
 
                 materialDatePicker.addOnNegativeButtonClickListener(view1 ->
@@ -151,7 +168,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                     entry.setDate(null);
                     entry.setTime(null);
                     dataAccessor.changeEntry(getPosition(), entry);
-                    notifyAdapter.accept(getPosition());
+                    getBindingAdapter().notifyItemChanged(getPosition());
 
                     if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
                 });
@@ -177,8 +194,8 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
                     entry.setTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
                     dataAccessor.changeEntry(getPosition(), entry);
-                    notifyAdapter.accept(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
+                    getBindingAdapter().notifyItemChanged(getPosition());
+                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
                 });
 
                 materialTimePicker.addOnNegativeButtonClickListener(view1 ->
@@ -188,8 +205,8 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
 
                     entry.setTime(null);
                     dataAccessor.changeEntry(getPosition(), entry);
-                    notifyAdapter.accept(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
+                    getBindingAdapter().notifyItemChanged(getPosition());
+                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
                 });
 
                 materialTimePicker.show(mainActivity.getSupportFragmentManager(), "null");
@@ -212,10 +229,10 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 {
                     entry.setNotifying(true);
                     dataAccessor.changeEntry(getPosition(), entry);
-                    if(!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
+                    if(!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
                 }
                 dataAccessor.changeEntry(getPosition(), entry);
-                notifyAdapter.accept(getPosition());
+                getBindingAdapter().notifyItemChanged(getPosition());
                 return true;
             });
 
@@ -224,7 +241,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 Entry entry=dataAccessor.getEntry(getPosition());
                 entry.setColor(colorHelper.getMenuItemColor(subitem));
                 dataAccessor.changeEntry(getPosition(), entry);
-                notifyAdapter.accept(getPosition());
+                getBindingAdapter().notifyItemChanged(getPosition());
                 return true;
             };
 
@@ -234,7 +251,8 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
         });
     }
 
-    public void bindData(Entry entry)
+
+    public void bindData(@NonNull Entry entry)
     {
         entryCardBinding.content.setText(entry.getContent());
         entryCardBinding.card.setCardBackgroundColor(entry.getColor());
@@ -257,11 +275,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
         else entryCardBinding.deadline.setVisibility(View.GONE);
     }
 
-    public void setContextMenuEnabled(boolean enabled)
-    {
-        contextMenuEnabled=enabled;
-    }
-
+    @Nullable
     public ContextMenu getContextMenu()
     {
         return contextMenu;

@@ -1,38 +1,31 @@
-package de.stevensolleder.simpledo.presenter;
+package de.stevensolleder.simpledo.presenter.recyclerview;
 
-import android.graphics.drawable.Drawable;
-import android.view.View;
+import android.view.ContextMenu;
 
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
 
 import de.stevensolleder.simpledo.R;
-import de.stevensolleder.simpledo.databinding.MainActivityBinding;
 import de.stevensolleder.simpledo.model.*;
-
+import de.stevensolleder.simpledo.presenter.notifications.INotificationHelper;
+import de.stevensolleder.simpledo.presenter.Main;
+import de.stevensolleder.simpledo.presenter.SimpleDo;
 
 
 public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
 {
     private Main mainActivity;
-    private MainActivityBinding mainBinding;
-    private RecyclerView.Adapter adapter;
     private IDataAccessor dataAccessor;
-    private ISortSettingsAccessor sortSettingsAccessor;
     private INotificationHelper notificationHelper;
     private EntryViewHolder currentDraggedViewHolder;
     private int distance;
 
-    public CustomItemTouchHelperCallback(Main mainActivity, MainActivityBinding mainBinding, RecyclerView.Adapter adapter, IDataAccessor dataAccessor, ISortSettingsAccessor sortSettingsAccessor, INotificationHelper notificationHelper)
+    public CustomItemTouchHelperCallback(Main mainActivity, IDataAccessor dataAccessor, INotificationHelper notificationHelper)
     {
         this.mainActivity=mainActivity;
-        this.mainBinding=mainBinding;
-        this.adapter=adapter;
         this.dataAccessor=dataAccessor;
-        this.sortSettingsAccessor = sortSettingsAccessor;
         this.notificationHelper=notificationHelper;
 
         //distance contains how many cards were passed after dropping the card after dragging the card
@@ -49,20 +42,15 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)
     {
-        try
-        {
-            ((EntryViewHolder)viewHolder).getContextMenu().close();
-        }
-        catch(Exception exception)
-        {
-            exception.printStackTrace();
-        }
+        ContextMenu contextMenu=((EntryViewHolder)viewHolder).getContextMenu();
+
+        if(contextMenu!=null) contextMenu.close();
 
         int fromIndex=viewHolder.getPosition();
         int toIndex=target.getPosition();
         if(fromIndex<toIndex) for (int i=fromIndex; i<toIndex; i++) dataAccessor.swapEntries(i, i+1);
         else for(int i=fromIndex; i>toIndex; i--) dataAccessor.swapEntries(i, i-1);
-        adapter.notifyItemMoved(fromIndex, toIndex);
+        viewHolder.getBindingAdapter().notifyItemMoved(fromIndex, toIndex);
 
         return viewHolder.getPosition()!=target.getPosition();
     }
@@ -83,24 +71,21 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
         Entry entry=dataAccessor.getEntry(position);
 
         dataAccessor.removeEntry(position);
-        adapter.notifyItemRemoved(position);
+        viewHolder.getBindingAdapter().notifyItemRemoved(position);
         if(entry.getDate()!=null) notificationHelper.cancelNotification(entry.getId());
 
-        Snackbar snackbar=Snackbar.make(mainBinding.root, SimpleDo.getAppContext().getResources().getString(R.string.entry_deleted), BaseTransientBottomBar.LENGTH_SHORT);
-        snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
-
-        if(mainBinding.addCard.getVisibility()== View.VISIBLE) snackbar.setAnchorView(mainBinding.addCard);
-        else snackbar.setAnchorView(mainBinding.floatingActionButton);
-
-        snackbar.setAction(SimpleDo.getAppContext().getResources().getString(R.string.undo), (view) ->
+        mainActivity.showSnackbar(SimpleDo.getAppContext().getResources().getString(R.string.entry_deleted), BaseTransientBottomBar.LENGTH_SHORT, (view) ->
         {
             dataAccessor.addEntry(position, entry);
-            adapter.notifyItemInserted(position);
-            if(entry.getDate()!=null) notificationHelper.planAndSendNotification(entry.getTime(), entry.getDate(), entry.getContent(), entry.getId());
+            viewHolder.getBindingAdapter().notifyItemInserted(position);
+            if(entry.getDate()!=null) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
         });
 
-        snackbar.show();
-        mainActivity.toggleSortability();
+        if(dataAccessor.getEntriesSize()<=1)
+        {
+            mainActivity.enableSortability(false);
+            mainActivity.resetSortability();
+        }
     }
 
     //onSelectedChanged() is called when the state of the current dragged card changes
@@ -126,14 +111,7 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
 
             if(distance!=0)
             {
-                Drawable temp = mainActivity.getResources().getDrawable(R.drawable.ic_swap_vert, mainActivity.getTheme());
-                temp.setAlpha(128);
-                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(temp);
-                mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(false);
-                sortSettingsAccessor.setSortDirection(Direction.NONE);
-
-                mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(mainActivity.getResources().getDrawable(R.drawable.ic_sort, mainActivity.getTheme()));
-                sortSettingsAccessor.setSortCriterion(Criterion.NONE);
+                mainActivity.resetSortability();
 
                 distance=0;
             }

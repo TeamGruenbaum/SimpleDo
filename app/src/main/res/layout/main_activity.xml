@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
@@ -16,149 +16,160 @@
         android:paddingBottom="120dp"
         android:scrollbars="vertical"/>
 
-    <com.google.android.material.card.MaterialCardView
-        style="@style/cardView"
-        android:id="@+id/addCard"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@id/bottomAppBar"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
 
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:visibility="gone"
-        app:cardElevation="20dp">
-
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
+            style="@style/cardView"
+            android:id="@+id/addCard"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_alignParentBottom="true">
+            android:layout_height="wrap_content"
+            app:layout_anchor="@id/bottomAppBar"
 
-            <EditText
-                style="@style/cardContentText"
-                android:id="@+id/contentEditText"
-                android:layout_width="match_parent"
-                android:maxLength="500"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone"
+            app:cardElevation="20dp">
 
             <LinearLayout
-                android:id="@+id/addCardDeadline"
-                style="@style/cardDeadlineText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_alignParentBottom="true">
 
-                <TextView
-                    android:id="@+id/addCardDate"
-                    style="@style/informationText" />
+                <EditText
+                    style="@style/cardContentText"
+                    android:id="@+id/contentEditText"
+                    android:layout_width="match_parent"
+                    android:maxLength="500"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
 
-                <TextView
-                    android:text=" "
-                    style="@style/informationText" />
+                <LinearLayout
+                    android:id="@+id/addCardDeadline"
+                    style="@style/cardDeadlineText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
-                <TextView
-                    android:id="@+id/addCardTime"
-                    style="@style/informationText"
-                    android:visibility="gone" />
+                    <TextView
+                        android:id="@+id/addCardDate"
+                        style="@style/informationText" />
+
+                    <TextView
+                        android:text=" "
+                        style="@style/informationText" />
+
+                    <TextView
+                        android:id="@+id/addCardTime"
+                        style="@style/informationText"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/divider0"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="?android:attr/listDivider" />
+
+                <LinearLayout
+                    android:id="@+id/deadline"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:gravity="end"
+                    android:orientation="horizontal"
+                    android:padding="0dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/cardButton"
+                        android:id="@+id/dateButton"
+                        android:tooltipText="@string/set_date"
+                        android:visibility="visible"
+                        app:icon="@drawable/ic_calendar"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/cardButton"
+                        android:id="@+id/timeButton"
+                        android:visibility="gone"
+                        android:tooltipText="@string/set_time"
+                        app:icon="@drawable/ic_alarm"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/cardButton"
+                        android:id="@+id/colorButton"
+                        android:visibility="visible"
+                        android:tooltipText="@string/set_color"
+                        app:icon="@drawable/ic_brush"/>
+
+                    <View
+                        android:id="@+id/divider1"
+                        android:visibility="gone"
+                        android:layout_width="1dp"
+                        android:layout_margin="6dp"
+                        android:layout_height="match_parent"
+                        android:background="?android:attr/listDivider" />
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/cardButton"
+                        android:id="@+id/remindButton"
+                        android:visibility="gone"
+                        android:tooltipText="@string/set_notification"
+                        android:enabled="false"
+                        app:icon="@drawable/ic_notifications_off"/>
+
+                    <View
+                        android:id="@+id/divider2"
+                        android:layout_width="1dp"
+                        android:layout_margin="6dp"
+                        android:layout_height="match_parent"
+                        android:background="?android:attr/listDivider" />
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/cardButton"
+                        android:id="@+id/addButton"
+                        android:layout_marginEnd="10dp"
+                        android:tooltipText="@string/add_entry"
+                        android:visibility="visible"
+                        app:icon="@drawable/ic_send"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <View
-                android:id="@+id/divider0"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:background="?android:attr/listDivider" />
+        </com.google.android.material.card.MaterialCardView>
 
-            <LinearLayout
-                android:id="@+id/deadline"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:gravity="end"
-                android:orientation="horizontal"
-                android:padding="0dp">
 
-                <com.google.android.material.button.MaterialButton
-                    style="@style/cardButton"
-                    android:id="@+id/dateButton"
-                    android:tooltipText="@string/set_date"
-                    android:visibility="visible"
-                    app:icon="@drawable/ic_calendar"/>
 
-                <com.google.android.material.button.MaterialButton
-                    style="@style/cardButton"
-                    android:id="@+id/timeButton"
-                    android:visibility="gone"
-                    android:tooltipText="@string/set_time"
-                    app:icon="@drawable/ic_alarm"/>
+        <com.google.android.material.bottomappbar.BottomAppBar
+            style="@style/Widget.MaterialComponents.BottomAppBar.PrimarySurface"
+            android:id="@+id/bottomAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:hideOnScroll="true"
+            app:menu="@menu/app_bar_menu"
+            app:navigationIcon="@drawable/ic_more_vert" />
 
-                <com.google.android.material.button.MaterialButton
-                    style="@style/cardButton"
-                    android:id="@+id/colorButton"
-                    android:visibility="visible"
-                    android:tooltipText="@string/set_color"
-                    app:icon="@drawable/ic_brush"/>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            style="@style/floatingActionButton"
+            android:id="@+id/floatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tooltipText="@string/start"
+            app:layout_anchor="@id/bottomAppBar"
+            app:srcCompat="@drawable/ic_add" />
 
-                <View
-                    android:id="@+id/divider1"
-                    android:visibility="gone"
-                    android:layout_width="1dp"
-                    android:layout_margin="6dp"
-                    android:layout_height="match_parent"
-                    android:background="?android:attr/listDivider" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    style="@style/cardButton"
-                    android:id="@+id/remindButton"
-                    android:visibility="gone"
-                    android:tooltipText="@string/set_notification"
-                    android:enabled="false"
-                    app:icon="@drawable/ic_notifications_off"/>
 
-                <View
-                    android:id="@+id/divider2"
-                    android:layout_width="1dp"
-                    android:layout_margin="6dp"
-                    android:layout_height="match_parent"
-                    android:background="?android:attr/listDivider" />
-
-                <com.google.android.material.button.MaterialButton
-                    style="@style/cardButton"
-                    android:id="@+id/addButton"
-                    android:layout_marginEnd="10dp"
-                    android:tooltipText="@string/add_entry"
-                    android:visibility="visible"
-                    app:icon="@drawable/ic_send"/>
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.bottomappbar.BottomAppBar
-        style="@style/Widget.MaterialComponents.BottomAppBar.PrimarySurface"
-        android:id="@+id/bottomAppBar"
-
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:hideOnScroll="true"
-        app:menu="@menu/app_bar_menu"
-        app:navigationIcon="@drawable/ic_more_vert" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        style="@style/floatingActionButton"
-        android:id="@+id/floatingActionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:tooltipText="@string/start"
-        app:layout_anchor="@id/bottomAppBar"
-        app:srcCompat="@drawable/ic_add" />
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
