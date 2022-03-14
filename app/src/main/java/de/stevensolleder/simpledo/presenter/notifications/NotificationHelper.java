@@ -9,16 +9,10 @@ import android.content.Intent;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import java.util.Calendar;
-import java.util.List;
-import java.util.function.Supplier;
 
-import de.stevensolleder.simpledo.R;
 import de.stevensolleder.simpledo.model.Date;
-import de.stevensolleder.simpledo.model.Entry;
-import de.stevensolleder.simpledo.model.IReminderSettingsAccessor;
 import de.stevensolleder.simpledo.model.Time;
 import de.stevensolleder.simpledo.presenter.SimpleDo;
 

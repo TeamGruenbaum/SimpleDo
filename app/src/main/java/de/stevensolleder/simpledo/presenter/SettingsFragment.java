@@ -68,7 +68,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Prefer
                         if(entry.getTime()==null&entry.isNotifying())
                         {
                             notificationHelper.cancelNotification(entry.getId());
-                            notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
+                            notificationHelper.planAndSendNotification(entry.getDate(), reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
                         }
                     }
                 });

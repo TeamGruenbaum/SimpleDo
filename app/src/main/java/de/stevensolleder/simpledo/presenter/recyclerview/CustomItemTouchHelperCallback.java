@@ -18,14 +18,17 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
 {
     private Main mainActivity;
     private IDataAccessor dataAccessor;
+    private IReminderSettingsAccessor reminderSettingsAccessor;
     private INotificationHelper notificationHelper;
+
     private EntryViewHolder currentDraggedViewHolder;
     private int distance;
 
-    public CustomItemTouchHelperCallback(Main mainActivity, IDataAccessor dataAccessor, INotificationHelper notificationHelper)
+    public CustomItemTouchHelperCallback(Main mainActivity, IDataAccessor dataAccessor, IReminderSettingsAccessor reminderSettingsAccessor, INotificationHelper notificationHelper)
     {
         this.mainActivity=mainActivity;
         this.dataAccessor=dataAccessor;
+        this.reminderSettingsAccessor=reminderSettingsAccessor;
         this.notificationHelper=notificationHelper;
 
         //distance contains how many cards were passed after dropping the card after dragging the card
@@ -43,7 +46,6 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)
     {
         ContextMenu contextMenu=((EntryViewHolder)viewHolder).getContextMenu();
-
         if(contextMenu!=null) contextMenu.close();
 
         int fromIndex=viewHolder.getPosition();
@@ -78,7 +80,7 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
         {
             dataAccessor.addEntry(position, entry);
             viewHolder.getBindingAdapter().notifyItemInserted(position);
-            if(entry.getDate()!=null) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
+            if(entry.getDate()!=null && entry.isNotifying()) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime():reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
         });
 
         if(dataAccessor.getEntriesSize()<=1)
@@ -112,7 +114,6 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
             if(distance!=0)
             {
                 mainActivity.resetSortability();
-
                 distance=0;
             }
         }

@@ -74,11 +74,8 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 entryCardBinding.content.setSelection(entryCardBinding.content.length());
 
                 mainActivity.itemTouchHelperEnabled(false);
-
                 entryCardBinding.card.setLongClickable(false);
-
                 contextMenuEnabled=false;
-
 
                 keyboardHelper.setKeyboardEnabled(true);
             }
@@ -91,11 +88,8 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 entryCardBinding.content.setFocusableInTouchMode(false);
 
                 mainActivity.itemTouchHelperEnabled(true);
-
                 entryCardBinding.card.setLongClickable(true);
-
                 contextMenuEnabled=true;
-
 
                 keyboardHelper.setKeyboardEnabled(false);
 
@@ -105,7 +99,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
                 {
                     notificationHelper.cancelNotification(entry.getId());
-                    notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
+                    notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime():reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
                 }
 
             }
@@ -159,7 +153,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                     dataAccessor.changeEntry(getPosition(), entry);
                     getBindingAdapter().notifyItemChanged(getPosition());
 
-                    if (entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
+                    if (entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime():reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
                 });
 
                 materialDatePicker.addOnNegativeButtonClickListener(view1 ->
@@ -195,7 +189,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                     entry.setTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
                     dataAccessor.changeEntry(getPosition(), entry);
                     getBindingAdapter().notifyItemChanged(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
+                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime(): reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
                 });
 
                 materialTimePicker.addOnNegativeButtonClickListener(view1 ->
@@ -206,7 +200,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                     entry.setTime(null);
                     dataAccessor.changeEntry(getPosition(), entry);
                     getBindingAdapter().notifyItemChanged(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
+                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime(): reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
                 });
 
                 materialTimePicker.show(mainActivity.getSupportFragmentManager(), "null");
@@ -229,7 +223,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 {
                     entry.setNotifying(true);
                     dataAccessor.changeEntry(getPosition(), entry);
-                    if(!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(), entry.getContent(), entry.getId());
+                    if(!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime(): reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
                 }
                 dataAccessor.changeEntry(getPosition(), entry);
                 getBindingAdapter().notifyItemChanged(getPosition());

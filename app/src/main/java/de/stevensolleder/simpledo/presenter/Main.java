@@ -1,22 +1,17 @@
 package de.stevensolleder.simpledo.presenter;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.view.inputmethod.InputMethodManager;
 
 import android.widget.Button;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
@@ -45,19 +40,23 @@ import de.stevensolleder.simpledo.presenter.recyclerview.EntryListAnimator;
 public class Main extends AppCompatActivity
 {
     private MainActivityBinding mainBinding;
+
+    private IDataAccessor dataAccessor;
+    private ISortSettingsAccessor sortSettingsAccessor;
+    private IReminderSettingsAccessor reminderSettingsAccessor;
+
+    private EntryAdapter entryAdapter;
+    private ItemTouchHelper itemTouchHelper;
+
+    private INotificationHelper notificationHelper;
+    private KeyboardHelper keyboardHelper;
+
+    private BottomBarAnimator bottomBarAnimator;
+
     private Date chosenDate=null;
     private Time chosenTime=null;
     private int chosenColor=-1;
     private boolean reminding=false;
-    private IDataAccessor dataAccessor;
-    private ISortSettingsAccessor sortSettingsAccessor;
-    private IReminderSettingsAccessor reminderSettingsAccessor;
-    private EntryAdapter entryAdapter;
-    private ItemTouchHelper itemTouchHelper;
-    private INotificationHelper notificationHelper;
-
-    private KeyboardHelper keyboardHelper;
-
 
 
     @Override
@@ -67,27 +66,32 @@ public class Main extends AppCompatActivity
         super.onCreate(savedInstanceState);
         mainBinding=MainActivityBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
+
+        //Create Accessors and Helpers
         dataAccessor=new DataAccessor(SimpleDo.getAppContext());
         sortSettingsAccessor=new SortSettingsAccessor(SimpleDo.getAppContext());
         reminderSettingsAccessor=new ReminderSettingsAccessor(SimpleDo.getAppContext());
+        keyboardHelper=new KeyboardHelper(this);
+        keyboardHelper.setKeyboardEnabled(false);
 
         //Set attributes from entryRecyclerView and set Adapter
         entryAdapter=new EntryAdapter(this, dataAccessor, reminderSettingsAccessor);
-        mainBinding.myRecyclerView.setHasFixedSize(true);
-        mainBinding.myRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mainBinding.myRecyclerView.setVerticalScrollBarEnabled(false);
-        mainBinding.myRecyclerView.setAdapter(entryAdapter);
+        mainBinding.recyclerView.setHasFixedSize(true);
+        mainBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mainBinding.recyclerView.setVerticalScrollBarEnabled(false);
+        mainBinding.recyclerView.setAdapter(entryAdapter);
 
-        //Setting swipe gestures
-        itemTouchHelper=new ItemTouchHelper(new CustomItemTouchHelperCallback(this, dataAccessor, notificationHelper));
-        itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
-
-        //Create and set Animator
-        mainBinding.myRecyclerView.setItemAnimator(new EntryListAnimator());
+        //Create and set Animators
+        mainBinding.recyclerView.setItemAnimator(new EntryListAnimator());
+        bottomBarAnimator=new BottomBarAnimator(mainBinding.floatingActionButton, mainBinding.bottomAppBar, mainBinding.addCard);
 
         //Create notificationChannel for reminders
         notificationHelper=new NotificationHelper();
         notificationHelper.createNotificationChannel("main", SimpleDo.getAppContext().getResources().getString(R.string.reminders), SimpleDo.getAppContext().getResources().getString(R.string.reminders_description), NotificationManager.IMPORTANCE_HIGH);
+
+        //Set swipe gestures
+        itemTouchHelper=new ItemTouchHelper(new CustomItemTouchHelperCallback(this, dataAccessor, reminderSettingsAccessor, notificationHelper));
+        itemTouchHelper.attachToRecyclerView(mainBinding.recyclerView);
 
         //React to theme changes
         Entry currentEntry;
@@ -108,11 +112,29 @@ public class Main extends AppCompatActivity
         }
         entryAdapter.notifyDataSetChanged();
 
-        //Setting up UI
+        //Set up UI
         {
-            setupLayout();
-            keyboardHelper = new KeyboardHelper(this);
-            keyboardHelper.setKeyboardEnabled(false);
+            switch(sortSettingsAccessor.getSortDirection())
+            {
+                case UP: mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, this.getTheme())); break;
+                case DOWN: mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, this.getTheme())); break;
+                case NONE:
+                {
+                    Drawable drawable = getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
+                    drawable.setAlpha(128);
+                    mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(drawable);
+                    mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(false);
+                } break;
+            }
+
+            switch(sortSettingsAccessor.getSortCriterion())
+            {
+                case TEXT: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_alpha, this.getTheme())); break;
+                case DEADLINE: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_clock, this.getTheme())); break;
+                case COLOR: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_palette, this.getTheme())); break;
+                case NONE: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_sort, this.getTheme())); break;
+            }
+
             mainBinding.floatingActionButton.setOnClickListener((view) -> start());
             mainBinding.dateButton.setOnClickListener((view) -> selectDate());
             mainBinding.timeButton.setOnClickListener((view) -> selectTime());
@@ -124,131 +146,31 @@ public class Main extends AppCompatActivity
             mainBinding.bottomAppBar.findViewById(R.id.sortCriterionButton).setOnClickListener((view) -> changeSortCriterion());
         }
 
+        //Set onBackPress functionality
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true){
             @Override
             public void handleOnBackPressed()
             {
                 getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 
-                int duration=400;
-                int interpolatorFactor=2;
-
-                ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(mainBinding.floatingActionButton, "scaleY", 1F).setDuration(duration);
-                ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(mainBinding.floatingActionButton, "scaleX", 1F).setDuration(duration);
-                ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(mainBinding.floatingActionButton, "alpha", 1F).setDuration(duration);
-                ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(mainBinding.floatingActionButton,"visibility", View.VISIBLE).setDuration(duration);
-
-                AnimatorSet floatingActionButtonAnimatorSet=new AnimatorSet();
-                floatingActionButtonAnimatorSet.play(floatingActionButtonScaleX).with(floatingActionButtonScaleY).with(floatingActionButtonAlpha).with(floatingActionButtonVisibility);
-                floatingActionButtonAnimatorSet.setStartDelay((long) (duration/1.2));
-                floatingActionButtonAnimatorSet.setInterpolator(new DecelerateInterpolator(interpolatorFactor));
-
-                ObjectAnimator addCardVisibility=ObjectAnimator.ofInt(mainBinding.addCard,"visibility", View.GONE).setDuration(10);
-                ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(mainBinding.addCard, "scaleY", 1F, 0.2F).setDuration(duration);
-                ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(mainBinding.addCard, "scaleX", 1F, 0.2F).setDuration(duration);
-                ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(mainBinding.addCard, "alpha", 1F, 0F).setDuration(duration);
-                ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(mainBinding.addCard, "radius", 4, 100).setDuration(duration);
-
-                AnimatorSet addCardAnimatorSet=new AnimatorSet();
-                addCardAnimatorSet.play(addCardScaleY).with(addCardScaleX).with(addCardAlpha).with(addCardRadius).before(addCardVisibility);
-                addCardAnimatorSet.setInterpolator(new AccelerateInterpolator(interpolatorFactor));
-
-                addCardAnimatorSet.addListener(new Animator.AnimatorListener()
-                {
-                    @Override
-                    public void onAnimationStart(Animator animation)
-                    {
-                        mainBinding.contentEditText.setEnabled(false);
-                    }
-
-                    @Override public void onAnimationEnd(Animator animation){}
-                    @Override public void onAnimationCancel(Animator animation){}
-                    @Override public void onAnimationRepeat(Animator animation){}
-                });
-
-                floatingActionButtonAnimatorSet.addListener(new Animator.AnimatorListener()
-                {
-                    @Override public void onAnimationStart(Animator animation) {}
-
-                    @Override
-                    public void onAnimationEnd(Animator animation)
-                    {
-                        mainBinding.contentEditText.setEnabled(true);
-                        mainBinding.bottomAppBar.performShow();
-                        mainBinding.bottomAppBar.setVisibility(View.VISIBLE);
-                    }
-
-                    @Override public void onAnimationCancel(Animator animation){}
-                    @Override public void onAnimationRepeat(Animator animation){}
-                });
-
-                addCardAnimatorSet.start();
-                floatingActionButtonAnimatorSet.start();
+                bottomBarAnimator.decreaseAndHideAddCard(400, 2);
+                bottomBarAnimator.showFloatingActionButton(400, 2);
             }
         });
     }
-
 
     private void start()
     {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        int duration=400;
-        int interpolatorFactor=2;
-
-        ObjectAnimator floatingActionButtonScaleX=ObjectAnimator.ofFloat(mainBinding.floatingActionButton, "scaleY", 1.5F).setDuration(duration);
-        ObjectAnimator floatingActionButtonScaleY=ObjectAnimator.ofFloat(mainBinding.floatingActionButton, "scaleX", 5F).setDuration(duration);
-        ObjectAnimator floatingActionButtonAlpha=ObjectAnimator.ofFloat(mainBinding.floatingActionButton, "alpha", 0F).setDuration(duration);
-        ObjectAnimator floatingActionButtonVisibility=ObjectAnimator.ofInt(mainBinding.floatingActionButton,"visibility", View.GONE).setDuration(duration);
-
-        AnimatorSet floatingActionButtonAnimatorSet=new AnimatorSet();
-        floatingActionButtonAnimatorSet.play(floatingActionButtonScaleX).with(floatingActionButtonScaleY).with(floatingActionButtonAlpha).with(floatingActionButtonVisibility);
-        floatingActionButtonAnimatorSet.setInterpolator(new AccelerateInterpolator(interpolatorFactor));
-
-        ObjectAnimator addCardVisibility=ObjectAnimator.ofInt(mainBinding.addCard,"visibility", View.VISIBLE).setDuration(10);
-        ObjectAnimator addCardScaleY=ObjectAnimator.ofFloat(mainBinding.addCard, "scaleY", 0.2F, 1F).setDuration(duration);
-        ObjectAnimator addCardScaleX=ObjectAnimator.ofFloat(mainBinding.addCard, "scaleX", 0.2F, 1F).setDuration(duration);
-        ObjectAnimator addCardAlpha=ObjectAnimator.ofFloat(mainBinding.addCard, "alpha", 0F, 1F).setDuration(duration);
-        ObjectAnimator addCardRadius=ObjectAnimator.ofFloat(mainBinding.addCard, "radius", 100, 4).setDuration(duration);
-
-        AnimatorSet addCardAnimatorSet=new AnimatorSet();
-        addCardAnimatorSet.play(addCardVisibility).with(addCardScaleY).with(addCardScaleX).with(addCardAlpha).with(addCardRadius);
-        addCardAnimatorSet.setStartDelay((long) (duration/1.2));
-        addCardAnimatorSet.setInterpolator(new DecelerateInterpolator(interpolatorFactor));
-
-
-        addCardAnimatorSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation)
-            {
-                mainBinding.contentEditText.setEnabled(false);
-                mainBinding.bottomAppBar.performHide();
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation)
-            {
-                mainBinding.contentEditText.setEnabled(true);
-
-
-
-                InputMethodManager inputMethodManager = (InputMethodManager) SimpleDo.getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-                mainBinding.contentEditText.requestFocus();
-            }
-
-            @Override public void onAnimationCancel(Animator animation){}
-            @Override public void onAnimationRepeat(Animator animation){}
-        });
-
-        floatingActionButtonAnimatorSet.start();
-        addCardAnimatorSet.start();
+        bottomBarAnimator.increaseAndHideFloatingActionButton(400, 2);
+        bottomBarAnimator.showAddCard(400, 2);
     }
 
     private void selectDate()
     {
         keyboardHelper.setKeyboardEnabled(false);
-        DateTimeConverter dateTimeConverter =new DateTimeConverter();
+        DateTimeConverter dateTimeConverter=new DateTimeConverter();
 
         MaterialDatePicker<Long> materialDatePicker=MaterialDatePicker.Builder
                 .datePicker()
@@ -260,13 +182,7 @@ public class Main extends AppCompatActivity
         {
             chosenDate=dateTimeConverter.fromMillisInDate(selection);
 
-            mainBinding.timeButton.setVisibility(View.VISIBLE);
-            mainBinding.addCardDeadline.setVisibility(View.VISIBLE);
-            mainBinding.addCardDate.setText(chosenDate.toString());
-            mainBinding.divider1.setVisibility(View.VISIBLE);
-            mainBinding.remindButton.setVisibility(View.VISIBLE);
-            mainBinding.remindButton.setEnabled(true);
-
+            deadlineSectionEnabled(true);
             keyboardHelper.setKeyboardEnabled(true);
         });
 
@@ -275,12 +191,7 @@ public class Main extends AppCompatActivity
             chosenDate=null;
             chosenTime=null;
 
-            mainBinding.timeButton.setVisibility(View.GONE);
-            mainBinding.addCardDeadline.setVisibility(View.GONE);
-            mainBinding.divider1.setVisibility(View.GONE);
-            mainBinding.remindButton.setVisibility(View.GONE);
-            mainBinding.remindButton.setEnabled(false);
-
+            deadlineSectionEnabled(false);
             keyboardHelper.setKeyboardEnabled(true);
         });
 
@@ -289,8 +200,23 @@ public class Main extends AppCompatActivity
         materialDatePicker.show(getSupportFragmentManager(), "null");
     }
 
+    private void deadlineSectionEnabled(boolean enabled)
+    {
+        mainBinding.divider1.setVisibility(enabled?View.VISIBLE:View.GONE);
+        mainBinding.timeButton.setVisibility(enabled?View.VISIBLE:View.GONE);
+        mainBinding.remindButton.setVisibility(enabled?View.VISIBLE:View.GONE);
+        mainBinding.remindButton.setIcon(reminding?getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme()):getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme()));
+        mainBinding.remindButton.setEnabled(enabled);
+
+        mainBinding.addCardDeadline.setVisibility(enabled?View.VISIBLE:View.GONE);
+        mainBinding.addCardDate.setText((enabled && chosenDate!=null)?chosenDate.toString():"");
+        mainBinding.addCardTime.setText((enabled && chosenTime!=null)?chosenTime.toString():"");
+    }
+
     private void selectTime()
     {
+        keyboardHelper.setKeyboardEnabled(false);
+
         MaterialTimePicker materialTimePicker=new MaterialTimePicker.Builder()
                 .setTimeFormat(TimeFormat.CLOCK_24H)
                 .setHour(chosenTime==null?Calendar.getInstance().get(Calendar.HOUR_OF_DAY):chosenTime.getHour())
@@ -308,8 +234,8 @@ public class Main extends AppCompatActivity
 
         materialTimePicker.addOnNegativeButtonClickListener(dialog ->
         {
-            mainBinding.addCardTime.setVisibility(View.GONE);
             chosenTime=null;
+            mainBinding.addCardTime.setVisibility(View.GONE);
 
             keyboardHelper.setKeyboardEnabled(true);
         });
@@ -353,8 +279,7 @@ public class Main extends AppCompatActivity
     private void toggleReminding()
     {
         reminding=!reminding;
-        Drawable drawable=reminding?getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme()):getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme());
-        mainBinding.remindButton.setIcon(drawable);
+        mainBinding.remindButton.setIcon(reminding?getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme()):getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme()));
     }
 
     private void changeSortDirection()
@@ -367,7 +292,7 @@ public class Main extends AppCompatActivity
                 break;
             case DOWN: case NONE:
                 mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, Main.this.getTheme()));
-            sortSettingsAccessor.setSortDirection(Direction.UP);
+                sortSettingsAccessor.setSortDirection(Direction.UP);
                 break;
         }
 
@@ -408,13 +333,12 @@ public class Main extends AppCompatActivity
         entryAdapter.notifyDataSetChanged();
     }
 
-
-
     private void addCard()
     {
         Entry entry = new Entry(new IdentificationHelper().createUniqueId());
         entry.setContent(mainBinding.contentEditText.getText().toString());
         entry.setNotifying(reminding);
+
         if (chosenColor != -1) entry.setColor(chosenColor);
 
         if (chosenDate != null)
@@ -427,105 +351,40 @@ public class Main extends AppCompatActivity
         {
             if (entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
             {
-                Snackbar snackbar = Snackbar.make(findViewById(R.id.root), this.getResources().getString(R.string.past_notification), BaseTransientBottomBar.LENGTH_SHORT);
-                snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
-                snackbar.setAnchorView(R.id.addCard);
-                snackbar.show();
+                showSnackbar(this.getResources().getString(R.string.past_notification), BaseTransientBottomBar.LENGTH_SHORT, null);
                 return;
             }
-            notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime(),  entry.getContent(), entry.getId());
+            notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime():reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
         }
-
-        mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_swap_vert, Main.this.getTheme()));
-        mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_sort, Main.this.getTheme()));
 
         dataAccessor.addEntry(entry);
         entryAdapter.notifyItemInserted(dataAccessor.getEntriesSize());
+        mainBinding.recyclerView.scrollToPosition(dataAccessor.getEntriesSize());
 
-        if(dataAccessor.getEntriesSize()<=1)
-        {
-            enableSortability(false);
-            resetSortability();
-        }
+        enableSortability(dataAccessor.getEntriesSize()<=1?false:true);
+        resetSortability();
+
+        reminding=false;
+        chosenDate=null;
+        chosenTime=null;
         mainBinding.contentEditText.getText().clear();
-        mainBinding.addCardDeadline.setVisibility(View.GONE);
-        mainBinding.timeButton.setVisibility(View.GONE);
-        mainBinding.addCardTime.setText("");
-        mainBinding.divider1.setVisibility(View.GONE);
-        mainBinding.remindButton.setVisibility(View.GONE);
-        mainBinding.remindButton.setIcon(getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme()));
-        reminding = false;
-        chosenDate = null;
-        chosenTime = null;
-
-        mainBinding.myRecyclerView.scrollToPosition(dataAccessor.getEntriesSize());
+        deadlineSectionEnabled(false);
     }
 
-    private void setupLayout()
-    {
-        switch(sortSettingsAccessor.getSortDirection())
-        {
-            case UP: mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, this.getTheme())); break;
-            case DOWN: mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, this.getTheme())); break;
-            case NONE:
-            {
-                Drawable drawable = getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
-                drawable.setAlpha(128);
-                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(drawable);
-                mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(false);
-            } break;
-        }
-
-        switch(sortSettingsAccessor.getSortCriterion())
-        {
-            case TEXT: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_alpha, this.getTheme())); break;
-            case DEADLINE: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_clock, this.getTheme())); break;
-            case COLOR: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_palette, this.getTheme())); break;
-            case NONE: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_sort, this.getTheme())); break;
-        }
-
-        //TODO
-    }
-
-    public void showSnackbar(String message, int length, View.OnClickListener action)
+    public void showSnackbar(@NonNull String message, int length, @Nullable View.OnClickListener action)
     {
         Snackbar snackbar = Snackbar.make(mainBinding.root, message, length);
         snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
-
-        if (mainBinding.addCard.getVisibility() == View.VISIBLE)
-            snackbar.setAnchorView(mainBinding.addCard);
-        else snackbar.setAnchorView(mainBinding.floatingActionButton);
-
-        snackbar.setAction(SimpleDo.getAppContext().getResources().getString(R.string.undo), action);
+        snackbar.setAnchorView((mainBinding.addCard.getVisibility() == View.VISIBLE)?mainBinding.addCard:mainBinding.floatingActionButton);
+        if(action!=null) snackbar.setAction(SimpleDo.getAppContext().getResources().getString(R.string.undo), action);
 
         snackbar.show();
     }
 
     public void itemTouchHelperEnabled(boolean enabled)
     {
-        if(enabled) itemTouchHelper.attachToRecyclerView(mainBinding.myRecyclerView);
+        if(enabled) itemTouchHelper.attachToRecyclerView(mainBinding.recyclerView);
         else itemTouchHelper.attachToRecyclerView(null);
-    }
-
-    public void enableBottomAppBar(boolean enabled)
-    {
-        if(enabled)
-        {
-            mainBinding.bottomAppBar.setVisibility(View.VISIBLE);
-            mainBinding.bottomAppBar.performShow();
-            mainBinding.floatingActionButton.setVisibility(View.VISIBLE);
-            mainBinding.floatingActionButton.show();
-        }
-        else
-        {
-            mainBinding.bottomAppBar.setVisibility(View.GONE);
-            mainBinding.floatingActionButton.setVisibility(View.GONE);
-            mainBinding.bottomAppBar.performHide();
-            mainBinding.floatingActionButton.hide();
-        }
-
-        //if (enabled) getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        //else getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
     }
 
     //Disables sortability if there is only one or no entry, enables it if there are two or more entries
@@ -542,8 +401,6 @@ public class Main extends AppCompatActivity
 
         mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(enabled);
         mainBinding.bottomAppBar.getMenu().getItem(1).setEnabled(enabled);
-
-
     }
 
     //Marks that entries are not sorted
