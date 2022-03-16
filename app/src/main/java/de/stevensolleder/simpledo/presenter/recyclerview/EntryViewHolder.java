@@ -122,52 +122,45 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 contextMenu.getItem(3).setVisible(true);
             }
 
-            if(dataAccessor.getEntry(getPosition()).isNotifying()) contextMenu.getItem(3).setTitle(SimpleDo.getAppContext().getResources().getString(R.string.deactivate_notification));
-            else contextMenu.getItem(3).setTitle(SimpleDo.getAppContext().getResources().getString(R.string.activate_notification));
+            contextMenu.getItem(3).setTitle(dataAccessor.getEntry(getPosition()).isNotifying()?SimpleDo.getAppContext().getResources().getString(R.string.deactivate_notification):SimpleDo.getAppContext().getResources().getString(R.string.activate_notification));
 
             contextMenu.getItem(0).setOnMenuItemClickListener((item) ->
             {
                 entryCardBinding.content.setFocusableInTouchMode(true);
                 entryCardBinding.content.setFocusable(true);
-                System.out.println(entryCardBinding.content.requestFocus());
                 return true;
             });
 
             contextMenu.getItem(1).setOnMenuItemClickListener((item) ->
             {
                 Date date=dataAccessor.getEntry(getPosition()).getDate();
-                DateTimeConverter dateTimeConverter =new DateTimeConverter();
+                DateTimeConverter dateTimeConverter=new DateTimeConverter();
 
-                MaterialDatePicker<Long> materialDatePicker=MaterialDatePicker.Builder
-                        .datePicker()
-                        .setTheme(R.style.MaterialCalendarTheme)
-                        .setSelection(date==null? Calendar.getInstance().getTimeInMillis(): dateTimeConverter.fromDateInMillis(date))
-                        .build();
+                mainActivity.showDatePicker(
+                        date==null? Calendar.getInstance().getTimeInMillis(): dateTimeConverter.fromDateInMillis(date),
+                        (selection) ->
+                        {
+                            Entry entry=dataAccessor.getEntry(getPosition());
+                            if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
 
-                materialDatePicker.addOnPositiveButtonClickListener(selection ->
-                {
-                    Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
+                            entry.setDate(dateTimeConverter.fromMillisInDate(selection));
+                            dataAccessor.changeEntry(getPosition(), entry);
+                            getBindingAdapter().notifyItemChanged(getPosition());
 
-                    entry.setDate(dateTimeConverter.fromMillisInDate(selection));
-                    dataAccessor.changeEntry(getPosition(), entry);
-                    getBindingAdapter().notifyItemChanged(getPosition());
+                            if (entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime():reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
+                        },
+                        (view1) ->
+                        {
+                            Entry entry=dataAccessor.getEntry(getPosition());
 
-                    if (entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime():reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
-                });
+                            if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
 
-                materialDatePicker.addOnNegativeButtonClickListener(view1 ->
-                {
-                    Entry entry=dataAccessor.getEntry(getPosition());
-                    entry.setDate(null);
-                    entry.setTime(null);
-                    dataAccessor.changeEntry(getPosition(), entry);
-                    getBindingAdapter().notifyItemChanged(getPosition());
+                            entry.setDate(null);
+                            entry.setTime(null);
+                            dataAccessor.changeEntry(getPosition(), entry);
+                            getBindingAdapter().notifyItemChanged(getPosition());
+                        });
 
-                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
-                });
-
-                materialDatePicker.show(mainActivity.getSupportFragmentManager(), "null");
                 return true;
             });
 
@@ -175,38 +168,33 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
             {
                 Time time=dataAccessor.getEntry(getPosition()).getTime();
 
-                MaterialTimePicker materialTimePicker=new MaterialTimePicker.Builder()
-                        .setTimeFormat(TimeFormat.CLOCK_24H)
-                        .setHour(time==null?Calendar.getInstance().get(Calendar.HOUR_OF_DAY):time.getHour())
-                        .setMinute(time==null?Calendar.getInstance().get(Calendar.MINUTE):time.getMinute())
-                        .build();
+                mainActivity.showTimePicker(time==null?Calendar.getInstance().get(Calendar.HOUR_OF_DAY):time.getHour(),
+                        time==null?Calendar.getInstance().get(Calendar.MINUTE):time.getMinute(),
+                        (hour, minute) ->
+                        {
+                            Entry entry = dataAccessor.getEntry(getPosition());
+                            if (entry.isNotifying() && !entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
+                                notificationHelper.cancelNotification(entry.getId());
 
-                materialTimePicker.addOnPositiveButtonClickListener(view1 ->
-                {
-                    Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
+                            entry.setTime(new Time(hour, minute));
+                            dataAccessor.changeEntry(getPosition(), entry);
+                            getBindingAdapter().notifyItemChanged(getPosition());
+                            if (entry.isNotifying() && !entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
+                                notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime() != null ? entry.getTime() : reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
+                        },
+                        (view1) ->
+                        {
+                            Entry entry = dataAccessor.getEntry(getPosition());
+                            if (entry.isNotifying() && !entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
+                                notificationHelper.cancelNotification(entry.getId());
 
-                    entry.setTime(new Time(materialTimePicker.getHour(), materialTimePicker.getMinute()));
-                    dataAccessor.changeEntry(getPosition(), entry);
-                    getBindingAdapter().notifyItemChanged(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime(): reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
-                });
+                            entry.setTime(null);
+                            dataAccessor.changeEntry(getPosition(), entry);
+                            getBindingAdapter().notifyItemChanged(getPosition());
+                            if (entry.isNotifying() && !entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
+                                notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime() != null ? entry.getTime() : reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
+                        });
 
-                materialTimePicker.addOnNegativeButtonClickListener(view1 ->
-                {
-                    Entry entry=dataAccessor.getEntry(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.cancelNotification(entry.getId());
-
-                    entry.setTime(null);
-                    dataAccessor.changeEntry(getPosition(), entry);
-                    getBindingAdapter().notifyItemChanged(getPosition());
-                    if(entry.isNotifying()&&!entry.isInPast(reminderSettingsAccessor.getAlldayTime())) notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime(): reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
-                });
-
-                materialTimePicker.show(mainActivity.getSupportFragmentManager(), "null");
-                materialTimePicker.getFragmentManager().executePendingTransactions();
-                materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_ok_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
-                materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_cancel_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
                 return true;
             });
 

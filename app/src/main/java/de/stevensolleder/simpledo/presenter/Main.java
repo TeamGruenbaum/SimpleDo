@@ -1,8 +1,10 @@
 package de.stevensolleder.simpledo.presenter;
 
 import android.app.NotificationManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -10,6 +12,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +22,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.timepicker.MaterialTimePicker;
@@ -26,6 +30,7 @@ import com.google.android.material.timepicker.TimeFormat;
 
 import java.lang.reflect.Field;
 import java.util.Calendar;
+import java.util.function.BiConsumer;
 
 import de.stevensolleder.simpledo.*;
 import de.stevensolleder.simpledo.databinding.MainActivityBinding;
@@ -53,10 +58,12 @@ public class Main extends AppCompatActivity
 
     private BottomBarAnimator bottomBarAnimator;
 
-    private Date chosenDate=null;
-    private Time chosenTime=null;
-    private int chosenColor=-1;
-    private boolean reminding=false;
+    private Date chosenDate;
+    private Time chosenTime;
+    private int chosenColor;
+    private boolean reminding;
+    private boolean datePickerShown;
+    private boolean timePickerShown;
 
 
     @Override
@@ -66,6 +73,14 @@ public class Main extends AppCompatActivity
         super.onCreate(savedInstanceState);
         mainBinding=MainActivityBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
+
+        //Set default values for attributes
+        chosenDate=null;
+        chosenTime=null;
+        chosenColor=-1;
+        reminding=false;
+        datePickerShown=false;
+        timePickerShown=false;
 
         //Create Accessors and Helpers
         dataAccessor=new DataAccessor(SimpleDo.getAppContext());
@@ -100,7 +115,7 @@ public class Main extends AppCompatActivity
             currentEntry=dataAccessor.getEntries().get(index);
             switch(currentEntry.getColor())
             {
-                case  -14606047: case -1: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardDefault)); break;
+                case -14606047: case -1: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardDefault)); break;
                 case -3422573: case -1596: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardYellow)); break;
                 case -3428734: case -8014: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardOrange)); break;
                 case -3433311: case -12846: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardRed)); break;
@@ -112,38 +127,217 @@ public class Main extends AppCompatActivity
         }
         entryAdapter.notifyDataSetChanged();
 
-        //Set up UI
+        //Set up UI state
         {
-            switch(sortSettingsAccessor.getSortDirection())
+            Drawable directionIcon;
+            switch (sortSettingsAccessor.getSortDirection())
             {
-                case UP: mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, this.getTheme())); break;
-                case DOWN: mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, this.getTheme())); break;
-                case NONE:
+                case UP: directionIcon=getResources().getDrawable(R.drawable.ic_arrow_upward, this.getTheme()); break;
+                case DOWN: directionIcon=getResources().getDrawable(R.drawable.ic_arrow_downward, this.getTheme()); break;
+                case NONE: default:
                 {
-                    Drawable drawable = getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
-                    drawable.setAlpha(128);
-                    mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(drawable);
+                    directionIcon = getResources().getDrawable(R.drawable.ic_swap_vert, this.getTheme());
+                    directionIcon.setAlpha(128);
                     mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(false);
-                } break;
+                }
+                break;
             }
+            mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(directionIcon);
 
-            switch(sortSettingsAccessor.getSortCriterion())
+            Drawable criterionIcon;
+            switch (sortSettingsAccessor.getSortCriterion())
             {
-                case TEXT: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_alpha, this.getTheme())); break;
-                case DEADLINE: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_clock, this.getTheme())); break;
-                case COLOR: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_palette, this.getTheme())); break;
-                case NONE: mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_sort, this.getTheme())); break;
+                case TEXT: criterionIcon=getResources().getDrawable(R.drawable.ic_alpha, this.getTheme()); break;
+                case DEADLINE: criterionIcon=getResources().getDrawable(R.drawable.ic_clock, this.getTheme()); break;
+                case COLOR: criterionIcon=getResources().getDrawable(R.drawable.ic_palette, this.getTheme()); break;
+                case NONE: default: criterionIcon=getResources().getDrawable(R.drawable.ic_sort, this.getTheme()); break;
             }
+            mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(criterionIcon);
+        }
 
-            mainBinding.floatingActionButton.setOnClickListener((view) -> start());
-            mainBinding.dateButton.setOnClickListener((view) -> selectDate());
-            mainBinding.timeButton.setOnClickListener((view) -> selectTime());
-            mainBinding.colorButton.setOnClickListener((view) -> selectColor());
-            mainBinding.remindButton.setOnClickListener((view) -> toggleReminding());
-            mainBinding.addButton.setOnClickListener((view) -> addCard());
+        //Set up UI actions
+        {
+            mainBinding.floatingActionButton.setOnClickListener((view) ->
+            {
+                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
+                bottomBarAnimator.increaseAndHideFloatingActionButton(400, 2);
+                bottomBarAnimator.showAddCard(400, 2);
+            });
+
+            mainBinding.dateButton.setOnClickListener((view) ->
+            {
+                keyboardHelper.setKeyboardEnabled(false);
+                DateTimeConverter dateTimeConverter=new DateTimeConverter();
+
+                showDatePicker(chosenDate==null?Calendar.getInstance().getTimeInMillis(): dateTimeConverter.fromDateInMillis(chosenDate),
+                        (selection) ->
+                        {
+                            if(chosenDate==null) deadlineSectionEnabled(true);
+
+                            chosenDate=dateTimeConverter.fromMillisInDate(selection);
+                            updateDeadlineText();
+
+                            keyboardHelper.setKeyboardEnabled(true);
+                        },
+                        (view1) ->
+                        {
+                            chosenDate=null;
+                            chosenTime=null;
+
+                            deadlineSectionEnabled(false);
+                            updateDeadlineText();
+
+                            keyboardHelper.setKeyboardEnabled(true);
+                        });
+            });
+
+            mainBinding.timeButton.setOnClickListener((view) ->
+            {
+                keyboardHelper.setKeyboardEnabled(false);
+
+                showTimePicker(chosenTime==null?Calendar.getInstance().get(Calendar.HOUR_OF_DAY):chosenTime.getHour(), chosenTime==null?Calendar.getInstance().get(Calendar.MINUTE):chosenTime.getMinute(),
+                        (hour, minute) ->
+                        {
+                            chosenTime=new Time(hour, minute);
+                            updateDeadlineText();
+
+                            keyboardHelper.setKeyboardEnabled(true);
+                        },
+                        (dialog)->
+                        {
+                            chosenTime=null;
+                            updateDeadlineText();
+
+                            keyboardHelper.setKeyboardEnabled(true);
+                        });
+            });
+
+            mainBinding.colorButton.setOnClickListener((view) ->
+            {
+                ColorHelper colorHelper=new ColorHelper();
+                PopupMenu colorMenu=new PopupMenu(this, mainBinding.colorButton);
+                colorMenu.getMenuInflater().inflate(R.menu.color_change_menu, colorMenu.getMenu());
+                try
+                {
+                    //Complex reflection stuff to achieve that in lower android versions the color images in the popup menu are shown
+                    Field fieldPopup=colorMenu.getClass().getDeclaredField("mPopup");
+                    fieldPopup.setAccessible(true);
+                    fieldPopup.get(colorMenu).getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(fieldPopup.get(colorMenu), true);
+                }
+                catch(Exception exception)
+                {
+                    exception.printStackTrace();
+                }
+
+                colorHelper.setupThemeSpecificColorMenuIcons(colorMenu.getMenu());
+
+                colorMenu.setOnMenuItemClickListener((menuItem)->
+                {
+                    chosenColor=colorHelper.getMenuItemColor(menuItem);
+                    mainBinding.addCard.setCardBackgroundColor(chosenColor);
+                    return true;
+                });
+                colorMenu.show();
+            });
+
+            mainBinding.remindButton.setOnClickListener((view) ->
+            {
+                reminding=!reminding;
+                mainBinding.remindButton.setIcon(reminding?getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme()):getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme()));
+            });
+
+            mainBinding.addButton.setOnClickListener((view) ->
+            {
+                Entry entry = new Entry(new IdentificationHelper().createUniqueId());
+                entry.setContent(mainBinding.contentEditText.getText().toString());
+                entry.setNotifying(reminding);
+
+                if (chosenColor != -1) entry.setColor(chosenColor);
+
+                if (chosenDate != null)
+                {
+                    entry.setDate(chosenDate);
+                    if (chosenTime != null) entry.setTime(chosenTime);
+                }
+
+                if (reminding)
+                {
+                    if (entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
+                    {
+                        showSnackbar(this.getResources().getString(R.string.past_notification), BaseTransientBottomBar.LENGTH_SHORT, null);
+                        return;
+                    }
+                    notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime():reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
+                }
+
+                dataAccessor.addEntry(entry);
+                entryAdapter.notifyItemInserted(dataAccessor.getEntriesSize());
+                mainBinding.recyclerView.scrollToPosition(dataAccessor.getEntriesSize());
+
+                enableSortability(dataAccessor.getEntriesSize()<=1?false:true);
+                resetSortability();
+
+                reminding=false;
+                chosenDate=null;
+                chosenTime=null;
+                mainBinding.contentEditText.getText().clear();
+                deadlineSectionEnabled(false);
+                updateDeadlineText();
+            });
+
+            mainBinding.bottomAppBar.findViewById(R.id.sortDirectionButton).setOnClickListener((view) ->
+            {
+                switch (sortSettingsAccessor.getSortDirection())
+                {
+                    case UP:
+                        mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
+                        sortSettingsAccessor.setSortDirection(Direction.DOWN);
+                        break;
+                    case DOWN: case NONE:
+                    mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, Main.this.getTheme()));
+                    sortSettingsAccessor.setSortDirection(Direction.UP);
+                    break;
+                }
+
+                dataAccessor.sortEntries(sortSettingsAccessor.getSortCriterion(), sortSettingsAccessor.getSortDirection());
+                entryAdapter.notifyDataSetChanged();
+            });
+
+            mainBinding.bottomAppBar.findViewById(R.id.sortCriterionButton).setOnClickListener((view) ->
+            {
+                switch (sortSettingsAccessor.getSortCriterion()) {
+                    case TEXT:
+                        mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_clock, Main.this.getTheme()));
+                        sortSettingsAccessor.setSortCriterion(Criterion.DEADLINE);
+                        break;
+                    case DEADLINE:
+                        mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_palette, Main.this.getTheme()));
+                        sortSettingsAccessor.setSortCriterion(Criterion.COLOR);
+                        break;
+                    case COLOR:
+                    case NONE:
+                        mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_alpha, Main.this.getTheme()));
+                        sortSettingsAccessor.setSortCriterion(Criterion.TEXT);
+                        Drawable drawable = getResources().getDrawable(R.drawable.ic_arrow_downward);
+                        drawable.setAlpha(255);
+                        mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(drawable);
+                        mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(true);
+                        sortSettingsAccessor.setSortDirection(Direction.DOWN);
+                        break;
+                }
+
+                if (sortSettingsAccessor.getSortDirection() == Direction.NONE)
+                {
+                    mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
+                    sortSettingsAccessor.setSortDirection(Direction.DOWN);
+                }
+
+                dataAccessor.sortEntries(sortSettingsAccessor.getSortCriterion(), sortSettingsAccessor.getSortDirection());
+                entryAdapter.notifyDataSetChanged();
+            });
+
             mainBinding.bottomAppBar.setNavigationOnClickListener((view) -> startActivity(new Intent(this, SettingsActivity.class)));
-            mainBinding.bottomAppBar.findViewById(R.id.sortDirectionButton).setOnClickListener((view) -> changeSortDirection());
-            mainBinding.bottomAppBar.findViewById(R.id.sortCriterionButton).setOnClickListener((view) -> changeSortCriterion());
         }
 
         //Set onBackPress functionality
@@ -159,47 +353,6 @@ public class Main extends AppCompatActivity
         });
     }
 
-    private void start()
-    {
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
-        bottomBarAnimator.increaseAndHideFloatingActionButton(400, 2);
-        bottomBarAnimator.showAddCard(400, 2);
-    }
-
-    private void selectDate()
-    {
-        keyboardHelper.setKeyboardEnabled(false);
-        DateTimeConverter dateTimeConverter=new DateTimeConverter();
-
-        MaterialDatePicker<Long> materialDatePicker=MaterialDatePicker.Builder
-                .datePicker()
-                .setTheme(R.style.MaterialCalendarTheme)
-                .setSelection(chosenDate==null?Calendar.getInstance().getTimeInMillis(): dateTimeConverter.fromDateInMillis(chosenDate))
-                .build();
-
-        materialDatePicker.addOnPositiveButtonClickListener(selection ->
-        {
-            chosenDate=dateTimeConverter.fromMillisInDate(selection);
-
-            deadlineSectionEnabled(true);
-            keyboardHelper.setKeyboardEnabled(true);
-        });
-
-        materialDatePicker.addOnNegativeButtonClickListener(view ->
-        {
-            chosenDate=null;
-            chosenTime=null;
-
-            deadlineSectionEnabled(false);
-            keyboardHelper.setKeyboardEnabled(true);
-        });
-
-        materialDatePicker.addOnCancelListener(dialog->keyboardHelper.setKeyboardEnabled(true));
-
-        materialDatePicker.show(getSupportFragmentManager(), "null");
-    }
-
     private void deadlineSectionEnabled(boolean enabled)
     {
         mainBinding.divider1.setVisibility(enabled?View.VISIBLE:View.GONE);
@@ -209,166 +362,12 @@ public class Main extends AppCompatActivity
         mainBinding.remindButton.setEnabled(enabled);
 
         mainBinding.addCardDeadline.setVisibility(enabled?View.VISIBLE:View.GONE);
-        mainBinding.addCardDate.setText((enabled && chosenDate!=null)?chosenDate.toString():"");
-        mainBinding.addCardTime.setText((enabled && chosenTime!=null)?chosenTime.toString():"");
     }
 
-    private void selectTime()
+    private void updateDeadlineText()
     {
-        keyboardHelper.setKeyboardEnabled(false);
-
-        MaterialTimePicker materialTimePicker=new MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_24H)
-                .setHour(chosenTime==null?Calendar.getInstance().get(Calendar.HOUR_OF_DAY):chosenTime.getHour())
-                .setMinute(chosenTime==null?Calendar.getInstance().get(Calendar.MINUTE):chosenTime.getMinute())
-                .build();
-
-        materialTimePicker.addOnPositiveButtonClickListener(view ->
-        {
-            chosenTime=new Time(materialTimePicker.getHour(), materialTimePicker.getMinute());
-            mainBinding.addCardTime.setVisibility(View.VISIBLE);
-            mainBinding.addCardTime.setText(chosenTime.toString());
-
-            keyboardHelper.setKeyboardEnabled(true);
-        });
-
-        materialTimePicker.addOnNegativeButtonClickListener(dialog ->
-        {
-            chosenTime=null;
-            mainBinding.addCardTime.setVisibility(View.GONE);
-
-            keyboardHelper.setKeyboardEnabled(true);
-        });
-
-        materialTimePicker.addOnCancelListener(dialog->keyboardHelper.setKeyboardEnabled(true));
-
-        materialTimePicker.show(getSupportFragmentManager(), null);
-        materialTimePicker.getParentFragmentManager().executePendingTransactions();
-        materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_ok_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
-        materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_cancel_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
-    }
-
-    private void selectColor()
-    {
-        ColorHelper colorHelper=new ColorHelper();
-        PopupMenu colorMenu=new PopupMenu(this, mainBinding.colorButton);
-        colorMenu.getMenuInflater().inflate(R.menu.color_change_menu, colorMenu.getMenu());
-        try
-        {
-            //Complex reflection stuff to achieve that in lower android versions the color images in the popup menu are shown
-            Field fieldPopup=colorMenu.getClass().getDeclaredField("mPopup");
-            fieldPopup.setAccessible(true);
-            fieldPopup.get(colorMenu).getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(fieldPopup.get(colorMenu), true);
-        }
-        catch(Exception exception)
-        {
-            exception.printStackTrace();
-        }
-
-        colorHelper.setupThemeSpecificColorMenuIcons(colorMenu.getMenu());
-
-        colorMenu.setOnMenuItemClickListener((menuItem)->
-        {
-            chosenColor=colorHelper.getMenuItemColor(menuItem);
-            mainBinding.addCard.setCardBackgroundColor(chosenColor);
-            return true;
-        });
-        colorMenu.show();
-    }
-
-    private void toggleReminding()
-    {
-        reminding=!reminding;
-        mainBinding.remindButton.setIcon(reminding?getResources().getDrawable(R.drawable.ic_notifications_active, Main.this.getTheme()):getResources().getDrawable(R.drawable.ic_notifications_off, Main.this.getTheme()));
-    }
-
-    private void changeSortDirection()
-    {
-        switch (sortSettingsAccessor.getSortDirection())
-        {
-            case UP:
-                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
-                sortSettingsAccessor.setSortDirection(Direction.DOWN);
-                break;
-            case DOWN: case NONE:
-                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_upward, Main.this.getTheme()));
-                sortSettingsAccessor.setSortDirection(Direction.UP);
-                break;
-        }
-
-        dataAccessor.sortEntries(sortSettingsAccessor.getSortCriterion(), sortSettingsAccessor.getSortDirection());
-        entryAdapter.notifyDataSetChanged();
-    }
-
-    private void changeSortCriterion()
-    {
-        switch (sortSettingsAccessor.getSortCriterion()) {
-            case TEXT:
-                mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_clock, Main.this.getTheme()));
-                sortSettingsAccessor.setSortCriterion(Criterion.DEADLINE);
-                break;
-            case DEADLINE:
-                mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_palette, Main.this.getTheme()));
-                sortSettingsAccessor.setSortCriterion(Criterion.COLOR);
-                break;
-            case COLOR:
-            case NONE:
-                mainBinding.bottomAppBar.getMenu().getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_alpha, Main.this.getTheme()));
-                sortSettingsAccessor.setSortCriterion(Criterion.TEXT);
-                Drawable drawable = getResources().getDrawable(R.drawable.ic_arrow_downward);
-                drawable.setAlpha(255);
-                mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(drawable);
-                mainBinding.bottomAppBar.getMenu().getItem(0).setEnabled(true);
-                sortSettingsAccessor.setSortDirection(Direction.DOWN);
-                break;
-        }
-
-        if (sortSettingsAccessor.getSortDirection() == Direction.NONE)
-        {
-            mainBinding.bottomAppBar.getMenu().getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_arrow_downward, Main.this.getTheme()));
-            sortSettingsAccessor.setSortDirection(Direction.DOWN);
-        }
-
-        dataAccessor.sortEntries(sortSettingsAccessor.getSortCriterion(), sortSettingsAccessor.getSortDirection());
-        entryAdapter.notifyDataSetChanged();
-    }
-
-    private void addCard()
-    {
-        Entry entry = new Entry(new IdentificationHelper().createUniqueId());
-        entry.setContent(mainBinding.contentEditText.getText().toString());
-        entry.setNotifying(reminding);
-
-        if (chosenColor != -1) entry.setColor(chosenColor);
-
-        if (chosenDate != null)
-        {
-            entry.setDate(chosenDate);
-            if (chosenTime != null) entry.setTime(chosenTime);
-        }
-
-        if (reminding)
-        {
-            if (entry.isInPast(reminderSettingsAccessor.getAlldayTime()))
-            {
-                showSnackbar(this.getResources().getString(R.string.past_notification), BaseTransientBottomBar.LENGTH_SHORT, null);
-                return;
-            }
-            notificationHelper.planAndSendNotification(entry.getDate(), entry.getTime()!=null?entry.getTime():reminderSettingsAccessor.getAlldayTime(), entry.getContent(), entry.getId());
-        }
-
-        dataAccessor.addEntry(entry);
-        entryAdapter.notifyItemInserted(dataAccessor.getEntriesSize());
-        mainBinding.recyclerView.scrollToPosition(dataAccessor.getEntriesSize());
-
-        enableSortability(dataAccessor.getEntriesSize()<=1?false:true);
-        resetSortability();
-
-        reminding=false;
-        chosenDate=null;
-        chosenTime=null;
-        mainBinding.contentEditText.getText().clear();
-        deadlineSectionEnabled(false);
+        mainBinding.addCardDate.setText((chosenDate!=null)?chosenDate.toString():"");
+        mainBinding.addCardTime.setText((chosenTime!=null)?chosenTime.toString():"");
     }
 
     public void showSnackbar(@NonNull String message, int length, @Nullable View.OnClickListener action)
@@ -417,5 +416,67 @@ public class Main extends AppCompatActivity
 
         sortSettingsAccessor.setSortDirection(Direction.NONE);
         sortSettingsAccessor.setSortCriterion(Criterion.NONE);
+    }
+
+    public void showDatePicker(long selection, MaterialPickerOnPositiveButtonClickListener<Long> onPositiveButtonClickAction, View.OnClickListener onNegativeButtonClickAction)
+    {
+        if(datePickerShown) return;
+        
+        MaterialDatePicker<Long> materialDatePicker=MaterialDatePicker.Builder
+                .datePicker()
+                .setTheme(R.style.MaterialCalendarTheme)
+                .setSelection(selection)
+                .build();
+
+        materialDatePicker.addOnPositiveButtonClickListener(currentSelection ->
+        {
+            onPositiveButtonClickAction.onPositiveButtonClick(currentSelection);
+            datePickerShown=false;
+        });
+
+        materialDatePicker.addOnNegativeButtonClickListener((view)->
+        {
+            onNegativeButtonClickAction.onClick(view);
+            datePickerShown=false;
+        });
+
+        materialDatePicker.addOnCancelListener(dialog -> datePickerShown=false);
+        
+        materialDatePicker.show(getSupportFragmentManager(), "null");
+        datePickerShown=true;
+    }
+
+    public void showTimePicker(@IntRange(from = 0L, to = 23L) int hour, @IntRange(from = 0L, to = 60L) int minute, BiConsumer<Integer, Integer> onPositiveButtonClickAction, View.OnClickListener onNegativeButtonClickAction)
+    {
+        if(timePickerShown) return;
+
+        MaterialTimePicker materialTimePicker=new MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_24H)
+                .setHour(hour)
+                .setMinute(minute)
+                .build();
+
+        materialTimePicker.addOnPositiveButtonClickListener(view ->
+        {
+            onPositiveButtonClickAction.accept(materialTimePicker.getHour(), materialTimePicker.getMinute());
+            timePickerShown=false;
+        });
+
+        materialTimePicker.addOnNegativeButtonClickListener(view ->
+        {
+            onNegativeButtonClickAction.onClick(view);
+            timePickerShown=false;
+        });
+
+        materialTimePicker.addOnCancelListener(dialog->
+        {
+            timePickerShown=false;
+        });
+
+        materialTimePicker.show(getSupportFragmentManager(), "null");
+        materialTimePicker.getFragmentManager().executePendingTransactions();
+        materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_ok_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.apply));
+        materialTimePicker.getView().<Button>findViewById(R.id.material_timepicker_cancel_button).setText(SimpleDo.getAppContext().getResources().getString(R.string.delete));
+        timePickerShown=true;
     }
 }
