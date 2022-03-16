@@ -221,7 +221,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
             MenuItem.OnMenuItemClickListener colorChanger=(subitem) ->
             {
                 Entry entry=dataAccessor.getEntry(getPosition());
-                entry.setColor(colorHelper.getMenuItemColor(subitem));
+                entry.setColor(colorHelper.convertMenuItemColorToColor(subitem));
                 dataAccessor.changeEntry(getPosition(), entry);
                 getBindingAdapter().notifyItemChanged(getPosition());
                 return true;
@@ -237,7 +237,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
     public void bindData(@NonNull Entry entry)
     {
         entryCardBinding.content.setText(entry.getContent());
-        entryCardBinding.card.setCardBackgroundColor(entry.getColor());
+        entryCardBinding.card.setCardBackgroundColor(new ColorHelper().convertColorToInteger(entry.getColor()));
 
         if(entry.isNotifying()) entryCardBinding.bell.setVisibility(View.VISIBLE);
         else entryCardBinding.bell.setVisibility(View.GONE);

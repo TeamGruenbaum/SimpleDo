@@ -102,7 +102,7 @@ public class DataAccessor implements IDataAccessor
                     else return (entry1.getDate()==null)?(Integer.MAX_VALUE):Integer.MIN_VALUE;
                 });
             } break;
-            case COLOR: entries.sort((entry1, entry2) -> (sortDirection==Direction.DOWN)?(entry2.getColor() - entry1.getColor()):(entry1.getColor() - entry2.getColor())); break;
+            case COLOR: entries.sort((entry1, entry2) -> (sortDirection==Direction.DOWN)?(entry2.getColor().compareTo(entry1.getColor())):(entry1.getColor().compareTo(entry2.getColor()))); break;
         }
         setEntries(entries);
     }

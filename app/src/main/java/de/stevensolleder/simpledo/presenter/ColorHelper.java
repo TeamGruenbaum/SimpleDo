@@ -7,23 +7,38 @@ import android.view.MenuItem;
 import androidx.core.content.ContextCompat;
 
 import de.stevensolleder.simpledo.R;
+import de.stevensolleder.simpledo.model.Color;
 
 
 public class ColorHelper
 {
     public ColorHelper(){}
 
-    public int getMenuItemColor(MenuItem menuItem)
+    public Color convertMenuItemColorToColor(MenuItem menuItem)
     {
         switch(menuItem.getItemId())
         {
-            case R.id.colorYellow: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardYellow);
-            case R.id.colorOrange: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardOrange);
-            case R.id.colorRed: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardRed);
-            case R.id.colorGreen: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardGreen);
-            case R.id.colorBlue: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardBlue);
-            case R.id.colorPurple: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardPurple);
-            case R.id.colorDefault: default: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardDefault);
+            case R.id.colorYellow: return Color.YELLOW;
+            case R.id.colorOrange: return Color.ORANGE;
+            case R.id.colorRed: return Color.RED;
+            case R.id.colorGreen: return Color.GREEN;
+            case R.id.colorBlue: return Color.BLUE;
+            case R.id.colorPurple: return Color.PURPLE;
+            case R.id.colorDefault: default: return Color.DEFAULT;
+        }
+    }
+    
+    public int convertColorToInteger(Color color)
+    {
+        switch(color)
+        {
+            case YELLOW: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardYellow);
+            case ORANGE: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardOrange);
+            case RED: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardRed);
+            case GREEN: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardGreen);
+            case BLUE: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardBlue);
+            case PURPLE: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardPurple);
+            case DEFAULT: default: return ContextCompat.getColor(SimpleDo.getAppContext(), R.color.colorCardDefault);
         }
     }
     

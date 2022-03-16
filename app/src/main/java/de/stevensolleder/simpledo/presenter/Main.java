@@ -60,7 +60,7 @@ public class Main extends AppCompatActivity
 
     private Date chosenDate;
     private Time chosenTime;
-    private int chosenColor;
+    private Color chosenColor;
     private boolean reminding;
     private boolean datePickerShown;
     private boolean timePickerShown;
@@ -77,7 +77,7 @@ public class Main extends AppCompatActivity
         //Set default values for attributes
         chosenDate=null;
         chosenTime=null;
-        chosenColor=-1;
+        chosenColor=Color.DEFAULT;
         reminding=false;
         datePickerShown=false;
         timePickerShown=false;
@@ -107,25 +107,6 @@ public class Main extends AppCompatActivity
         //Set swipe gestures
         itemTouchHelper=new ItemTouchHelper(new CustomItemTouchHelperCallback(this, dataAccessor, reminderSettingsAccessor, notificationHelper));
         itemTouchHelper.attachToRecyclerView(mainBinding.recyclerView);
-
-        //React to theme changes
-        Entry currentEntry;
-        for(int index=0; index<dataAccessor.getEntries().size(); index++)
-        {
-            currentEntry=dataAccessor.getEntries().get(index);
-            switch(currentEntry.getColor())
-            {
-                case -14606047: case -1: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardDefault)); break;
-                case -3422573: case -1596: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardYellow)); break;
-                case -3428734: case -8014: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardOrange)); break;
-                case -3433311: case -12846: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardRed)); break;
-                case -5588073: case -2298424: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardGreen)); break;
-                case -7689016: case -4464901: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardBlue)); break;
-                case -5271883: case -1982745: currentEntry.setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorCardPurple)); break;
-            }
-            dataAccessor.changeEntry(index, currentEntry);
-        }
-        entryAdapter.notifyDataSetChanged();
 
         //Set up UI state
         {
@@ -234,8 +215,8 @@ public class Main extends AppCompatActivity
 
                 colorMenu.setOnMenuItemClickListener((menuItem)->
                 {
-                    chosenColor=colorHelper.getMenuItemColor(menuItem);
-                    mainBinding.addCard.setCardBackgroundColor(chosenColor);
+                    chosenColor=colorHelper.convertMenuItemColorToColor(menuItem);
+                    mainBinding.addCard.setCardBackgroundColor(colorHelper.convertColorToInteger(chosenColor));
                     return true;
                 });
                 colorMenu.show();
@@ -253,7 +234,7 @@ public class Main extends AppCompatActivity
                 entry.setContent(mainBinding.contentEditText.getText().toString());
                 entry.setNotifying(reminding);
 
-                if (chosenColor != -1) entry.setColor(chosenColor);
+                if (chosenColor != Color.DEFAULT) entry.setColor(chosenColor);
 
                 if (chosenDate != null)
                 {
