@@ -5,15 +5,10 @@ import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.timepicker.MaterialTimePicker;
-import com.google.android.material.timepicker.TimeFormat;
 
 import java.util.Calendar;
 
@@ -22,7 +17,6 @@ import de.stevensolleder.simpledo.databinding.EntryCardBinding;
 import de.stevensolleder.simpledo.model.*;
 import de.stevensolleder.simpledo.presenter.ColorHelper;
 import de.stevensolleder.simpledo.presenter.DateTimeConverter;
-import de.stevensolleder.simpledo.presenter.KeyboardHelper;
 import de.stevensolleder.simpledo.presenter.Main;
 import de.stevensolleder.simpledo.presenter.notifications.NotificationHelper;
 import de.stevensolleder.simpledo.presenter.SimpleDo;
@@ -46,7 +40,6 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
         this.contextMenuEnabled=true;
 
         ColorHelper colorHelper=new ColorHelper();
-        KeyboardHelper keyboardHelper=new KeyboardHelper(mainActivity);
         NotificationHelper notificationHelper=new NotificationHelper();
 
         entryCardBinding.content.setKeyPreImeAction((keyCode, keyEvent) ->
@@ -77,7 +70,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 entryCardBinding.card.setLongClickable(false);
                 contextMenuEnabled=false;
 
-                keyboardHelper.setKeyboardEnabled(true);
+                mainActivity.setKeyboardEnabled(true);
             }
             else
             {
@@ -91,7 +84,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
                 entryCardBinding.card.setLongClickable(true);
                 contextMenuEnabled=true;
 
-                keyboardHelper.setKeyboardEnabled(false);
+                mainActivity.setKeyboardEnabled(false);
 
                 Entry entry=dataAccessor.getEntry(getPosition());
                 entry.setContent(entryCardBinding.content.getText().toString());
@@ -113,7 +106,7 @@ public class EntryViewHolder extends RecyclerView.ViewHolder
             this.contextMenu=contextMenu;
             new MenuInflater(SimpleDo.getAppContext()).inflate(R.menu.entry_change_menu, contextMenu);
 
-            keyboardHelper.setKeyboardEnabled(false);
+            mainActivity.setKeyboardEnabled(false);
             mainActivity.onBackPressed();
 
             if(dataAccessor.getEntry(getPosition()).getDate()!=null)

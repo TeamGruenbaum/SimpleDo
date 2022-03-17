@@ -86,7 +86,8 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
         if(dataAccessor.getEntriesSize()<=1)
         {
             mainActivity.enableSortability(false);
-            mainActivity.resetSortability();
+            mainActivity.setSortDirectionIcon(Direction.NONE);
+            mainActivity.setSortCriterionIcon(Criterion.NONE);
         }
     }
 
@@ -113,7 +114,8 @@ public class CustomItemTouchHelperCallback extends ItemTouchHelper.Callback
 
             if(distance!=0)
             {
-                mainActivity.resetSortability();
+                mainActivity.setSortDirectionIcon(Direction.NONE);
+                mainActivity.setSortCriterionIcon(Criterion.NONE);
                 distance=0;
             }
         }
