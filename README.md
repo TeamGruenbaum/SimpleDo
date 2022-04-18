@@ -43,15 +43,10 @@ If you want the app to display a notification for a certain task you can set a r
 </p>
 
 
-## Class Diagram
-You can find our class diagram on [Lucidchart]().
-<br><br>
-
 ## Libraries
 Following libraries were used:
-- [Gson](https://github.com/google/gson)
-- [Material-design-icons](https://github.com/google/material-design-icons)
-- [Material-components-android](https://github.com/material-components/material-components-android)
+- [Gson 2.8.6](https://github.com/google/gson)
+- [KeyboardVisibilityEvent 3.0.0](https://github.com/yshrsmz/KeyboardVisibilityEvent)
 <br>
 
 ## Get in contact
