@@ -29,7 +29,7 @@
     <string name="activate_notification">Activate notification</string>
     <string name="deactivate_notification">Deactivate notification</string>
     <string name="open_source_licences">Open-source licences</string>
-    <string name="version">Version 2021.1 Beta 1</string>
+    <string name="version">1.0.0</string>
     <string name="apply">Apply</string>
     <string name="delete">Delete</string>
     <string name="undo">Undo</string>

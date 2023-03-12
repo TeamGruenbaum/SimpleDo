@@ -48,6 +48,8 @@
                     android:id="@+id/contentEditText"
                     android:layout_width="match_parent"
                     android:maxLength="500"
+                    android:lines="3"
+                    android:gravity="start"
                     android:layout_height="0dp"
                     android:layout_weight="1" />
 
@@ -69,8 +71,7 @@
 
                     <TextView
                         android:id="@+id/addCardTime"
-                        style="@style/informationText"
-                        android:visibility="gone" />
+                        style="@style/informationText"/>
 
                 </LinearLayout>
 
@@ -95,12 +96,14 @@
                         android:id="@+id/dateButton"
                         android:tooltipText="@string/set_date"
                         android:visibility="visible"
+                        android:onClick="setDate"
                         app:icon="@drawable/ic_calendar"/>
 
                     <com.google.android.material.button.MaterialButton
                         style="@style/cardButton"
                         android:id="@+id/timeButton"
                         android:visibility="gone"
+                        android:onClick="setTime"
                         android:tooltipText="@string/set_time"
                         app:icon="@drawable/ic_alarm"/>
 
@@ -109,6 +112,7 @@
                         android:id="@+id/colorButton"
                         android:visibility="visible"
                         android:tooltipText="@string/set_color"
+                        android:onClick="setColor"
                         app:icon="@drawable/ic_brush"/>
 
                     <View
@@ -125,6 +129,7 @@
                         android:visibility="gone"
                         android:tooltipText="@string/set_notification"
                         android:enabled="false"
+                        android:onClick="toggleReminding"
                         app:icon="@drawable/ic_notifications_off"/>
 
                     <View
@@ -140,6 +145,7 @@
                         android:layout_marginEnd="10dp"
                         android:tooltipText="@string/add_entry"
                         android:visibility="visible"
+                        android:onClick="addEntry"
                         app:icon="@drawable/ic_send"/>
 
                 </LinearLayout>
@@ -166,6 +172,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:tooltipText="@string/start"
+            android:onClick="startInput"
             app:layout_anchor="@id/bottomAppBar"
             app:srcCompat="@drawable/ic_add" />
 

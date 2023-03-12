@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.stevensolleder.simpledo">
+    package="de.gruenbaum.simpledo">
+
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:name=".presenter.SimpleDo"
@@ -19,6 +22,7 @@
         <activity
             android:windowSoftInputMode="adjustNothing"
             android:name=".presenter.Main"
+            android:exported="true"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
