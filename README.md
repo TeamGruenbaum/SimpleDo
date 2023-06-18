@@ -31,7 +31,7 @@ If you want the app to display a notification for a certain task you can set a r
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="https://github.com/TeamGruenbaum/SimpleDo/blob/master/screenshots/darksettings.jpg" width="30%" padding="10px 10px 10px 10px">
 </p>
-
+<br>
 
 ## Themes
 **SimpleDo** has a light and a dark theme that can be switched in the settings menu and also adapts to the system settings.
@@ -41,7 +41,12 @@ If you want the app to display a notification for a certain task you can set a r
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="https://github.com/TeamGruenbaum/SimpleDo/blob/master/screenshots/darktheme.jpg" width="30%" padding="10px 10px 10px 10px">
 </p>
+<br>
 
+## Developers
+- [Steven Solleder](https://github.com/stevensolleder): Mainly responsible for architecture, equally responsible for implementation
+- [Isabell Waas](https://github.com/isabellwaas): Contributed to architecture, equally responsible for implementation
+<br>
 
 ## Libraries
 Following libraries were used:
